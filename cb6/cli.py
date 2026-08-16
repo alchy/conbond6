@@ -1,8 +1,8 @@
 """CLI: konverzace nad pamětí z terminálu.
 
-    python -m cb5 chat [--pamet p.json]            # REPL: věty, otázky, !příkazy
-    python -m cb5 ingest soubor.txt --dok jmeno [--pamet p.json]
-    python -m cb5 ask "Kde se narodil Alois Jirásek?" --pamet p.json
+    python -m cb6 chat [--pamet p.json]            # REPL: věty, otázky, !příkazy
+    python -m cb6 ingest soubor.txt --dok jmeno [--pamet p.json]
+    python -m cb6 ask "Kde se narodil Alois Jirásek?" --pamet p.json
 
 Orákulum je živá služba UDPipe (`127.0.0.1:42200`) s keší
 `data/cache/parses.json`; bez služby se čte jen z keše.
@@ -14,9 +14,9 @@ import argparse
 import sys
 from pathlib import Path
 
-from cb5.dialog import Session
-from cb5.memory import Memory
-from cb5.oracle import live_or_recorded
+from cb6.dialog import Session
+from cb6.memory import Memory
+from cb6.oracle import live_or_recorded
 
 HERE = Path(__file__).resolve().parent.parent
 CACHE = HERE / "data" / "cache" / "parses.json"

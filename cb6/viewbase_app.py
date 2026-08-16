@@ -1,13 +1,13 @@
 """Konverzace nad živým grafem ve viewBase (volitelný adaptér).
 
     pip install -e /Users/j/Projects/viewBase/python      # viewbase (lokálně)
-    python -m cb5.viewbase_app [--pamet p.json] [--port 8080]
+    python -m cb6.viewbase_app [--pamet p.json] [--port 8080]
 
 Proč: paměť conbond5 JE graf (spec § 3) a člověk má vidět, čím systém
 myslí. Adaptér drží mimo jádro: po každém tahu se rozdíl paměti promítne
 do plátna (`ensure_node`/`ensure_edge`), aktivace se ukáže jako
 `highlight`, a konzole v prohlížeči (`TerminalWindow`) je tentýž dialog
-jako `python -m cb5 chat`. Klik na uzel otevře detail s výroky.
+jako `python -m cb6 chat`. Klik na uzel otevře detail s výroky.
 
 Typy uzlů: entita, group (i zúžená), místo, čas, výrok. Tvrdé hrany jsou
 role a jádrové relace; měkké (spoluvýskyt) se kreslí tence a jinou barvou,
@@ -20,10 +20,10 @@ import argparse
 import sys
 from pathlib import Path
 
-from cb5.dialog import Session
-from cb5.memory import Memory
-from cb5.oracle import live_or_recorded
-from cb5.render import describe_node, render_statement
+from cb6.dialog import Session
+from cb6.memory import Memory
+from cb6.oracle import live_or_recorded
+from cb6.render import describe_node, render_statement
 
 HERE = Path(__file__).resolve().parent.parent
 CACHE = HERE / "data" / "cache" / "parses.json"

@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from cb5.oracle import RecordedOracle
-from cb5.read import Predication, Reading, read
+from cb6.oracle import RecordedOracle
+from cb6.read import Predication, Reading, read
 
 DATA = Path(__file__).parent / "data" / "parses.json"
 SENTENCES = Path(__file__).parent / "data" / "sentences.txt"

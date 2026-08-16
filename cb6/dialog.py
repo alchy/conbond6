@@ -21,13 +21,13 @@ from typing import Sequence
 
 import networkx as nx
 
-from cb5.ground import Grounded, ground
-from cb5.logic import Verdict, enumerate_, evaluate
-from cb5.memory import Memory, OpenItem, Provenance, Statement
-from cb5.oracle import OracleError, Parse, SegmentationError
-from cb5.read import Reading, read
-from cb5.recall import recall
-from cb5.render import describe_node, render_answer, render_statement
+from cb6.ground import Grounded, ground
+from cb6.logic import Verdict, enumerate_, evaluate
+from cb6.memory import Memory, OpenItem, Provenance, Statement
+from cb6.oracle import OracleError, Parse, SegmentationError
+from cb6.read import Reading, read
+from cb6.recall import recall
+from cb6.render import describe_node, render_answer, render_statement
 
 
 @dataclass

@@ -1,8 +1,8 @@
 """Bench: porovnání očekávané odpovědi s výplněmi (jména, tvary, letopočty, počty)."""
 
-from cb5.bench import answer_matches
-from cb5.chronos import TimeSpec
-from cb5.memory import Memory
+from cb6.bench import answer_matches
+from cb6.chronos import TimeSpec
+from cb6.memory import Memory
 
 
 def test_answer_matches_forms_years_counts() -> None:

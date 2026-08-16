@@ -1,8 +1,8 @@
 """Měření nad korpusem conBond2: míra zápisu a přesnost odpovědí.
 
-    python -m cb5.bench                      # všechny dokumenty se zlatými otázkami
-    python -m cb5.bench --dok alois_jirásek  # jeden dokument
-    python -m cb5.bench --strop 60           # nejvýš 60 řádků na dokument
+    python -m cb6.bench                      # všechny dokumenty se zlatými otázkami
+    python -m cb6.bench --dok alois_jirásek  # jeden dokument
+    python -m cb6.bench --strop 60           # nejvýš 60 řádků na dokument
 
 Hlavní metrika (spec § 10): **znalost získaná z textu** — kolik z vět se
 zapsalo jako výrok s rolí, kolik zbylo ve zbytku, a hlavně kolik zlatých
@@ -28,10 +28,10 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from cb5.dialog import Session
-from cb5.memory import Memory
-from cb5.oracle import CachedOracle, OracleUnavailable, UDPipeOracle
-from cb5.render import describe_node
+from cb6.dialog import Session
+from cb6.memory import Memory
+from cb6.oracle import CachedOracle, OracleUnavailable, UDPipeOracle
+from cb6.render import describe_node
 
 HERE = Path(__file__).resolve().parent.parent
 CORPUS = HERE / "data" / "corpus" / "conBond2"

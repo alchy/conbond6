@@ -317,7 +317,7 @@ class CachedOracle:
         if self.inner is None:
             raise KeyError(
                 f"rozbor pro {text!r} není v {self.path}; pořiď ho: "
-                f"python -m cb5.record <věty.txt> {self.path}"
+                f"python -m cb6.record <věty.txt> {self.path}"
             )
         parse = self.inner.parse(text)
         self._data[text] = parse_to_json(parse)

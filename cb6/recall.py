@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from typing import Sequence
 
-from cb5.defaults import synonym_class
-from cb5.logic import GRADE_RANK
-from cb5.memory import Memory, Statement
+from cb6.defaults import synonym_class
+from cb6.logic import GRADE_RANK
+from cb6.memory import Memory, Statement
 
 
 def recall(memory: Memory, node_ids: Sequence[str], k: int = 3, *, pred: str | None = None,

@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from cb5.chronos import TimeSpec
-from cb5.memory import Memory, Provenance, Role, Statement
+from cb6.chronos import TimeSpec
+from cb6.memory import Memory, Provenance, Role, Statement
 
 
 def S(pred: str | None, kind: str = "verb", *, kernel: str | None = None, neg: bool = False, roles: list[Role] | None = None, grade: str = "read") -> Statement:

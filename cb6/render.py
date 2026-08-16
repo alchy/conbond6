@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from typing import Sequence
 
-from cb5.logic import Proof, Verdict
-from cb5.memory import Memory, Statement
+from cb6.logic import Proof, Verdict
+from cb6.memory import Memory, Statement
 
 ROLE_LABELS: dict[str, str] = {
     "kdo": "kdo", "co": "co", "komu": "komu", "čím": "čím", "kde": "kde", "kam": "kam", "odkud": "odkud",

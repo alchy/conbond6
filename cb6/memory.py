@@ -26,7 +26,7 @@ from typing import Any, Iterator, Literal, Sequence
 
 import networkx as nx
 
-from cb5.chronos import TimeSpec, before as time_before, within as time_within
+from cb6.chronos import TimeSpec, before as time_before, within as time_within
 
 Grade = Literal["said", "read", "derived"]
 Quant = Literal["∀", "∃", "·"]

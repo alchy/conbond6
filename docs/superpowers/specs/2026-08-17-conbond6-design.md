@@ -96,7 +96,7 @@ graf a graf je pozorovatelný model mentálního stavu systému (I‑11, I‑12)
 | `tests/` | 88 hermetických testů, `parses.json` | zůstávají; přibývají testy statusů, benche, registru |
 
 Přenos je mechanický: `git clone conbond5 conbond6`, přejmenování balíčku
-`cb5 → cb6` (jediný commit „chore: přejmenování balíčku“), `pyproject`
+`cb6 → cb6` (jediný commit „chore: přejmenování balíčku“), `pyproject`
 `name = conbond6`. Necommitnuté změny conbond5 (`memory.py`, `bench.py`,
 `mereni/`) se před klonem commitnou do conbond5 jako uzavření v1.
 

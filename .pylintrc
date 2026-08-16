@@ -1,0 +1,6 @@
+[MASTER]
+ignore=.venv,data,mereni
+[MESSAGES CONTROL]
+disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-return-statements,too-many-public-methods,line-too-long,fixme,duplicate-code,too-many-positional-arguments,too-many-nested-blocks,too-many-lines
+[FORMAT]
+max-line-length=140

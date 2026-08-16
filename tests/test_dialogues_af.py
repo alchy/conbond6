@@ -9,9 +9,9 @@ from pathlib import Path
 
 import pytest
 
-from cb5.dialog import Session
-from cb5.memory import Memory
-from cb5.oracle import RecordedOracle
+from cb6.dialog import Session
+from cb6.memory import Memory
+from cb6.oracle import RecordedOracle
 
 DATA = Path(__file__).parent / "data" / "parses.json"
 

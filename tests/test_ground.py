@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from cb5.ground import ground
-from cb5.memory import Memory, Provenance
-from cb5.oracle import RecordedOracle
-from cb5.read import read
+from cb6.ground import ground
+from cb6.memory import Memory, Provenance
+from cb6.oracle import RecordedOracle
+from cb6.read import read
 
 DATA = Path(__file__).parent / "data" / "parses.json"
 

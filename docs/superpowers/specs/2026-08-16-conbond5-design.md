@@ -257,7 +257,7 @@ hlásí („trvání stavů neumím“), nikdy tiše.
 
 ```
 conbond5/
-  cb5/ oracle.py read.py chronos.py memory.py logic.py recall.py
+  cb6/ oracle.py read.py chronos.py memory.py logic.py recall.py
        dialog.py render.py bench.py cli.py
   tests/ (pytest; zlaté rozbory jako JSON data; renaming testy)
   data/ (odkaz na conBond2 korpus — klonuje bench; keš rozborů)

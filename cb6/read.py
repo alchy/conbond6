@@ -22,11 +22,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal, Mapping
 
-from cb5 import defaults as D
-from cb5.chronos import MONTHS, TimeSpec, is_time_noun, time_from_tokens
+from cb6 import defaults as D
+from cb6.chronos import MONTHS, TimeSpec, is_time_noun, time_from_tokens
 
 MONTH_LEMMAS = frozenset(MONTHS)
-from cb5.oracle import Parse, Token
+from cb6.oracle import Parse, Token
 
 Quant = Literal["∀", "∃", "·"]
 Kind = Literal["entity", "group", "place", "time", "value", "pron", "wh"]
@@ -528,7 +528,7 @@ class _Reader:
         if t.lemma in D.PARTICLES:
             self.mark(t.index, "particle")
             return
-        from cb5.chronos import RELATIVE_DAYS
+        from cb6.chronos import RELATIVE_DAYS
 
         if t.lemma in RELATIVE_DAYS or t.lemma in D.SEQUENCE_ADVERBS:
             name = "kdy" if t.lemma in RELATIVE_DAYS else "pořadí"

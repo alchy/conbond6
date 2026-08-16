@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cb5.oracle import (
+from cb6.oracle import (
     CachedOracle,
     OracleError,
     Parse,
@@ -31,7 +31,7 @@ def test_recorded_parse_has_root_and_provenance(oracle: RecordedOracle) -> None:
 
 
 def test_missing_sentence_explains_how_to_record(oracle: RecordedOracle) -> None:
-    with pytest.raises(KeyError, match="cb5.record"):
+    with pytest.raises(KeyError, match="cb6.record"):
         oracle.parse("Tahle věta v nahrávce není.")
 
 

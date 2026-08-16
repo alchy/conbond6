@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from cb5.chronos import TimeSpec, before, is_time_noun, time_from_tokens, within, year_of
-from cb5.oracle import RecordedOracle, Token
+from cb6.chronos import TimeSpec, before, is_time_noun, time_from_tokens, within, year_of
+from cb6.oracle import RecordedOracle, Token
 
 DATA = Path(__file__).parent / "data" / "parses.json"
 

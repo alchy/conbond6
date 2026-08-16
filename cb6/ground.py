@@ -16,8 +16,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from cb5.memory import Memory, Node, OpenItem, Provenance, Role, Statement
-from cb5.read import Predication, Reading, TermSpec
+from cb6.memory import Memory, Node, OpenItem, Provenance, Role, Statement
+from cb6.read import Predication, Reading, TermSpec
 
 
 @dataclass

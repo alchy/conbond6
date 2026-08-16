@@ -1,6 +1,6 @@
 """Pořízení nahraných rozborů pro testy.
 
-    python -m cb5.record tests/data/sentences.txt tests/data/parses.json
+    python -m cb6.record tests/data/sentences.txt tests/data/parses.json
 
 Jedna věta na řádek; prázdné řádky a řádky začínající `#` se přeskočí.
 Rozbory už nahrané se nepřepisují (jsou to zlatá data — kdyby model driftl,
@@ -12,7 +12,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from cb5.oracle import CachedOracle, UDPipeOracle
+from cb6.oracle import CachedOracle, UDPipeOracle
 
 
 def main(argv: list[str]) -> int:

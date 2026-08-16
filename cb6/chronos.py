@@ -15,7 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal, Sequence
 
-from cb5.oracle import Token
+from cb6.oracle import Token
 
 Date = tuple[int, int, int]  # (rok, měsíc, den); 0 = neurčeno
 

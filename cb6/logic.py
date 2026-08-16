@@ -20,8 +20,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from cb5.defaults import PLACE_NOUNS, synonym_class
-from cb5.memory import Memory, Role, Statement
+from cb6.defaults import PLACE_NOUNS, synonym_class
+from cb6.memory import Memory, Role, Statement
 
 Grade = Literal["said", "read", "derived"]
 GRADE_RANK = {"said": 3, "read": 2, "derived": 1}

@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from cb5.dialog import Session
-from cb5.memory import Memory
-from cb5.oracle import RecordedOracle
-from cb5.recall import recall
+from cb6.dialog import Session
+from cb6.memory import Memory
+from cb6.oracle import RecordedOracle
+from cb6.recall import recall
 
 DATA = Path(__file__).parent / "data" / "parses.json"
 
@@ -80,7 +80,7 @@ def test_rule_command_bridges(s: Session) -> None:
 def test_synonym_command(s: Session) -> None:
     s.say("Hrabal napsal Postřižiny.")
     s.say("!synonymum napsat = stvořit")
-    from cb5.defaults import synonym_class
+    from cb6.defaults import synonym_class
     assert synonym_class("stvořit", s.memory.learned["synonyms"]) == synonym_class("napsat")
     assert synonym_class("stvořit") != synonym_class("napsat")  # bez paměti nic
     assert s.say("Kdo stvořil Postřižiny?").verdict.value == "ANO"  # type: ignore[union-attr]

@@ -1,4 +1,11 @@
-# conbond5 — konverzační systém s grafovou pamětí a logickým hodnocením výroků
+# conbond6 — měřitelná cesta od psaného textu ke znalosti
+
+conbond6 vychází z conbond5 (klon s historií). Zadání a invarianty:
+[`docs/superpowers/specs/2026-08-17-conbond6-design.md`](docs/superpowers/specs/2026-08-17-conbond6-design.md);
+plán: [`docs/superpowers/plans/2026-08-17-conbond6-v1.md`](docs/superpowers/plans/2026-08-17-conbond6-v1.md).
+Níže původní popis jádra conbond5 (platí, dokud ho conbond6 nepřepíše).
+
+## Jádro (z conbond5)
 
 Systém, který každou českou větu textu **zapíše do grafové paměti** jako
 výrok s epistemickým stupněm a nad pamětí **hodnotí výroky** — ANO / NE /
@@ -27,7 +34,7 @@ zápisu s osmi blokátory nepustila nic, na co zbyla jediná otázka. Vznikl
    **výchozích voleb**, které při čtení padly (∀ z generického prézentu,
    `kde` z `v+Loc`, nevyslovený podmět z aktivace, kopula → subset…).
    Odpověď to vždy říká a cituje větu.
-3. **Výchozí volby jsou data** (`cb5/defaults.py`), přeučitelná dialogem
+3. **Výchozí volby jsou data** (`cb6/defaults.py`), přeučitelná dialogem
    (`!role přes+Acc = kudy`, `!synonymum kázat = hlásat`, `!pravidlo
    jet(kam:X) => být(kde:X)`, `!výjimka létat pták tučňák`).
 
@@ -42,8 +49,8 @@ Předpoklad: služba UDPipe `cb-udpipe` na `127.0.0.1:42200`
 ```bash
 python3.11 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/python -m pytest -q                 # 88 testů, hermeticky (nahrané rozbory)
-.venv/bin/python -m cb5 chat                  # REPL
-.venv/bin/python -m cb5.bench --dok alois_jirásek --vypis   # měření nad korpusem
+.venv/bin/python -m cb6 chat                  # REPL
+.venv/bin/python -m cb6.bench --dok alois_jirásek --vypis   # měření nad korpusem
 ```
 
 ```
@@ -75,21 +82,21 @@ python3.11 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 
 | modul | co dělá |
 |---|---|
-| `cb5/oracle.py` | UDPipe fasáda s proveniencí modelu; `CachedOracle` (JSON keš), `RecordedOracle` (testy bez sítě) |
-| `cb5/chronos.py` | čas jako data: datum, rok, interval, století, pojmenované časy; `before`, `within` |
-| `cb5/defaults.py` | výchozí volby jako data: role z předložky + pádu + druhu výplně, determinátory → kvantifikátor, částice, modální slovesa, tázací slova, synonyma predikátů |
-| `cb5/read.py` | rozbor → predikace: sloveso / kopula / fragment, role, negace, modalita, koordinace, vnořené a vztažné věty, přívlastky jako výroky vedle věty, životopisná závorka; **každý token má místo**, jinak je ve zbytku |
-| `cb5/memory.py` | graf výroků: uzly (entita, group i zúžená, místo, čas), `attach/revoke/inspect`, uzávěry `member*/subset*/within*/same_as*`, čas, disjunktnost, výjimky, pravidla, aktivace, měkké hrany, `graph()` (networkx → viewBase), JSON |
-| `cb5/ground.py` | čtení → paměť: identita (částečná jména), instance z neurčité zmínky, koreference aktivací / téma dokumentu, přivlastnění, otevřené položky |
-| `cb5/logic.py` | shoda dotazu s výroky (každá role dotazu musí mít protějšek), distribuce ∀ dolů, negace → NE, disjunktnost, počty, modalita → MOŽNÁ, wh‑výčty vč. rodiny rolí místa/času, definice, pravidla, výjimky |
-| `cb5/recall.py` | propad: co paměť o uzlech z otázky ví (jen řadí) |
-| `cb5/render.py` | verdikt + důvod + zdroj + doložka stupně (šablony jako data) |
-| `cb5/dialog.py` | `Session`: `ingest`, `say`, opravy („Ne, …“, „To není pravda.“, „Ne každý X.“), hlášení konfliktu, příkazy, backlog, žurnál a `replay` |
-| `cb5/bench.py` | měření nad korpusem conBond2 (66 wiki dokumentů, 682 + 135 zlatých otázek) |
+| `cb6/oracle.py` | UDPipe fasáda s proveniencí modelu; `CachedOracle` (JSON keš), `RecordedOracle` (testy bez sítě) |
+| `cb6/chronos.py` | čas jako data: datum, rok, interval, století, pojmenované časy; `before`, `within` |
+| `cb6/defaults.py` | výchozí volby jako data: role z předložky + pádu + druhu výplně, determinátory → kvantifikátor, částice, modální slovesa, tázací slova, synonyma predikátů |
+| `cb6/read.py` | rozbor → predikace: sloveso / kopula / fragment, role, negace, modalita, koordinace, vnořené a vztažné věty, přívlastky jako výroky vedle věty, životopisná závorka; **každý token má místo**, jinak je ve zbytku |
+| `cb6/memory.py` | graf výroků: uzly (entita, group i zúžená, místo, čas), `attach/revoke/inspect`, uzávěry `member*/subset*/within*/same_as*`, čas, disjunktnost, výjimky, pravidla, aktivace, měkké hrany, `graph()` (networkx → viewBase), JSON |
+| `cb6/ground.py` | čtení → paměť: identita (částečná jména), instance z neurčité zmínky, koreference aktivací / téma dokumentu, přivlastnění, otevřené položky |
+| `cb6/logic.py` | shoda dotazu s výroky (každá role dotazu musí mít protějšek), distribuce ∀ dolů, negace → NE, disjunktnost, počty, modalita → MOŽNÁ, wh‑výčty vč. rodiny rolí místa/času, definice, pravidla, výjimky |
+| `cb6/recall.py` | propad: co paměť o uzlech z otázky ví (jen řadí) |
+| `cb6/render.py` | verdikt + důvod + zdroj + doložka stupně (šablony jako data) |
+| `cb6/dialog.py` | `Session`: `ingest`, `say`, opravy („Ne, …“, „To není pravda.“, „Ne každý X.“), hlášení konfliktu, příkazy, backlog, žurnál a `replay` |
+| `cb6/bench.py` | měření nad korpusem conBond2 (66 wiki dokumentů, 682 + 135 zlatých otázek) |
 
 ## Měření
 
-`python -m cb5.bench` klonuje conBond2 do `data/corpus/`, každý dokument
+`python -m cb6.bench` klonuje conBond2 do `data/corpus/`, každý dokument
 vloží do čerstvé paměti a položí k němu zlaté otázky. Výsledky jdou do
 `mereni/`. Viz [MĚŘENÍ](#výsledky-prvního-běhu) níže.
 
