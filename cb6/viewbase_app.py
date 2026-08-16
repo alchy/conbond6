@@ -36,7 +36,14 @@ TYPES = {
     "value": dict(shape="box", color="#c9c9c9", size=0.8),
     "statement": dict(shape="sphere", color="#ff2a6d", size=0.7),
     "statement_said": dict(shape="sphere", color="#ff5fa2", size=0.8),
+    "statement_hypothesis": dict(shape="sphere", color="#ffd166", size=0.6),
+    "statement_rejected": dict(shape="sphere", color="#666666", size=0.5),
+    "statement_pattern": dict(shape="sphere", color="#9b5de5", size=0.5),
 }
+#: Uzly, které v živém pohledu nezobrazujeme (jsou v grafu kvůli auditu a
+#: introspekci — `!ukaž`, bench/graphcheck): věty, dokumenty, segmenty,
+#: otevřené položky. Odvolané výroky také ne.
+HIDDEN_KINDS = ("sentence", "document", "segment", "open")
 
 
 def build(session: Session, *, title: str = "conbond5") -> object:
@@ -56,9 +63,17 @@ def build(session: Session, *, title: str = "conbond5") -> object:
         with canvas.batch():
             for nid, data in g.nodes(data=True):
                 kind = data.get("kind", "group")
+                if kind in HIDDEN_KINDS or (kind == "statement" and data.get("life") != "active"):
+                    continue
                 t = kind
                 if kind == "statement" and data.get("grade") == "said":
                     t = "statement_said"
+                if kind == "statement" and data.get("claim") == "HYPOTHESIS":
+                    t = "statement_hypothesis"
+                if kind == "statement" and data.get("claim") == "REJECTED":
+                    t = "statement_rejected"
+                if kind == "statement" and data.get("mood") in ("pattern", "reported"):
+                    t = "statement_pattern"
                 if t not in TYPES:
                     t = "group"
                 label = data.get("label", nid)
@@ -72,7 +87,7 @@ def build(session: Session, *, title: str = "conbond5") -> object:
                 synced_nodes.add(str(nid))
             for a, b, data in g.edges(data=True):
                 key = (str(a), str(b), str(data.get("type")))
-                if key in synced_edges or a == b:
+                if key in synced_edges or a == b or str(a) not in synced_nodes or str(b) not in synced_nodes:
                     continue
                 synced_edges.add(key)
                 canvas.ensure_edge(str(a), str(b), type=str(data.get("type")), soft=bool(data.get("soft")))

@@ -225,6 +225,9 @@ class Memory:
         self.soft: dict[tuple[str, str], float] = defaultdict(float)
         self.learned: dict[str, dict[str, str]] = {"roles": {}, "synonyms": {}}
         self.exceptions: list[tuple[str, str, str]] = []  # (pred, group_id, excluded_id)
+        #: Zmínky: (věta, uzel, role, tvar, segment) — projekce diskurzu do grafu
+        #: (hrana `mention`); registr referentů je jen pohled nad tímto seznamem.
+        self.mentions: list[tuple[str, str, str, str, str]] = []
         #: verze báze — mění se každým zápisem/odvoláním; klíč keše uzávěrů
         self.version = 0
         self._edge_cache: dict[tuple[int, str], dict[str, list[tuple[str, str]]]] = {}
@@ -333,8 +336,44 @@ class Memory:
                 return n
         return self.new_node("document", name, doc=name)
 
-    def new_sentence(self, doc: str, no: int, text: str) -> Node:
-        return self.new_node("sentence", f"{doc}#{no}", doc=doc, text=text)
+    def new_segment(self, doc: str, no: int, title: str) -> Node:
+        """Segment dokumentu (oddíl / odstavec) — hranice diskurzu (spec § 4.2).
+
+        Args:
+            doc: jméno dokumentu (uzel `document` musí existovat, viz `ensure_document`).
+            no: pořadí segmentu v dokumentu.
+            title: nadpis nebo první věta (jen popisek).
+        Returns:
+            Uzel `segment`; `base` = id dokumentu (hrana `part_of` v exportu).
+        """
+        d = self.ensure_document(doc)
+        seg = self.new_node("segment", f"{doc}§{no}", doc=doc, text=title)
+        seg.base = d.id
+        return seg
+
+    def new_sentence(self, doc: str, no: int, text: str, *, segment: str | None = None) -> Node:
+        """Uzel věty; `base` = segment (když je), jinak dokument — z toho vede
+        hrana `part_of` v exportu (I‑11: každý výrok má cestu k dokumentu)."""
+        n = self.new_node("sentence", f"{doc}#{no}", doc=doc, text=text)
+        n.base = segment or self.ensure_document(doc).id
+        return n
+
+    def note_mention(self, sentence_id: str, node_id: str, role: str, form: str, segment: str = "") -> None:
+        """Zaznamenej zmínku uzlu ve větě (hrana `mention` v grafu).
+
+        Proč: koreference se rozhoduje nad zmínkami (rod, číslo, role, čerstvost,
+        segment). Aby rozhodnutí bylo z grafu dohledatelné (I‑12), zmínka je
+        hrana grafu, ne položka skryté tabulky.
+
+        Args:
+            sentence_id: uzel věty; node_id: zmíněný uzel; role: role ve výroku;
+            form: povrchový tvar; segment: id segmentu (nebo "").
+        """
+        if not segment:
+            sent = self.nodes.get(sentence_id)
+            if sent is not None and sent.base and self.nodes.get(sent.base, Node("", "")).kind == "segment":
+                segment = sent.base
+        self.mentions.append((sentence_id, node_id, role, form, segment))
 
     def node(self, node_id: str) -> Node:
         return self.nodes[node_id]
@@ -671,28 +710,68 @@ class Memory:
     # ---- graf, program, JSON ---------------------------------------------------
 
     def graph(self) -> nx.MultiDiGraph:
-        """Graf pro viewBase: uzly s `kind/label/activation`, hrany s `type`
-        a `soft` (měkké jen řadí — v grafu jsou, ale odlišené)."""
+        """Graf pro viewBase i pro audit (I‑11, I‑12): **všechno**, co paměť
+        drží, s proveniencí — uzly dokumentů, segmentů, vět, termů, výroků a
+        otevřených položek; hrany rolí a jader (tvrdé), spoluvýskytu (měkké),
+        a strukturní hrany `source`, `part_of`, `nested_in`, `derived_from`,
+        `uses_rule`, `alternative_of`, `about`, `residue_of`, `mention`.
+
+        Atributy výroku: `claim`, `grade`, `life` (active/revoked), `defaults`,
+        `reason`, `residue`, `pred`, `neg`, `mood`, `kind`, `role_authorities`.
+        Odvolané výroky se exportují také (`life="revoked"`) — historie je
+        vidět; audit je počítá zvlášť.
+
+        Returns:
+            `networkx.MultiDiGraph` (duck typing pro `viewBase.add_graph`).
+        """
         g: nx.MultiDiGraph = nx.MultiDiGraph()
         for n in self.nodes.values():
-            if n.kind in ("document", "sentence"):
-                continue
-            g.add_node(n.id, kind=n.kind, label=n.label(), activation=self.activation(n.id))
-        for st in self.active():
-            g.add_node(st.id, kind="statement", label=self.render_short(st), grade=st.grade, activation=0.0)
+            attrs: dict[str, Any] = {"kind": n.kind, "label": n.label(), "activation": self.activation(n.id)}
+            if n.kind == "sentence":
+                attrs["text"] = n.text
+                attrs["no"] = n.lemma.rsplit("#", 1)[-1]
+            if n.kind == "segment":
+                attrs["title"] = n.text
+            g.add_node(n.id, **attrs)
+            if n.kind in ("sentence", "segment") and n.base:
+                g.add_edge(n.id, n.base, type="part_of", soft=False)
+        for st in self.statements.values():
+            g.add_node(st.id, kind="statement", label=self.render_short(st), grade=st.grade, claim=st.claim,
+                       life=st.status, defaults=list(st.defaults), reason=st.reason,
+                       residue=[f for f, _ in st.residue], pred=st.pred, neg=st.neg, mood=st.mood,
+                       stmt_kind=st.kind, role_authorities={r.name: r.authority for r in st.roles}, activation=0.0)
             for r in st.roles:
                 for t in r.terms:
-                    g.add_edge(st.id, t, type=f"role:{r.name}", soft=False)
+                    g.add_edge(st.id, t, type=f"role:{r.name}", soft=False, authority=r.authority)
                 if r.nested:
-                    g.add_edge(st.id, r.nested, type=f"role:{r.name}", soft=False)
-            if st.kernel and not st.neg:
+                    g.add_edge(st.id, r.nested, type=f"role:{r.name}", soft=False, authority=r.authority)
+            if st.sentence:
+                g.add_edge(st.id, st.sentence, type="source", soft=False)
+                if st.residue:
+                    g.add_edge(st.id, st.sentence, type="residue_of", soft=False, tokens=[f for f, _ in st.residue])
+            if st.parent:
+                g.add_edge(st.id, st.parent, type="nested_in", soft=False)
+            if st.derived_from:
+                g.add_edge(st.id, st.derived_from, type="derived_from", soft=False, rule=st.rule or "")
+            if st.rule:
+                g.add_edge(st.id, st.rule, type="uses_rule", soft=False)
+            for alt in st.alternatives:
+                g.add_edge(st.id, alt, type="alternative_of", soft=False)
+            if st.status == "active" and st.kernel and not st.neg and st.claim == "SAFE" and st.mood == "assert":
                 a, b = self._kernel_pair(st)
                 for x in a:
                     for y in b:
                         g.add_edge(x, y, type=st.kernel, soft=False, statement=st.id)
+        for o in self.open_items_.values():
+            g.add_node(o.id, kind="open", label=o.question, question=o.question, open_kind=o.kind,
+                       answered=o.answer is not None, activation=0.0)
+            if o.statement:
+                g.add_edge(o.id, o.statement, type="about", soft=False)
         for n in self.nodes.values():
             if n.kind == "group" and n.base:
                 g.add_edge(n.id, n.base, type="restricts", soft=False)
+        for sent, node, role, form, seg in self.mentions:
+            g.add_edge(sent, node, type="mention", soft=False, role=role, form=form, segment=seg)
         for (sa, sb), w in self.soft.items():
             g.add_edge(sa, sb, type="co_mention", soft=True, weight=w)
         return g
@@ -738,6 +817,7 @@ class Memory:
             "exceptions": [list(x) for x in self.exceptions],
             "learned": self.learned,
             "soft": [[a, b, w] for (a, b), w in sorted(self.soft.items())],
+            "mentions": [list(x) for x in self.mentions],
             "activation": dict(sorted(self.activation_.items())),
         }
 
@@ -766,6 +846,7 @@ class Memory:
             m.rules.append(Rule(**rd))
         m.exceptions = [tuple(x) for x in d.get("exceptions", [])]  # type: ignore[misc,union-attr]
         m.learned = d.get("learned", m.learned)  # type: ignore[assignment]
+        m.mentions = [tuple(x) for x in d.get("mentions", [])]  # type: ignore[misc,union-attr]
         for a, b, w in d.get("soft", []):  # type: ignore[union-attr]
             m.soft[(a, b)] = w
         m.activation_ = defaultdict(float, d.get("activation", {}))  # type: ignore[arg-type]
