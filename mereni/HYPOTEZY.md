@@ -4,4 +4,4 @@ Formát: `## <datum> · <úkol>` · **Změna:** … · **Hypotéza:** které č�
 
 ## 2026-08-17 · Task 0 · výchozí bod
 **Změna:** žádná — conbond6 = klon conbond5 (HEAD 60ad1c9), balíček `cb6`.
-**Výchozí čísla (conbond5, druhá větev, `baseline-conbond5-bench-vse.md`):** 43 dokumentů, 13 899 vět, 46 258 výroků, zbytek 14 118/164 454 tokenů (8,6 %), otevřené 11 839 (0,85/větu), QA 436/722 = 60,4 %. **Neměřeno:** yield, věrnost výroků (unsupported), statusy, dosah, audit grafu — to je práce conbond6.
+**Výchozí čísla (conbond5 v1 uzavřený, HEAD c503b68, `mereni/bench-vse.md`):** 43 dokumentů se zlatými otázkami, 13 899 vět, 46 256 výroků, zbytek 8,6 % tokenů, otevřené 11 839 (0,85/větu), QA 440/722 = 60,9 %. **Neměřeno:** yield, věrnost výroků (unsupported), statusy, dosah, audit grafu — to je práce conbond6.
