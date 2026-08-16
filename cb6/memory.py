@@ -30,6 +30,16 @@ from cb6.chronos import TimeSpec, before as time_before, within as time_within
 
 Grade = Literal["said", "read", "derived"]
 Quant = Literal["∀", "∃", "·"]
+#: Status výroku (spec conbond6 § 3): co s výrokem smí logika dělat.
+#: `SAFE` = bezpečné jádro (znalost); `HYPOTHESIS` = interpretace, kterou text
+#: neurčuje (nikdy ve verdiktu, I‑3); `REJECTED` = čtení by vyžadovalo
+#: nepovolený krok (zapsané s důvodem, hlásí se, I‑4). Pole `status` níže je
+#: naproti tomu jen životní cyklus (`active|revoked`).
+Claim = Literal["SAFE", "HYPOTHESIS", "REJECTED"]
+#: Nálada výroku: tvrzení; otázka; vzor uvnitř pravidla (podmínka/důsledek —
+#: není tvrzení o světě); obsah promluvy/postoje („Petr řekl, že …“ — také
+#: není tvrzení o světě). Do znalosti jde jen `assert`.
+Mood = Literal["assert", "question", "pattern", "reported"]
 
 KERNELS = ("member", "subset", "within", "same_as", "before", "name")
 
@@ -142,7 +152,16 @@ class Statement:
     derived_from: str | None = None
     sentence: str = ""
     tense: str | None = None
-    mood: str = "assert"
+    mood: Mood = "assert"
+    #: Status výroku (spec conbond6 § 3) — druhá osa vedle `grade`.
+    claim: Claim = "SAFE"
+    #: HYPOTHESIS → id výroků (jádro téže věty), jichž je alternativou.
+    alternatives: list[str] = field(default_factory=list)
+    #: `grade == "derived"`: id pravidla (výrok `kind="rule"`), kterým vznikl.
+    rule: str | None = None
+    #: Výrok, do něhož je tento vnořen (`Role.nested`) — vztažná věta, obsah
+    #: promluvy, vzor pravidla. Vnoření není odvození, proto zvlášť.
+    parent: str | None = None
 
     def role(self, name: str) -> Role | None:
         for r in self.roles:
@@ -173,6 +192,8 @@ class Statement:
             prov=prov, status=str(d.get("status", "active")), reason=str(d.get("reason", "")),
             derived_from=d.get("derived_from"), sentence=str(d.get("sentence", "")),  # type: ignore[arg-type]
             tense=d.get("tense"), mood=str(d.get("mood", "assert")),  # type: ignore[arg-type]
+            claim=str(d.get("claim", "SAFE")), alternatives=list(d.get("alternatives", [])),  # type: ignore[arg-type,call-overload]
+            rule=d.get("rule"), parent=d.get("parent"),  # type: ignore[arg-type]
         )
 
 
@@ -350,7 +371,9 @@ class Memory:
         self.version += 1
         out.append(sid)
         for other in list(self.statements.values()):
-            if other.derived_from == sid and other.status == "active":
+            if other.status != "active":
+                continue
+            if other.derived_from == sid or other.parent == sid or other.rule == sid:
                 out.extend(self.revoke(other.id, f"odvoláno s {sid}: {reason}"))
         return out
 
@@ -368,6 +391,45 @@ class Memory:
         for st in self.statements.values():
             if st.status == "active":
                 yield st
+
+    def knowledge(self) -> Iterator[Statement]:
+        """Znalost = to, co smí do verdiktu: aktivní, `SAFE`, `mood == "assert"`.
+
+        Proč zvlášť vedle `active()`: hypotézy, zamítnutí, vzory pravidel a
+        obsah promluv v paměti *jsou* (I‑11: graf nese všechno), ale logika
+        z nich nesmí odpovídat (I‑3, I‑4). `active()` zůstává pro propad,
+        introspekci a export.
+
+        Returns:
+            Iterátor výroků, o něž se smí opřít verdikt ANO/NE a výplň díry.
+        """
+        for st in self.statements.values():
+            if st.status == "active" and st.claim == "SAFE" and st.mood == "assert":
+                yield st
+
+    def by_claim(self, claim: Claim) -> list[Statement]:
+        """Aktivní výroky s daným statusem (`SAFE` / `HYPOTHESIS` / `REJECTED`).
+
+        Args:
+            claim: status výroku.
+        Returns:
+            Seznam aktivních výroků v pořadí vzniku.
+        """
+        return [s for s in self.statements.values() if s.status == "active" and s.claim == claim]
+
+    def set_claim(self, sid: str, claim: Claim, reason: str) -> None:
+        """Přechod statusu (spec § 3.2) — vždy s důvodem, který zůstane vidět
+        v `defaults` (a tedy v grafu a v `!ukaž`).
+
+        Args:
+            sid: id výroku.
+            claim: nový status.
+            reason: proč (kdo/co rozhodl — dialog, pozdější věta, revize).
+        """
+        st = self.statements[sid]
+        st.claim = claim
+        st.defaults.append(f"status → {claim}: {reason}")
+        self.version += 1
 
     def by_pred(self, pred: str) -> list[Statement]:
         return [self.statements[i] for i in self._by_pred.get(pred, []) if self.statements[i].status == "active"]
@@ -667,7 +729,7 @@ class Memory:
 
     def to_json(self) -> dict[str, Any]:
         return {
-            "format": "conbond5-memory/1",
+            "format": "conbond6-memory/2",
             "counters": dict(self.counters),
             "nodes": [n.to_json() for n in self.nodes.values()],
             "statements": [s.to_json() for s in self.statements.values()],

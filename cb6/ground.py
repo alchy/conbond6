@@ -181,12 +181,23 @@ class Grounder:
     # ---- predikace -----------------------------------------------------------
 
     def ground_predication(self, p: Predication, *, parent: str | None = None, residue: list[tuple[str, str]] | None = None) -> Statement:
+        """Zakotvi jednu predikaci jako výrok (a rekurzivně její vnořené).
+
+        Args:
+            p: predikace z čtení.
+            parent: id výroku, do něhož je tato vnořena (vztažná věta, obsah
+                promluvy…) — jde do `Statement.parent`, ne do `derived_from`
+                (vnoření není odvození).
+            residue: zbytek věty, který nese hlavní výrok.
+        Returns:
+            Zapsaný (nebo u otázky jen sestavený) výrok.
+        """
         self._defaults = list(p.defaults)
         self._pending_open = []
         subj = p.role("kdo")
         subject_specific = bool(subj and subj.terms and subj.terms[0].kind in ("entity", "pron") and subj.terms[0].quant == "·")
         st = Statement("", p.pred, p.kind, neg=p.neg, modality=p.modality, kernel=p.kernel, grade=self.grade,  # type: ignore[arg-type]
-                       prov=self.prov, sentence=self.out.sentence, tense=p.tense, mood=p.mood, derived_from=parent,
+                       prov=self.prov, sentence=self.out.sentence, tense=p.tense, mood=p.mood, parent=parent,
                        residue=list(residue or []))
         nested_specs: list[tuple[Role, Predication]] = []
         for rf in p.roles:
