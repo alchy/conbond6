@@ -11,7 +11,7 @@
 | koncept (proč takhle) | `docs/KONCEPT.md` |
 | plán v1 + stav provedení | `docs/superpowers/plans/2026-08-17-conbond6-v1.md` |
 | hypotézy a výsledky tahů | `mereni/HYPOTEZY.md` |
-| zprávy benche | `mereni/<datum>-<commit>.md/.json` (poslední plný: `2026-08-17-5646e5b`) |
+| zprávy benche | `mereni/<datum>-<commit>.md/.json` (poslední plný, **stabilní vzorek**: `2026-08-17-234ca26`) |
 | lidské odpovědi auditu | `mereni/audit-<dokument>.json` (otisk → [verdikt, pozn, chápu‑z‑grafu a/n]) |
 | keš verdiktů soudce | `mereni/audit-cache.json` (klíč = otisk · soudce · verze promptu) |
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
@@ -45,12 +45,12 @@ Zelený řádek: víc pravdivé (unsupported neroste), doložitelné (každý z�
 | měřítko | conbond5 (výchozí) | conbond6 v1 |
 |---|---|---|
 | unsupported, 2 dok. / vzorek 100 (soudce gemma4) | **76,5 %** | **23,0 %** [15,8–32,1] |
-| unsupported, plný běh 8 dok. / 400 | — | 32,8 % [28,3–37,5] (hlavní 35 %, appos 26 %, nmod‑místo 17 %) |
+| unsupported, plný běh 8 dok. / 400 (**stabilní vzorek po větách, 234ca26**) | — | **31,4 %** [26,9–35,9] (hlavní 32 %, appos 37 %, nmod‑místo 13 %) |
 | yield hl./vše (2 dok.) | 160 / 298 | 89 / 94 |
 | yield hl./vše (plný běh, 182 853 slov) | — | 77 / 90 |
 | statusy (plný běh) | — | SAFE 27 164 · HYPOTHESIS 3 218 · REJECTED 20 553; pravidel 59, odvozeno 4 |
 | QA stejné 2 dok. | 12/17 | 12/17 |
-| QA plný běh | 60,9 % na staré sadě (682 auto) | 173/334; **kurátorované 29/130** (etalon 14/32, conbond 8/8, korpus 7/90); otazky‑filtr 144/204 (71 %) |
+| QA plný běh | 60,9 % na staré sadě (682 auto) | 175/334; **kurátorované 29/130** (etalon 14/32, conbond 8/8, korpus 7/90); otazky‑filtr 146/204 (72 %) |
 | audit grafu | — | 0 porušení (bylo 33, opraveno) |
 | determinismus | — | ano |
 | lidský audit | — | 1 výrok (J.), shoda se soudcem 1/1 — **potřeba ≥ 30 na dokument** |
@@ -72,6 +72,7 @@ Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná z
 5. Prostor modelů pro disjunkci/ekvivalenci/kardinalitu (přenos `conBond3/cb_logic/models.py`) — dnes REJECTED s důvodem.
 6. Adaptéry conbond1/conbond4 pro zpětný běh QA (Task 12 — neproveden).
 7. Valence jako data (`valence.json` conbond1 / VALLEX), relativní čas (conbond1 chronos), nominalizace, rekurze v dotazu (jellyAI3 SubQuery) — každý jako měřený tah, až bench ukáže potřebu.
+8. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
 
 ## 7. Deník rozhodnutí
 
@@ -82,6 +83,9 @@ Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná z
 - 17. 8. — Kurátorované a automatické otázky se vykazují zvlášť; auto po valenčním filtru; LM‑generované jen po lidském ověření (požadavek J.: otázky s hlavou a patou).
 - 17. 8. — `read.py` v1 beze změny konstrukcí; opravy jen tam, kde výroky lhaly (precision).
 - 17. 8. — viewBase → viewBase2 (github.com/alchy/viewBase2), oblasti podle dokumentu (`skupina`).
+- 17. 8. — Vzorek auditu se vybírá po větách se seedem = dokument (dřív seed = commit → každý commit jiných 400 výroků, ±5 b. šum). Čísla před 234ca26 nejsou navzájem srovnatelná; od 234ca26 ano.
+- 17. 8. — ∀ z generického prézentu jen v jednoduché obecné větě (kořen, nekoordinovaný podmět, bez PROPN); hlavní predikace 35 → 31–32 % nepodložených.
+- 17. 8. — conbond5 (paralelně) jde cestou šíře konstrukcí (ruční otázky 59/70); conbond6 cestou věrnosti; další tah conbond6 = přebírat konstrukce z conbond5 po jedné přes bránu benche.
 
 ## 8. Jak předat dál (checklist pro nové sezení)
 
