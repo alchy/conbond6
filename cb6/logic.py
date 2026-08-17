@@ -371,6 +371,8 @@ class Evaluator:
         near: list[str] = []
         matched: list[tuple[Statement, Proof]] = []
         for f in m.knowledge():
+            if f.kind == "typing":
+                continue  # „x ∈ x“ z neurčité zmínky není odpověď (slouží jen uzávěrům)
             if self.same_pred(q.pred, f.pred) is None or f.neg:
                 continue
             p = self.match(q, f)
@@ -457,7 +459,7 @@ class Evaluator:
     def describe(self, node_id: str) -> list[Statement]:
         """Okolí uzlu: členství/podmnožiny, `být`, výroky s uzlem v podmětu, ostatní."""
         m = self.m
-        about = [s for s in m.statements_about(node_id) if s.claim == "SAFE" and s.mood == "assert" and s.kind != "fragment"]
+        about = [s for s in m.statements_about(node_id) if s.claim == "SAFE" and s.mood == "assert" and s.kind not in ("fragment", "typing")]
         def rank(s: Statement) -> tuple[int, int]:
             kdo = s.role("kdo")
             is_subj = bool(kdo and node_id in kdo.terms)
