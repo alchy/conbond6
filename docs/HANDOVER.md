@@ -92,6 +92,7 @@ Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná z
 
 ## 8. Jak předat dál (checklist pro nové sezení)
 
+0. Nové sezení v tomto adresáři dostane zadání automaticky z `CLAUDE.md` (pravidla spolupráce, kde co je, další tah).
 1. Přečíst `docs/KONCEPT.md`, spec § 0–1, tuto stránku, poslední záznam v `mereni/HYPOTEZY.md`.
 2. Ověřit služby: UDPipe 42200, Ollama 11434, `pytest -q` zelené.
 3. Rychlá smyčka na dvou dokumentech (§ 3), porovnat s posledními čísly (§ 4).
