@@ -7,6 +7,10 @@
 "netvrdí",
 "Věta uvádí roky sepsání „Čapkovy Hovory“ (1928–1935), nikoli datum smrti Masaryka."
 ],
+"00f975eaeec9bd81|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí rok 1888 a přesídlení do Prahy pro Jiráseka."
+],
 "0116dd8152d5da47|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že pamětní deska je osazena na místě."
@@ -34,6 +38,10 @@
 "02cb2f1d31a09622|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že byl amatérským fotografem a popisuje jeho schopnosti jako mimořádně nadaného a dobrého."
+],
+"02dfb24e50fa5dfd|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí časový limit (do roku 1925), konatele (Karel Čapek) a spolubydlícího (Josef Čapek) v konkrétním místě."
 ],
 "03e8291bb58f9c72|ollama:gemma4:latest|v1": [
 "netvrdí",
@@ -67,6 +75,10 @@
 "tvrdí",
 "Všechny role a okolnosti sedí dle textu."
 ],
+"0a5a3f8ef5189c70|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Výrok správně odhaduje podmět z kontextu a zachovává všechny okolnosti (s rodiči, brzy, do Úpice)."
+],
 "0bf453aed0884f7f|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta neuvádí, že by Alois Jirásek měl nějaké práce; uvádí, že byly vytvořeny v Litomyšli."
@@ -74,6 +86,10 @@
 "0c52ef8d99e8cb5d|ollama:gemma4:latest|v2": [
 "částečně",
 "Věta uvádí, že katolická církev zakázala zvonit zvony pražských kostelů k uctění jeho památky, ale výrok neuvádí předmět zákazu (zvonění zvonů) ani konkrétní místo/objekt."
+],
+"0c8b29208dd43ee1|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Výrok správně zachycuje děj odechodu Karel Čapka z Národních listů v roce 1921 kvůli protestu."
 ],
 "0cc43c58244167c7|ollama:gemma4:latest|v1": [
 "tvrdí",
@@ -163,6 +179,10 @@
 "tvrdí",
 "Věta uvádí konkrétní datum a osobu vystupující z římskokatolické církve."
 ],
+"18c957001fc5ca75|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí konkrétní datum a osobu vystupující z dané církve."
+],
 "196f79cf6c06a0fe|ollama:gemma4:latest|v1": [
 "tvrdí",
 "Věta uvádí rozšíření slova po světě v kontextu divadelní hry R.U.R."
@@ -215,6 +235,14 @@
 "tvrdí",
 "Výrok správně zachycuje první část věty a kontextuální podmět."
 ],
+"1e2d5a30ff783374|ollama:gemma4:latest|v2": [
+"částečně",
+"Věta uvádí konkrétní časové období (20. letech 20. století), ale výrok používá obecný kvantifikátor '∃' pro čas, a také neuvádí přesněji, že je to v rámci tohoto období."
+],
+"1fda9280fd594e7e|ollama:gemma4:latest|v2": [
+"částečně",
+"Výrok chybně určuje pro_koho (mělo by být o Spolku žurnalistů) a také je zjednodušující, protože věta uvádí konkrétní místo (v rámci kolonie), nikoli jen obecně 'kolonie[vinohradský]'."
+],
 "2032ed574753358c|ollama:gemma4:latest|v1": [
 "tvrdí",
 "Věta doslova uvádí datum a místo zániku."
@@ -243,13 +271,29 @@
 "netvrdí",
 "Věta tvrdí, že databáze NK ČR eviduje přes 40 vydání, nikoli obecně o všech databázích."
 ],
+"27c0554a653d97af|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že promluvili nad rakví konkrétní osoby."
+],
+"2870608aab09eddc|ollama:gemma4:latest|v2": [
+"částečně",
+"Jádro (uplatňování přístupu a uznávání) sedí, ale výrok zjednodušuje/chybí přesná kvantifikace; věta mluví o 'přístupu' a 'uznávání', nikoli explicitně o '∀přístup[individualistický]+∀uznávání'."
+],
 "28cd605eea613be0|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že byl český prozaik, dramatik, středoškolský učitel, politik, autor a představitel realismu, což odpovídá tvrzení o členství v těchto skupinách."
 ],
+"295ac092c4aa73d1|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí dvojčata jako poslední děti."
+],
 "295c3725bda26774|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta uvádí o ukončení studia jako o události před působením jako vychovatel, ale výrok tvrdí vztah mezi 'ukončením' a 'studium', což není v textu explicitně popsáno takto."
+],
+"2a1ee90e48e7ac1b|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Výrok správně identifikuje děj (vydat) a všechny zúčastněné osoby/subjekty, včetně konkrétního jedince Aloise Jiráseka jako jednoho ze signatářů."
 ],
 "30d2845429170340|ollama:gemma4:latest|v1": [
 "netvrdí",
@@ -274,6 +318,14 @@
 "3344a38ca4ee0f53|ollama:gemma4:latest|v2": [
 "netvrdí",
 "Věta tvrdí, že žili spolu v bytě na Malé Straně, nikoli jen, že Karel Čapek měl bratra Josefa Čapka."
+],
+"33bdbc7dbf32d732|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že podnikal cesty do míst, 'kam umisťoval děj svých děl', což je ekvivalentní tvrzení o tom, kde umisťoval děj."
+],
+"33fde62441c0a4f7|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Výrok předpokládá, že Karel Čapek je vyobrazen na reverzu medaile a že tato medaile má symbolický zástupce významných osobností. Věta pouze uvádí, co je na reverzu medaile (vyobrazení jako symbolický zástupce) a neidentifikuje tuto osobu s Karel Čapek."
 ],
 "34babca9bbdd1341|ollama:gemma4:latest|v1": [
 "tvrdí",
@@ -310,6 +362,10 @@
 "3a4031591190a4ab|ollama:gemma4:latest|v2": [
 "částečně",
 "Věta tvrdí, že Československá národní demokracie byla pokračovatelkou strany mladočeské, ale výrok je příliš obecný a neuvádí konkrétní vztah (být členem/pokračovateli) s dostatečnou přesností."
+],
+"3a73942eb2a40d00|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Věta tvrdí, že namísto zvonů zněly sborové skladby, nikoli jen o existenci zvonů."
 ],
 "3b4d9bc6ad9fa855|ollama:gemma4:latest|v2": [
 "částečně",
@@ -455,6 +511,10 @@
 "tvrdí",
 "Věta tvrdí, že méně rozsáhlé balady, idyly a romance měly podobně šťastný osud."
 ],
+"503c921d81a1cdd9|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Věta uvádí roky života (narození a úmrtí), ale výrok tvrdí děj zemřít s konkrétním rokem a místem, které nejsou v textu popsány jako děj."
+],
 "50c0cbb445fbec3c|ollama:gemma4:latest|v1": [
 "tvrdí",
 "Věta je ve formě titulku, který uvádí dva konkrétní subjekty/místa, což odpovídá výkladu ∅(téma:·mládí+·Litomyšl)."
@@ -514,6 +574,10 @@
 "571680bd78b796dd|ollama:gemma4:latest|v2": [
 "netvrdí",
 "Věta tvrdí, že činnost novináře ovlivnila jazyk a sloh děl, ale neuvádí, že Karel Čapek měl tyto věci jako své vlastní vlastnosti v tomto kontextu."
+],
+"575ce932453aa57c|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí konkrétní datum narození Boženy."
 ],
 "5874e8c627bf0f1f|ollama:gemma4:latest|v1": [
 "tvrdí",
@@ -651,6 +715,10 @@
 "netvrdí",
 "Věta uvádí jen názvy dokumentů, neuvádí žádné dějové vztahy jako je 'nmod' (vydání/spolu vydání)."
 ],
+"6cf3388597f8d334|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Věta neuvádí děj 'jít' s penězi, ale spíše jejich využití (šly na zaplacení studií)."
+],
 "6d8aefe5f1ba82f2|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta uvádí, že Josef Čapek obýval polovinu domu se svou rodinou, nikoli Karel Čapek."
@@ -670,6 +738,10 @@
 "6eccd1e9e1323af5|ollama:gemma4:latest|v2": [
 "netvrdí",
 "Věta tvrdí o 'dovedit mistrovsky využít příznačných historických detailů k podrobnému prokreslení doby', nikoli, že dovedl něco konkrétního s kódem [s0308]."
+],
+"704da038ea658997|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Podmět Karel Čapek je z kontextu a výrok správně zachycuje akci 'snažit se o ospravedlnění' s kvantifikátorem pro ospravedlnění."
 ],
 "709b5ad44c9e412d|ollama:gemma4:latest|v1": [
 "netvrdí",
@@ -767,6 +839,10 @@
 "netvrdí",
 "Věta tvrdí, že o panování Jiřího z Poděbrad zůstal nedokončen román/díl (nejen 'co'), nikoli jen, že existuje nějaký nedokončený výrok."
 ],
+"7aec421c52dae25e|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta tvrdí, že o panování Jiřího z Poděbrad zůstal nedokončen husitský král I– II."
+],
 "7bd6d342639bc322|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že jednosvazkové příběhy byly komponovány v duchu novel."
@@ -778,6 +854,10 @@
 "7fb72c8deedd8183|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Výrok správně identifikuje vztah mezi jménem a původním příjmením uváděným ve větě."
+],
+"824faec0851b7407|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že ve svých dílech vyjadřoval obavu (co), a kontext určuje podmět Karel Čapek."
 ],
 "8289b5052a5b765e|ollama:gemma4:latest|v1": [
 "netvrdí",
@@ -791,6 +871,10 @@
 "netvrdí",
 "Věta tvrdí, že novela pojednává o životě studentů v Litomyšli okolo roku 1848, nikoli jen o roce 1848."
 ],
+"856880e6ed4156e1|ollama:gemma4:latest|v2": [
+"částečně",
+"Výrok chybně identifikuje podmět jako 'hledání' namísto kontextu (Karel Čapek) a také chybí přesná role pro 'v Lidových novinách', ale základní děj (být otištěný, kdy, kde) je v podstatě správně zachycen."
+],
 "85a6579e44db9d64|ollama:gemma4:latest|v1": [
 "tvrdí",
 "Věta uvádí konkrétní gymnázium (podmět), počátek (od roku 1921) a důvod název (na jeho počest, což je ekvivalent na+Acc)."
@@ -802,6 +886,14 @@
 "85c80fcec2c04de6|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta tvrdí, že podepsal Manifest českých spisovatelů (konkrétní manifest), nikoli, že je manifest členem nějaké skupiny."
+],
+"8840693e6bffb114|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí konkrétní místo (východočeské Hronov u Náchoda), což je specifikace pro výrok o místě."
+],
+"884daaebf6e3e20e|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že Karel Čapek původně chtěl roboty nazvat 'laboři', což odpovídá struktuře vůle:nazvat(jak:·původně, kdo:·Karel Čapek, co:∃robot, čím:∃labor)."
 ],
 "88d4e2cd7a0a43a0|ollama:gemma4:latest|v1": [
 "tvrdí",
@@ -843,6 +935,10 @@
 "netvrdí",
 "Věta uvádí, že za pět let získal prostorný byt v Resslově ulici, nikoli že by získával první byt a pak nějaké množství bytů."
 ],
+"8b0b93268e95e19d|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Výrok je nekonzistentní a pokouší se kombinovat různé entity (dva první byty vs. prostorný byt) do jednoho děje, který věta nepodává."
+],
 "8b229b14d14fbd78|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí akci (zveřejnění úvahy) jako reakci na událost, a kontext určuje subjekta Karel Čapek."
@@ -863,6 +959,10 @@
 "tvrdí",
 "Věta uvádí o dětech narozených před Aloisem Jiráskem jeho rodičům."
 ],
+"8cd925a3b0162a55|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že zůstal nadále věřícím křesťanem, což odpovídá výkladu 'zůstat(kdo:·Alois Jirásek, jak:·nadále, čím:∃křesťan[věřící])' s použitím kontextu pro podmět."
+],
 "8d89bf7cf119a47f|ollama:gemma4:latest|v1": [
 "tvrdí",
 "Výrok správně identifikuje konatele (Karel a Olga) a předmět (doživotní právo), které obdrželi v kontextu svatby."
@@ -878,6 +978,14 @@
 "92ff4ecb7500ed34|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že v Úpici absolvoval základní školu."
+],
+"9362afb6dedc9896|ollama:gemma4:latest|v2": [
+"částečně",
+"Věta uvádí datum a místo publikace (Lidové noviny), ale výrok je příliš konkrétní ohledně obsahu ('co:[s0178]') a neuvádí, že se jedná o 'pokusit_se' vysvětlit aktivity, spíše jde o to, že *v* těchto novinách bylo otištěno."
+],
+"93957b011ff2cd81|ollama:gemma4:latest|v2": [
+"částečně",
+"Jádro (ovlivňovat tvorbu) sedí, ale výrok zjednodušuje a přidává 'jak:·výrazně' a kvantifikátor 'co:∃podoba', zatímco věta mluví o ovlivnění 'podobu tradičních i nově vzniklých novinářských útvarů'."
 ],
 "943269ef9d1a9ebe|ollama:gemma4:latest|v1": [
 "částečně",
@@ -950,6 +1058,10 @@
 "a01f6e12c97c89a7|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí časový okres a místo pobytu pro Aloise Jiráska."
+],
+"a17cf015b3a26a68|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že byl autorem publikace, což odpovídá tvrzení o členství v skupině autorů."
 ],
 "a61c1768d095bd17|ollama:gemma4:latest|v1": [
 "netvrdí",
@@ -1035,6 +1147,10 @@
 "částečně",
 "Věta uvádí interval let (1910–1911), výrok ale uvádí pouze rok 1910, což je zjednodušení."
 ],
+"ba6b1644a95aacde|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí konkrétní událost v roce 1913, k kterému je z kontextu jasné, že se vztahuje na Aloise Jiráseka."
+],
 "bb1700e7bbc3cae7|ollama:gemma4:latest|v2": [
 "netvrdí",
 "Věta uvádí, že se rodičům narodily děti (Helena, Josef, Emílie), ale výrok tvrdí, že je to 'dítě' jako množné číslo a pak přidává jméno Josefa Jiráseka, což není v textu uvedeno."
@@ -1042,6 +1158,10 @@
 "bb34f2e97716449d|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že film režíroval Štěpán Skalský a Jaromír Pleskot."
+],
+"bb8942ac8b01e8c4|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že sem se řadí jeho utopické romány a dramata."
 ],
 "bc314a16d25d2153|ollama:gemma4:latest|v1": [
 "netvrdí",
@@ -1171,6 +1291,10 @@
 "netvrdí",
 "Věta tvrdí, že gestapo plánovalo zatčení, nikoli, že je známo, že daná osoba existuje nebo má nějaké známé vlastnosti."
 ],
+"c7522082a9bf7d6f|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Věta tvrdí, že gestapo plánovalo zatčení, nikoli, že je známo, že Karel Čapek byl známý."
+],
 "c7c51083cc15e584|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že část dětství prožíval v Hronově u dědečka ve mlýně."
@@ -1215,6 +1339,10 @@
 "částečně",
 "Jádro (by být zástupcem) sedí, ale výrok chybně kvantifikuje a neuvádí správnou strukturu vztahu (neje jasné, že je zástupce *některých* osobností, spíše symbolický zástupce celku)."
 ],
+"ce85d062898cc3b8|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí konkrétní počet dětí (7 celkem, 6 dcer a 1 syn), což odpovídá výkladu s kvantifikátory."
+],
 "cf280fb1b78b001d|ollama:gemma4:latest|v1": [
 "tvrdí",
 "Věta uvádí, že jeho bratra Josefa hrál František Řehák."
@@ -1234,6 +1362,22 @@
 "d25ff4b43baec47d|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že činnost poskytla podněty a ovlivnila organizaci, jazyk, sloh, výraz i tvar."
+],
+"d3672e95a45ca891|ollama:gemma4:latest|v2": [
+"částečně",
+"Věta uvádí, že první práce vznikly v Litomyšli během pražských studií, ale výrok naznačuje, že publikování začalo právě v době pražských studií a zároveň je zjevná nekonzistence mezi místem vzniku prací (Litomyšl) a časovým rámcem (pražské studia). Kromě toho není jasné, zda se jedná o fázi publikování nebo vznik prací."
+],
+"d3bb3fd95d3750f6|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že medaile je symbolický zástupce významných osobností zde žijících a tvořících."
+],
+"d3c939574de2249e|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Věta tvrdí o dopisech, nikoli o bytí něčeho v určité době."
+],
+"d40fdb0ef2d1de3e|ollama:gemma4:latest|v2": [
+"netvrdí",
+"V kontextu je podmět Alois Jirásek, nikoli 'pobyt'. Navíc výrok uvádí příjemce možnosti jako Jelínková, což není v textu zmíněno."
 ],
 "d68edf2d0702e7c0|ollama:gemma4:latest|v2": [
 "netvrdí",
@@ -1263,9 +1407,17 @@
 "částečně",
 "Věta uvádí konkrétní období a místo (Litomyš), ale výrok neuvádí toto omezení časem/místem, pouze genericky tvrdí působení jako profesor."
 ],
+"dc75c9e5fea0ea45|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Kontext určuje podmět Aloisa Jiráska; věta tvrdí, že působil jako redaktor."
+],
 "dd05d6edf0ea470a|ollama:gemma4:latest|v1": [
 "tvrdí",
 "Věta uvádí, že se jedná o mírové poselství na Štědrý den 1937."
+],
+"dd6fc0ec8fa0f0e8|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že Josef Jirásek byl původně tkadlec a poté pekař, což odpovídá tvrzení o členství v skupině (případem '∃' pro dvě role)."
 ],
 "e128339017efc9f6|ollama:gemma4:latest|v1": [
 "částečně",
@@ -1319,6 +1471,10 @@
 "netvrdí",
 "Věta uvádí, že Čapek kritizuje společenské problémy, ale výrok tvrdí, že je problém členem nějaké skupiny, což není v textu popsáno."
 ],
+"e87178e8fbf7f2c8|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí soubor pověstí a jeho charakteristiky, což odpovídá tvrzení o členství."
+],
 "ea3e9f9f8b179805|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta uvádí o ukončení studia a získání doktorátu, ale neuvádí, že Karel Čapek měl vztah (mít) k Univerzitě Karlově v Praze."
@@ -1342,6 +1498,10 @@
 "ed6e432276d0da0b|ollama:gemma4:latest|v2": [
 "částečně",
 "Věta uvádí konkrétní události a roky pro různé medaile, ale výrok je příliš obecný (být nositelem + udělený + 1926) a neukazuje správně vztah mezi těmito prvky."
+],
+"f13d20eac045f86d|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Všechny role a okolnosti jsou v textu popsány a správně přiřazeny."
 ],
 "f185fe84d232da96|ollama:gemma4:latest|v1": [
 "netvrdí",
@@ -1379,9 +1539,17 @@
 "tvrdí",
 "Výrok správně identifikuje dědicové jako věnovatele sbírky Náprstkovu muzeu v roce 1981."
 ],
+"f5a05c8774f54b81|ollama:gemma4:latest|v2": [
+"částečně",
+"Výrok správně identifikuje děj (věnovat), ale chybí specifikace příjemce sbírky (Náprstkovo muzeum) a je zjednodušen, že se jedná o konkrétní sbírku, nikoli jen obecný kvantifikátor."
+],
 "f65902db8d8c8a1c|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta je pouze název a neobsahuje žádné tvrzení o existenci zajímavostí."
+],
+"f7a387d8aacff59e|ollama:gemma4:latest|v2": [
+"částečně",
+"Věta uvádí časový limit (do roku 1925), ale výrok přidává kvantifikátor '∃senátor' a používá členění, které není v textu explicitně popsáno jako jeho příslušnost k skupině senátorů po tomto roce."
 ],
 "fa4c2cd99752aa1d|ollama:gemma4:latest|v1": [
 "tvrdí",
@@ -1399,6 +1567,10 @@
 "netvrdí",
 "Výrok chybně modeluje okolnosti jako soubor subjektů (kdo), zatímco věta uvádí, že dílo bylo ovlivněno několika událostmi a obdobími."
 ],
+"fbd127bc9d01256f|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Výrok je příliš složitý a pokouší se shrnout více událostí do jedné role 'jak', zatímco věta uvádí několik samostatných ovlivňujících faktorů (první světová válka, fašismus v Itálii, nacismus v Německu, hrozby proti ČSR)."
+],
 "fc7c273b9d44f3b6|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta uvádí, že ulice či náměstí jsou pojmenovány po Jiráskovi, ale neuvádí, že Alois Jirásek má takové ulice."
@@ -1406,6 +1578,10 @@
 "fc7c273b9d44f3b6|ollama:gemma4:latest|v2": [
 "netvrdí",
 "Věta tvrdí, že ulice či náměstí jsou pojmenovány po Jiráskovi (nebo mají jeho název), nikoli že Alois Jirásek měl takové ulice."
+],
+"fd49e523a015e52c|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí stav 'být v penzi' od roku 1909 pro Aloise Jiráseka."
 ],
 "fe9cdf185ba6f9b5|ollama:gemma4:latest|v2": [
 "tvrdí",

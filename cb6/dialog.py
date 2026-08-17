@@ -22,7 +22,7 @@ from typing import Sequence
 import networkx as nx
 
 from cb6.ground import Grounded, ground
-from cb6.logic import Verdict, enumerate_, evaluate
+from cb6.logic import Verdict, derive, enumerate_, evaluate, rejected_notes
 from cb6.memory import Memory, OpenItem, Provenance, Statement
 from cb6.oracle import OracleError, Parse, SegmentationError
 from cb6.read import Reading, read
@@ -126,6 +126,7 @@ class Session:
         prov = self._prov(doc, parse.text)
         g = ground(reading, self.memory, prov, "read", topic=self.topics.get(doc))
         self._update_topic(doc, g)
+        derived = derive(self.memory)
         self.memory.tick()
         # téma dokumentu drží slabou stálou aktivaci — dokument JE o něm
         if doc in self.topics:
@@ -137,6 +138,8 @@ class Session:
             "residue": list(reading.residue),
             "open": [o.id for o in g.open],
             "defaults": list(g.main.defaults) if g.main else [],
+            "derived": [d.id for d in derived],
+            "notes": list(g.notes),
         }
 
     # ---- tah dialogu -----------------------------------------------------------
@@ -172,7 +175,10 @@ class Session:
         q = g.main
         assert q is not None
         wh = any(r.wh for r in q.roles)
+        derive(m)
         verdict = enumerate_(m, q) if wh else evaluate(m, q)
+        if wh and not verdict.fillers and not verdict.notes:
+            verdict.notes = rejected_notes(m, q)
         recalled: list[Statement] = []
         if verdict.value == "NEVÍM":
             recalled = recall(m, q.term_ids(), 3, pred=q.pred, exclude=verdict.near)
@@ -215,6 +221,7 @@ class Session:
                     conflict = v
         g = ground(reading, m, prov, "said", topic=self.topics.get(doc))
         self._update_topic(doc, g)
+        derived = derive(m)
         m.tick()
         self._last_said = [s.id for s in g.statements if s.derived_from is None and s.parent is None]
         for s in g.statements:
@@ -222,6 +229,8 @@ class Session:
                 lines.append(f"✓ zapsáno [{s.id}] {render_statement(m, s)}")
                 if s.defaults:
                     lines.append("   [" + "; ".join(s.defaults) + "]")
+        for d in derived:
+            lines.append(f"   ⇒ odvozeno [{d.id}] {render_statement(m, d)}")
         if reading.residue:
             lines.append("   zbytek: " + ", ".join(f"„{f}“ ({p})" for f, p in reading.residue))
         for o in g.open:

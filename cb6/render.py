@@ -146,6 +146,8 @@ def render_answer(m: Memory, verdict: Verdict, *, wh: bool, recalled: Sequence[S
     if verdict.value == "NEVÍM" or (wh and not verdict.fillers):
         for miss in verdict.missing:
             lines.append(f"   {TEMPLATES['missing']} {miss}")
+        for note in verdict.notes:
+            lines.append(f"   ⚠ {note}")
         near = [m.statements[s] for s in verdict.near if s in m.statements]
         shown: list[Statement] = []
         for st in list(near) + list(recalled):

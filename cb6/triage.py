@@ -90,7 +90,7 @@ def _conditional_kind(reading: Reading, main: Predication, role: RoleFill) -> st
     return "if"
 
 
-def _has_disjunction(reading: Reading, main: Predication) -> bool:
+def _has_disjunction(reading: Reading) -> bool:
     """Souřadná spojka vylučovací kdekoli ve větě (v1 hrubě: celá věta)."""
     return any(t.deprel == "cc" and t.lemma in D.DISJUNCTION_CC for t in reading.parse.tokens)
 
@@ -135,8 +135,8 @@ def triage(reading: Reading) -> Triaged:
     if main.mood == "question":
         return t
 
-    if _has_disjunction(reading, main) or _has_cardinality(reading):
-        why = "disjunkce bez prostoru modelů" if _has_disjunction(reading, main) else "kardinalita bez prostoru modelů"
+    if _has_disjunction(reading) or _has_cardinality(reading):
+        why = "disjunkce bez prostoru modelů" if _has_disjunction(reading) else "kardinalita bez prostoru modelů"
         for p in _walk(main):
             t.decisions[id(p)] = Decision("REJECTED", "assert", why)
         t.notes.append(why)

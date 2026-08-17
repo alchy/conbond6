@@ -18766,6 +18766,89 @@
 }
 ]
 },
+"Přijde Jana?": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Přijde Jana?",
+"tokens": [
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Mood",
+"Ind"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Person",
+"3"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Pres"
+],
+[
+"VerbForm",
+"Fin"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "Přijde",
+"head": 0,
+"id": 1,
+"lemma": "přijít",
+"upos": "VERB"
+},
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Fem"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Jana",
+"head": 1,
+"id": 2,
+"lemma": "Jana",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": "?",
+"head": 1,
+"id": 3,
+"lemma": "?",
+"upos": "PUNCT"
+}
+]
+},
 "Přijde Karel?": {
 "provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
 "text": "Přijde Karel?",

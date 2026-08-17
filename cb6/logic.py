@@ -62,6 +62,9 @@ class Verdict:
     near: list[str] = field(default_factory=list)
     #: wh: (id uzlu nebo `count:N`, důkaz)
     fillers: list[tuple[str, Proof]] = field(default_factory=list)
+    #: I‑4: zamítnuté výroky o termech dotazu — „text o tom mluví, ale interpretaci
+    #: neurčuje“; a hypotézy (I‑3) — „možná …“; render je vypíše, verdikt neovlivní
+    notes: list[str] = field(default_factory=list)
 
 
 def weakest(a: str, b: str) -> Grade:
@@ -318,7 +321,7 @@ class Evaluator:
             return Verdict("NE", [], neg, near=near)
         if modal:
             return Verdict("MOŽNÁ", modal, near=near)
-        return Verdict("NEVÍM", missing=self._missing(q, near), near=near)
+        return Verdict("NEVÍM", missing=self._missing(q, near), near=near, notes=rejected_notes(m, q))
 
     def _near(self, q: Statement, f: Statement) -> bool:
         """Blízký výrok: týž predikát a aspoň jeden term dotazu sedí."""
@@ -490,6 +493,88 @@ class Evaluator:
             return Verdict("ANO", [p for _, p in fillers], fillers=fillers)
         near = [s.id for s in self.describe(node_id)]
         return Verdict("NEVÍM", near=near, missing=[] if near else [f"o {m.node(node_id).label()} nevím nic"])
+
+
+def rejected_notes(memory: Memory, q: Statement) -> list[str]:
+    """Poznámky I‑4 (zamítnuté výroky o termech dotazu) a I‑3 (hypotézy o nich).
+
+    Zamítnutí a hypotéza nesmí zmizet jako prosté NEVÍM: odpověď řekne, že text
+    o věci mluví, a proč to není znalost. Verdikt to nemění.
+    """
+    terms = set(q.term_ids())
+    out: list[str] = []
+    for st in memory.by_claim("REJECTED"):
+        if terms & set(st.term_ids()) and (st.pred == q.pred or st.kind == "nmod" or q.pred is None):
+            z = memory.nodes.get(st.sentence)
+            src = f" (věta {z.lemma.rsplit('#', 1)[-1]}: „{z.text[:90]}“)" if z else ""
+            out.append(f"text o tom mluví{src}, ale interpretaci neurčuje: {st.reason}")
+    for st in memory.by_claim("HYPOTHESIS"):
+        if terms & set(st.term_ids()) and st.pred == q.pred:
+            out.append(f"hypotéza, ne znalost: {memory.render_short(st)} [{st.id}] — {st.reason or 'nejistá volba'}")
+    return out[:5]
+
+
+def derive(memory: Memory, evaluator: "Evaluator | None" = None) -> list[Statement]:
+    """Uplatni pravidla z textu (výroky `kind="rule"`) nejmenším pevným bodem.
+
+    Pravidlo je `if cond then cons` nad konkrétními entitami (vzory `mood="pattern"`
+    vnořené do pravidla). Když v znalosti existuje výrok `f`, na který podmínka
+    sedí (týž predikát, táž polarita, každý term podmínky má protějšek — přes
+    `Evaluator.match`), zapíše se důsledek jako výrok `grade="derived"`, `claim=SAFE`,
+    `rule=<id pravidla>`, `derived_from=<id f>` — v grafu je řetěz vidět (I‑12).
+    Idempotentní (týž důsledek se nezapíše dvakrát); opakuje se, dokud něco přibývá
+    (řetězy pravidel). Odvolání faktu nebo pravidla odvolá i důsledky (`Memory.revoke`).
+
+    Args:
+        memory: paměť; evaluator: volitelně sdílený `Evaluator`.
+    Returns:
+        Nově zapsané odvozené výroky.
+    """
+    ev = evaluator or Evaluator(memory)
+    new: list[Statement] = []
+    changed = True
+    while changed:
+        changed = False
+        rules = [s for s in memory.knowledge() if s.kind == "rule"]
+        for rule in rules:
+            r_if, r_then = rule.role("pokud"), rule.role("pak")
+            if not r_if or not r_then or not r_if.nested or not r_then.nested:
+                continue
+            cond = memory.statements.get(r_if.nested)
+            cons = memory.statements.get(r_then.nested)
+            if cond is None or cons is None or cons.status != "active":
+                continue
+            for f in list(memory.knowledge()):
+                if f.kind == "rule" or f.mood != "assert" or f.pred is None:
+                    continue
+                if ev.same_pred(cond.pred, f.pred) is None or bool(f.neg) != bool(cond.neg):
+                    continue
+                if not cond.roles or not all(r.terms or r.nested for r in cond.roles):
+                    continue
+                proof = ev.match(cond, f)
+                if proof is None:
+                    continue
+                if _derived_exists(memory, cons, rule.id):
+                    continue
+                st = Statement("", cons.pred, cons.kind, neg=cons.neg, modality=cons.modality, kernel=cons.kernel,
+                               roles=[Role(r.name, list(r.terms), r.quant, r.authority, r.surface, r.nested, dict(r.counts)) for r in cons.roles],
+                               grade="derived", defaults=list(rule.defaults) + list(cons.defaults) + [f"odvozeno pravidlem {rule.id} z {f.id}"],
+                               prov=rule.prov, sentence=rule.sentence, tense=cons.tense, mood="assert", claim="SAFE",
+                               rule=rule.id, derived_from=f.id)
+                memory.attach(st)
+                new.append(st)
+                changed = True
+    return new
+
+
+def _derived_exists(memory: Memory, cons: Statement, rule_id: str) -> bool:
+    """Existuje už aktivní odvozený výrok téhož důsledku z téhož pravidla?"""
+    sig = (cons.pred, cons.neg, tuple((r.name, tuple(sorted(r.terms))) for r in cons.roles))
+    for st in memory.knowledge():
+        if st.grade == "derived" and st.rule == rule_id:
+            if (st.pred, st.neg, tuple((r.name, tuple(sorted(r.terms))) for r in st.roles)) == sig:
+                return True
+    return False
 
 
 def evaluate(memory: Memory, q: Statement) -> Verdict:
