@@ -635,9 +635,27 @@ class _Reader:
         p.roles.insert(0, RoleFill("kdo", "prodrop", [term], "prodrop"))
         p.defaults.append("kdo:pro-drop z kontextu")
 
+    def _generic_context(self, p: Predication) -> bool:
+        """Smí holý podmět v prézentu znamenat „všichni“ (∀)?
+
+        Ano jen v jednoduché obecné větě: predikace je kořen věty (ne vedlejší /
+        vztažná věta), podmět není koordinovaný a věta nejmenuje žádnou entitu
+        (PROPN). V encyklopedické větě o Jiráskovi „věcnost je charakteristická
+        pro jeho prózy“ není ∀věcnost — precision audit 17. 8. 2026 (18 %
+        nepodložených bylo ∀). „Ptáci létají.“ / „Pes štěká.“ zůstávají ∀.
+        """
+        if p.head != self.p.root().index:
+            return False
+        subj = p.role("kdo")
+        if subj is not None and len(subj.terms) > 1:
+            return False
+        if any(t.upos == "PROPN" for t in self.p.tokens):
+            return False
+        return True
+
     def _quantify(self, p: Predication) -> None:
         """Kvantifikátor role podle tvaru — a autorita každé volby."""
-        generic = (p.tense == "Pres") or (p.kind == "copula" and p.tense in (None, "Pres"))
+        generic = ((p.tense == "Pres") or (p.kind == "copula" and p.tense in (None, "Pres"))) and self._generic_context(p)
         for r in p.roles:
             for t in r.terms:
                 if t.quant is not None:

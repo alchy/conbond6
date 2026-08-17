@@ -37,3 +37,8 @@ Yield hl./vše 160/298 na 1 000 slov; QA 12/17 (kurátorované 3/3); graf 0 poru
 **Poznámky:** (a) srovnání s conbond5 60,9 % není srovnání — jiná sada (682 auto → 204 filtrovaných + kurátorované + korpus); na filtrovaných auto je to 71 %; (b) korpus 7/90 je poctivý výchozí bod na těžších otázkách (Vesmír, Hudba: „Jakou rychlostí v km/s na megaparsek…“); (c) unsupported 34,9 % na 8 dokumentech vs 23 % na dvou — širší vzorek, těžší texty; hlavní zbývající chyby viz Task 6.
 
 **Běh 2 (commit 5646e5b, po opravě auditu):** QA 173/334 = 51,8 % (jeden zásah přes zamítnutý nmod odpadl — poctivě); kurátorované 29/130; unsupported 32,8 % [28,3–37,5] (hlavní 35 %, appos 26 %, nmod‑místo 17 %); **audit grafu 0 porušení**; determinismus ano; zpráva `mereni/2026-08-17-5646e5b.md`.
+
+## 2026-08-17 · tah: ∀ jen v jednoduché obecné větě
+**Nález (audit plného běhu, 150 nepodložených):** 18 % je kvantifikátor ∀ z „holý podmět + prézens“ ve větách, které nejsou obecné (vedlejší věty, výčty, věty s vlastními jmény): `být(kdo:∀odvaha+∀statečnost…)`, `¬mít(kdo:∀tma, co:∃stín)` z názvu povídky. Další třídy: kopula/přístavek s odpadem („The“, „6.“, „např.“) 15 %, koordinace v podmětu 5 %, participia 3 %, uvozovky/citace 6 %; zbytek smíšený.
+**Změna:** `_generic_context` v `read.py`: ∀ jen když je predikace kořen věty, podmět není koordinovaný a věta nemá žádné PROPN; jinak `·` (epizoda). Dialogy E/B („Ptáci létají“, „Ovoce obsahuje vitamíny“) zůstávají ∀ (testy zelené).
+**Hypotéza:** unsupported plného běhu klesne o 3–6 bodů (∀ třída zmizí z větší části), QA beze změny nebo −1…−2 (otázky přes ∀ distribuci na encyklopedickém textu jsou vzácné).
