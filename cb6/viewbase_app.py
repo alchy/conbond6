@@ -1,9 +1,14 @@
-"""Konverzace nad živým grafem ve viewBase (volitelný adaptér).
+"""Konverzace nad živým grafem ve viewBase2 (volitelný adaptér).
 
-    pip install -e /Users/j/Projects/viewBase/python      # viewbase (lokálně)
+    pip install -e /Users/j/Projects/viewBase2/python     # viewbase (github.com/alchy/viewBase2)
     python -m cb6.viewbase_app [--pamet p.json] [--port 8080]
 
-Proč: paměť conbond5 JE graf (spec § 3) a člověk má vidět, čím systém
+Model viewBase2: `Project` (služba, port) → `Screen` (plocha) → okna:
+`GraphWindow` (živý 3D graf, fyzika v prohlížeči, oblasti podle metadata
+`skupina` = dokument), `TerminalWindow` (dialog), `LogWindow`, detailní okno
+na klik.
+
+Proč: paměť conbond6 JE graf (spec § 3, I‑11) a člověk má vidět, čím systém
 myslí. Adaptér drží mimo jádro: po každém tahu se rozdíl paměti promítne
 do plátna (`ensure_node`/`ensure_edge`), aktivace se ukáže jako
 `highlight`, a konzole v prohlížeči (`TerminalWindow`) je tentýž dialog
@@ -19,6 +24,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 from cb6.dialog import Session
 from cb6.memory import Memory
@@ -46,13 +52,25 @@ TYPES = {
 HIDDEN_KINDS = ("sentence", "document", "segment", "open")
 
 
-def build(session: Session, *, title: str = "conbond6") -> object:
+def build(session: Session, *, title: str = "conbond6", port: int = 8080) -> tuple[Any, Any]:
+    """Postav projekt viewBase2: screen s grafovým oknem, konzolí (dialog) a log oknem.
+
+    Args:
+        session: sezení nad pamětí (graf se z ní promítá po každém tahu).
+        title: titulek; port: port služby (Project ho potřebuje před vším).
+    Returns:
+        (project, screen) — volající zavolá `project.serve(screen, …)`.
+    """
     import viewbase as vb  # type: ignore[import-not-found]
 
-    canvas = vb.Canvas(title=title, theme="cyber", highlight_neighbors=1)
+    project = vb.Project(port=port)
+    screen = vb.Screen(title=title, theme="cyber")
+    graph = vb.GraphWindow(screen=screen, title=f"{title} — graf paměti", dimensions=3, theme="cyber", highlight_neighbors=1)
+    vb.LogWindow(screen=screen)
     for name, style in TYPES.items():
-        canvas.define_type(name, **style)
-    canvas.define_type("soft", color="#333333", size=0.1)
+        graph.define_type(name, **style)
+    graph.define_type("soft", color="#333333", size=0.1)
+    graph.node_label("{name}")
 
     synced_nodes: set[str] = set()
     synced_edges: set[tuple[str, str, str]] = set()
@@ -60,7 +78,7 @@ def build(session: Session, *, title: str = "conbond6") -> object:
     def sync() -> None:
         m = session.memory
         g = m.graph()
-        with canvas.batch():
+        with graph.batch():
             for nid, data in g.nodes(data=True):
                 kind = data.get("kind", "group")
                 if kind in HIDDEN_KINDS or (kind == "statement" and data.get("life") != "active"):
@@ -77,61 +95,71 @@ def build(session: Session, *, title: str = "conbond6") -> object:
                 if t not in TYPES:
                     t = "group"
                 label = data.get("label", nid)
-                if kind == "statement":
-                    label = m.render_short(m.statements[nid]) if nid in m.statements else label
-                if kind == "statement":
-                    info = render_statement(m, m.statements[nid], with_source=True) if nid in m.statements else ""
+                st = m.statements.get(nid) if kind == "statement" else None
+                if st is not None:
+                    label = m.render_short(st)
+                    info = render_statement(m, st, with_source=True)
+                    skupina = st.prov.doc or ""
+                    status = f"{st.claim} · {st.grade} · {st.mood}"
                 else:
-                    info = " | ".join(render_statement(m, s) for s in m.statements_about(nid)[:6])
-                canvas.ensure_node(str(nid), type=t, label="{name}", name=label, kind=kind, vyroky=info)
+                    node = m.nodes.get(nid)
+                    info = " | ".join(render_statement(m, x) for x in m.statements_about(nid)[:6])
+                    skupina = node.doc if node is not None and node.doc else ""
+                    status = kind
+                # `skupina` = dokument → knihovna z ní udělá oblast (shluk) v layoutu
+                graph.ensure_node(str(nid), type=t, name=label, kind=kind, status=status, vyroky=info, skupina=skupina or "—")
                 synced_nodes.add(str(nid))
             for a, b, data in g.edges(data=True):
                 key = (str(a), str(b), str(data.get("type")))
                 if key in synced_edges or a == b or str(a) not in synced_nodes or str(b) not in synced_nodes:
                     continue
                 synced_edges.add(key)
-                canvas.ensure_edge(str(a), str(b), type=str(data.get("type")), soft=bool(data.get("soft")))
-            # odvolané výroky zmizí z plátna
+                graph.ensure_edge(str(a), str(b), type=str(data.get("type")), soft=bool(data.get("soft")))
             for sid, st in m.statements.items():
-                if st.status != "active" and canvas.has_node(sid):
-                    canvas.remove_node(sid)
-        # aktivace = kontext
+                if st.status != "active" and graph.has_node(sid):
+                    graph.remove_node(sid)
+                    synced_nodes.discard(sid)
+        # aktivace = kontext rozhovoru: rozsvítí se nejteplejší uzly a jejich okolí
         for n in m.most_active()[:3]:
-            if canvas.has_node(n.id):
-                canvas.highlight(n.id, 1)
+            if graph.has_node(n.id):
+                graph.highlight(n.id, 1)
 
-    konzole = vb.TerminalWindow("dialog", title="conbond5 — dialog", prompt="» ", width=640)
+    konzole = vb.TerminalWindow("dialog", title=f"{title} — dialog", prompt="» ", width=640, closable=False)
 
     def on_input(event: object) -> None:
         line = getattr(event, "line", "").strip()
         if not line:
             return
-        canvas.terminal_write("dialog", f"» {line}")
+        graph.terminal_write("dialog", f"» {line}")
         try:
             answer = session.say(line)
             for out in answer.text.splitlines():
-                canvas.terminal_write("dialog", out)
+                graph.terminal_write("dialog", out)
         except Exception as exc:  # noqa: BLE001 — konzole nesmí spadnout
-            canvas.terminal_write("dialog", f"✗ chyba: {exc}")
+            graph.terminal_write("dialog", f"✗ chyba: {exc}")
         sync()
 
-    canvas.detail_window(rows=[("uzel", "name"), ("druh", "kind"), ("výroky", "vyroky")], width_chars=60)
+    graph.detail_window(rows=[("uzel", "name"), ("druh", "kind"), ("status", "status"), ("dokument", "skupina"), ("výroky", "vyroky")], width_chars=64)
 
-    @canvas.on_click
+    @graph.on_click
     def _clicked(event: object) -> None:
         nid = getattr(event, "node_id", None)
         m = session.memory
-        if nid and nid in m.nodes:
-            canvas.terminal_write("dialog", f"[{nid}] {describe_node(m, nid)}")
+        if not nid:
+            return
+        graph.show_detail(nid)
+        if nid in m.nodes:
+            graph.terminal_write("dialog", f"[{nid}] {describe_node(m, nid)}")
             for st in m.statements_about(nid)[:5]:
-                canvas.terminal_write("dialog", "   " + render_statement(m, st, with_source=True))
-        elif nid and nid in m.statements:
-            canvas.terminal_write("dialog", f"[{nid}] {render_statement(m, m.statements[nid], with_source=True)}")
+                graph.terminal_write("dialog", "   " + render_statement(m, st, with_source=True))
+        elif nid in m.statements:
+            graph.terminal_write("dialog", f"[{nid}] {render_statement(m, m.statements[nid], with_source=True)}")
+            graph.terminal_write("dialog", "   (celý záznam: !ukaž " + nid + ")")
 
-    canvas.open_terminal(konzole, on_input=on_input)
-    canvas.terminal_write("dialog", "conbond5: piš věty (zapíšu), otázky (odpovím), !nápověda pro příkazy.")
+    graph.open_terminal(konzole, on_input=on_input)
+    graph.terminal_write("dialog", f"{title}: piš věty (zapíšu), otázky (odpovím), !nápověda pro příkazy, !ukaž s0042 pro výrok v grafu.")
     sync()
-    return canvas
+    return project, screen
 
 
 def main(argv: list[str]) -> int:
@@ -146,9 +174,9 @@ def main(argv: list[str]) -> int:
         return 2
     memory = Memory.load(Path(args.pamet)) if args.pamet and Path(args.pamet).exists() else Memory()
     session = Session(memory, live_or_recorded(CACHE))
-    canvas = build(session)
+    project, screen = build(session, port=args.port)
     try:
-        vb.serve(canvas, port=args.port, open_browser=True)
+        project.serve(screen, open_browser=True)
     finally:
         if args.pamet:
             session.memory.save(Path(args.pamet))
