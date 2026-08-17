@@ -1,124 +1,83 @@
 # conbond6 — měřitelná cesta od psaného textu ke znalosti
 
-conbond6 vychází z conbond5 (klon s historií). Zadání a invarianty:
-[`docs/superpowers/specs/2026-08-17-conbond6-design.md`](docs/superpowers/specs/2026-08-17-conbond6-design.md);
-plán: [`docs/superpowers/plans/2026-08-17-conbond6-v1.md`](docs/superpowers/plans/2026-08-17-conbond6-v1.md).
-Níže původní popis jádra conbond5 (platí, dokud ho conbond6 nepřepíše).
+Šestý pokus o systém, který **z českého textu získá znalost, věrnou zdroji,
+vysvětlitelnou, dotazovatelnou a bezpečnou vůči domýšlení** — a který to
+o sobě dokáže *změřit*. Vychází z conbond5 (klon s historií, balíček `cb5 →
+cb6`); mění se měřítko, ne motor.
 
-## Jádro (z conbond5)
+- **Zadání a invarianty I‑1…I‑12:** [`docs/superpowers/specs/2026-08-17-conbond6-design.md`](docs/superpowers/specs/2026-08-17-conbond6-design.md)
+- **Plán v1:** [`docs/superpowers/plans/2026-08-17-conbond6-v1.md`](docs/superpowers/plans/2026-08-17-conbond6-v1.md)
+- **Hypotézy a výsledky každého tahu:** [`mereni/HYPOTEZY.md`](mereni/HYPOTEZY.md) · zprávy `mereni/<datum>-<commit>.md`
 
-Systém, který každou českou větu textu **zapíše do grafové paměti** jako
-výrok s epistemickým stupněm a nad pamětí **hodnotí výroky** — ANO / NE /
-NEVÍM s důkazem a citací zdrojové věty — v dialogu s člověkem, který ho
-tímtéž dialogem opravuje a doučuje.
+## Jedna věta
 
-Syntéza conBond2 (korpus + zlaté otázky, aktivační pole), conBond3
-(„nic se neztrácí“, retrieval jako propad nad týmž grafem, JSON
-persistence) a conbond4 (reifikované vztahy s rolemi, entita ≠ jméno,
-provenience + odvolání, uzávěry, verdikty s důkazem, determinismus).
-Návrh: [`docs/superpowers/specs/2026-08-16-conbond5-design.md`](docs/superpowers/specs/2026-08-16-conbond5-design.md),
-plán: [`docs/superpowers/plans/2026-08-16-conbond5-v1.md`](docs/superpowers/plans/2026-08-16-conbond5-v1.md).
+Text → čtení (UDPipe → tabulkové čtení, nic se neztrácí) → **triáž** (co je
+tvrzení, co podmínka, co obsah promluvy, co fráze) → **graf** (výroky
+s proveniencí, statusem `SAFE / HYPOTHESIS / REJECTED`, stupněm `read / said /
+derived`, výchozími volbami) → logika (ANO / NE / NEVÍM s důkazem, jen nad
+`SAFE`) → odpověď, jejíž cesta je v grafu vidět (`!ukaž s0042`).
 
-## Proč (a v čem je to jinak než conbond4)
+## Běh za 5 minut
 
-conbond4 měl nad korpusem 220/238 vět přečteno, ale **8 zapsáno** — brána
-zápisu s osmi blokátory nepustila nic, na co zbyla jediná otázka. Vznikl
-„interaktivní analyzátor neznalosti“. conbond5 obrací tři věci:
-
-1. **Čtení se vždy zapíše.** Co se přečetlo, jde do paměti; co ne, jde
-   tam taky — jako *zbytek* na téže větě, viditelný. Otázky, které by
-   conbond4 kladl dopředu, jsou *otevřené položky* (backlog `!otevřené`):
-   neblokují nic, kdykoli je lze zodpovědět (`!odpověz o0001 kde`).
-2. **Každý výrok má stupeň** — `said` (řekls to) · `read` (přečteno
-   z textu) · `derived` (odvozeno; dědí nejslabší premisu) — a seznam
-   **výchozích voleb**, které při čtení padly (∀ z generického prézentu,
-   `kde` z `v+Loc`, nevyslovený podmět z aktivace, kopula → subset…).
-   Odpověď to vždy říká a cituje větu.
-3. **Výchozí volby jsou data** (`cb6/defaults.py`), přeučitelná dialogem
-   (`!role přes+Acc = kudy`, `!synonymum kázat = hlásat`, `!pravidlo
-   jet(kam:X) => být(kde:X)`, `!výjimka létat pták tučňák`).
-
-Guard, který zůstává: **pravdivost neteče po měkké hraně** — aktivace
-(sliding window kontextu) jen řadí a navrhuje, nikdy netvrdí.
-
-## Rychlý start
-
-Předpoklad: služba UDPipe `cb-udpipe` na `127.0.0.1:42200`
-([conbond4-deps](https://github.com/alchy/conbond4-deps) nebo conBond3).
+Předpoklad: služba UDPipe z conBond3 na `127.0.0.1:42200` (jen pro nové
+rozbory a bench; testy jedou z nahraných rozborů) a pro precision audit
+Ollama s modelem `gemma4:latest` (viz `bench/config.json`).
 
 ```bash
-python3.11 -m venv .venv && .venv/bin/pip install -e ".[dev]"
-.venv/bin/python -m pytest -q                 # 89 testů, hermeticky (nahrané rozbory)
-.venv/bin/python -m cb6 chat                  # REPL
-.venv/bin/python -m cb6.bench --dok alois_jirásek --vypis   # měření nad korpusem
+python3.11 -m venv .venv && .venv/bin/pip install -e '.[dev]'
+.venv/bin/python -m pytest -q                       # hermetické testy
+.venv/bin/python -m cb6 chat                        # REPL: vlož text, ptej se, !ukaž, !hypotéza, !statusy, !otevřené
+.venv/bin/python -m bench run --sada wiki --strop 40 --dok alois_jirásek --soudce   # rychlá smyčka s auditem
+.venv/bin/python -m bench run --vse --dvakrat --soudce --audit-doky 8               # plný běh → mereni/
+.venv/bin/python -m bench audit --dok alois_jirásek --rucne                          # lidský vzorek (I‑12 otázka)
+.venv/bin/python -m bench diff mereni/A.json mereni/B.json
+.venv/bin/python -m bench gold-filter               # přegenerovat vyfiltrované automatické otázky
 ```
 
-```
-» Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.
-✓ zapsáno [s0001] být(kdo: Alois Jirásek, co: ∃prozaik (český) + ∃dramatik + ∃učitel (středoškolský) + ∃politik) ⟨member⟩
-✓ zapsáno [s0002] narodit_se(kdo: Alois Jirásek, kdy: 23. 8. 1851, kde: Hronov)   [životopisná závorka]
-✓ zapsáno [s0003] zemřít(kdo: Alois Jirásek, kdy: 12. 3. 1930, kde: Praha)        [životopisná závorka]
-» Celý život pracoval jako učitel dějepisu na gymnáziu, nejprve v Litomyšli a poté v Praze.
-✓ zapsáno [s0004] pracovat(kdo: Alois Jirásek, jak dlouho: život, jako: ∃učitel, kde: ∃gymnázium + ∃Litomyšl + ∃Praha, pořadí: nejprve + poté)
-   [kdo:pro-drop z kontextu; kdo: „nevyslovený podmět“ = Alois Jirásek (z aktivace)]
-» Kde pracoval Alois Jirásek?
-→ gymnázium; Litomyšl; Praha
-   - pracovat(kdo: Alois Jirásek, …)  [s0004]
-       zdroj: „Celý život pracoval jako učitel dějepisu na gymnáziu, nejprve v Litomyšli a poté v Praze.“ (dialog, věta 2)
-   [řekls to; kdo: „nevyslovený podmět“ = Alois Jirásek (z aktivace)]
-» Pes štěká.            » Jezevčík je pes.
-» Štěká jezevčík?
-→ ANO
-   - štěkat(kdo: ∀pes)  [s0005]     - být(kdo: ∀jezevčík, co: ∃pes) ⟨subset⟩  [s0006]
-   ↳ jezevčík ⊆ pes (∀ se přenáší dolů)
-   [odvozeno z: řekls to; kdo:∀ generický prézens]
-» Petr bydlí v Praze.   » Bydlí Petr v Brně?
-→ NEVÍM
-   chybí: o Brno nevím nic
-   vím:  - bydlet(kdo: Petr, kde: Praha)  — zdroj: „Petr bydlí v Praze.“
-```
+## Co bench měří (spec § 5)
 
-## Moduly
-
-| modul | co dělá |
+| metrika | co říká |
 |---|---|
-| `cb6/oracle.py` | UDPipe fasáda s proveniencí modelu; `CachedOracle` (JSON keš), `RecordedOracle` (testy bez sítě) |
-| `cb6/chronos.py` | čas jako data: datum, rok, interval, století, pojmenované časy; `before`, `within` |
-| `cb6/defaults.py` | výchozí volby jako data: role z předložky + pádu + druhu výplně, determinátory → kvantifikátor, částice, modální slovesa, tázací slova, synonyma predikátů |
-| `cb6/read.py` | rozbor → predikace: sloveso / kopula / fragment, role, negace, modalita, koordinace, vnořené a vztažné věty, přívlastky jako výroky vedle věty, životopisná závorka; **každý token má místo**, jinak je ve zbytku |
-| `cb6/memory.py` | graf výroků: uzly (entita, group i zúžená, místo, čas), `attach/revoke/inspect`, uzávěry `member*/subset*/within*/same_as*`, čas, disjunktnost, výjimky, pravidla, aktivace, měkké hrany, `graph()` (networkx → viewBase), JSON |
-| `cb6/ground.py` | čtení → paměť: identita (částečná jména), instance z neurčité zmínky, koreference aktivací / téma dokumentu, přivlastnění, otevřené položky |
-| `cb6/logic.py` | shoda dotazu s výroky (každá role dotazu musí mít protějšek), distribuce ∀ dolů, negace → NE, disjunktnost, počty, modalita → MOŽNÁ, wh‑výčty vč. rodiny rolí místa/času, definice, pravidla, výjimky |
-| `cb6/recall.py` | propad: co paměť o uzlech z otázky ví (jen řadí) |
-| `cb6/render.py` | verdikt + důvod + zdroj + doložka stupně (šablony jako data) |
-| `cb6/dialog.py` | `Session`: `ingest`, `say`, opravy („Ne, …“, „To není pravda.“, „Ne každý X.“), hlášení konfliktu, příkazy, backlog, žurnál a `replay` |
-| `cb6/bench.py` | měření nad korpusem conBond2 (66 wiki dokumentů, 682 + 135 zlatých otázek) |
+| **knowledge yield** hl./vše | `SAFE` výroků na 1 000 slov — hlavní predikace / všechny (bez pravidel a typování) |
+| statusy | `SAFE` · `HYPOTHESIS` · `REJECTED` (+ nálady `pattern`, `reported`) |
+| zbytek %, open/větu | co čtení neumístilo; otevřené položky (backlog) |
+| QA | správně / otázek; **kurátorované** zvlášť (hlavní číslo); dosah 0 / 1‑3 / 4‑10 / >10 / jiný segment |
+| **precision audit** | vzorek `SAFE` výroků × zdrojová věta → *tvrdí / netvrdí / částečně*; soudce (Ollama) + člověk; unsupported = (netvrdí + ½ částečně)/n s Wilsonovým intervalem; shoda soudce/člověk; „nechápu z grafu“ % |
+| **audit grafu** | provenience, derivace, statusy, osiřelost, otevřené; **rekonstrukce odpovědi jen z exportu** (I‑12) |
+| determinismus | dva běhy = týž otisk paměti |
+| diff | proti předchozí zprávě (i proti conbond5 `bench-vse.json`) |
 
-## Měření (17. 8. 2026, `mereni/bench-vse.md`)
+Zlaté otázky (`bench/gold/`, s proveniencí): kurátorované `etalon` 40 a
+`conbond` 95 z conBond2 beze změny; automatické `otazky.json` 682 po
+valenčním filtru **204** (`otazky-filtr.log.md` — proč které padly);
+conBondCorpus 120 otázek (Vesmír, Hudba). Kurátorované a automatické se
+vykazují zvlášť; automatické mají i chybné odpovědi (nález), do hlavního
+čísla nejdou.
 
-`python -m cb6.bench` klonuje conBond2 do `data/corpus/`, každý dokument
-vloží do čerstvé paměti a položí k němu zlaté otázky (682 automaticky
-generovaných kde/kdy z `otazky.json` + 40 z `etalon.json`, k dokumentům
-se sadou). Rozbory se kešují, druhý běh trvá vteřiny.
+## Invarianty, které hlídají testy
 
-| | conbond4 (16. 8.) | conbond5 v1 (17. 8.) |
+| | invariant | test |
 |---|---|---|
-| korpus conbond4 (238 vět): zapsáno | 8 | **233 s rolí**, zbytek 5,6 % tokenů |
-| korpus conBond2 (66 dok., 13 899 vět): zapsáno | — | **13 899** (46 256 výroků, zbytek 8,6 % tokenů, 11 839 otevřených položek) |
-| zlaté otázky (722): správná výplň | 0 | **440 (60,9 %)** |
-| zlaté otázky: správná odpověď aspoň v „vím: …“ | 0 | 610 (84 %) |
-| rozklad chyb | — | role/logika 134 · špatná výplň 100 · bez výroku 45 · predikát chybí 3 |
-| dialogy A–F ze zadání conbond4 | — | zelené (`tests/test_dialogues_af.py`) |
-| „Bydlí Petr v Brně?“ po „Petr bydlí v Praze.“ | ANO (nepravda) | NEVÍM + „vím: bydlí v Praze“ |
+| I‑1 | žádná brána zápisu | `test_dialog_g` (každá věta zapsána), bench `written_pct` |
+| I‑3 | hypotéza nikdy ve verdiktu | `tests/bench/test_i3.py`, `test_discourse`, `test_render_show` |
+| I‑4 | zamítnutí není neznalost | `test_rules::test_zamitnuti_se_hlasi_ne_mlci` |
+| I‑7 | determinismus, replay | `test_rules`, `test_dialog_g`, bench `--dvakrat` |
+| I‑8 | nevolit význam kvůli počtu | `test_triage` (podmínka, disjunkce), `test_discourse` (dva kandidáti → hypotézy) |
+| I‑11 | paměť je graf | `test_graph_export`, `bench/graphcheck` |
+| I‑12 | odpověď rekonstruovatelná z grafu | `tests/bench/test_graphcheck`, `bench/graphcheck.check_answer` |
 
-Čas: celý korpus (13 899 vět) se z keše vloží za ~10 s a 722 otázek se
-zodpoví za ~4 s. Poctivost zůstává: každá odpověď cituje větu a přiznává
-výchozí volby (∀ z generického prézentu, podmět z aktivace…).
+## Kde co je
 
-## Meze v1 (řečené, ne mlčené)
+```
+cb6/       oracle chronos defaults read triage discourse memory ground logic recall render dialog cli viewbase_app
+bench/     data gold qa metrics run graphcheck audit judge diff __main__ · gold/ (zlaté otázky) · config.json
+tests/     hermetické (nahrané rozbory v tests/data/parses.json; nové věty: sentences.txt + python -m cb6.record)
+mereni/    HYPOTEZY.md · zprávy · audit-<doc>.json (lidské odpovědi) · audit-cache.json (soudce)
+```
 
-Koreference jen aktivací (rod/číslo + čerstvost) a tématem dokumentu; čas
-jen body / roky / intervaly; bez plné predikátové logiky (algebra skupin +
-reifikace hloubky 1); modalita jako příznak výroku; čeština na výstupu
-strukturovaně (role: výplň), ne volnou větou; bez rankeru čtení. Každá mez
-se v odpovědi hlásí, nikdy tiše.
+## Stav (17. 8. 2026, dva dokumenty, strop 40 řádků, vzorek 100 výroků)
+
+conbond5 výchozí: unsupported **76,5 %**, yield 160/298 · po triáži, opravách
+čtení a registru referentů: unsupported **23,0 %** [15,8–32,1], yield **89/94**,
+QA 12/17 beze změny, graf 0 porušení, determinismus ano. Plný běh a lidský
+audit: `mereni/`.
