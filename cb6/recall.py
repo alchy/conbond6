@@ -32,6 +32,8 @@ def recall(memory: Memory, node_ids: Sequence[str], k: int = 3, *, pred: str | N
         for st in memory.statements_about(i):
             if st.id in seen or st.id in exclude or st.derived_from:
                 continue
+            if st.claim == "REJECTED" or st.mood in ("pattern", "question"):
+                continue  # zamítnutí se hlásí zvlášť (Verdict.notes), vzory pravidel nejsou „vím“
             seen.add(st.id)
             terms = set(st.term_ids())
             overlap = len(terms & set(ids))
@@ -45,6 +47,8 @@ def recall(memory: Memory, node_ids: Sequence[str], k: int = 3, *, pred: str | N
                 score -= 2.0
             if st.kind == "nmod":
                 score -= 1.0
+            if st.claim == "HYPOTHESIS" or st.mood == "reported":
+                score -= 1.5  # hypotéza / obsah promluvy až za znalostí
             scored.append((score, int(st.id[1:]), st))
     scored.sort(key=lambda x: (-x[0], -x[1]))
     return [st for _, _, st in scored[:k]]

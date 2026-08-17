@@ -80,10 +80,72 @@ def render_statement(m: Memory, st: Statement, *, with_source: bool = False) -> 
         if labels:
             parts.append(f"{role_label(r.name)}: {' + '.join(labels)}")
     kernel = f" ⟨{st.kernel}⟩" if st.kernel else ""
+    if st.kind == "rule":
+        head = "pravidlo"
     out = f"{head}({', '.join(parts)}){kernel}"
+    tag = STATUS_TAGS.get((st.claim, st.mood)) or STATUS_TAGS.get((st.claim, "*"))
+    if tag:
+        out += f" {tag}"
     if with_source and st.prov.text:
         out += "  — " + TEMPLATES["source"].format(text=st.prov.text, doc=st.prov.doc, no=st.prov.sent_no)
     return out
+
+
+#: Doložka statusu za výrokem (spec § 3): co není znalost, musí být vidět.
+STATUS_TAGS: dict[tuple[str, str], str] = {
+    ("HYPOTHESIS", "*"): "[hypotéza, ne znalost]",
+    ("REJECTED", "*"): "[zamítnuto]",
+    ("SAFE", "reported"): "[obsah promluvy, ne fakt]",
+    ("SAFE", "pattern"): "[vzor pravidla]",
+}
+
+
+def render_show(m: Memory, sid: str) -> str:
+    """`!ukaž s0042` — výrok, jak je v grafu (I‑12): status, stupeň, život,
+    zdroj, výchozí volby, alternativy, vnoření, odvození, zbytek, otevřené
+    položky a okolí termů (do 5 hran na term).
+
+    Args:
+        m: paměť; sid: id výroku.
+    Returns:
+        Víceřádkový text; neznámé id → jedna řádka „neznám“.
+    """
+    st = m.statements.get(sid)
+    if st is None:
+        return f"neznám {sid}"
+    lines = [f"{sid}  {st.claim} · {GRADE_LABELS.get(st.grade, st.grade)} · {'aktivní' if st.status == 'active' else 'odvolán: ' + st.reason} · nálada {st.mood}"]
+    lines.append("  " + render_statement(m, st))
+    z = m.nodes.get(st.sentence)
+    if z is not None:
+        lines.append(f"  source → {z.id} „{z.text}“ ({z.doc}, věta {z.lemma.rsplit('#', 1)[-1]})")
+    elif st.prov.text:
+        lines.append(f"  source → „{st.prov.text}“ ({st.prov.doc}, věta {st.prov.sent_no})")
+    if st.reason and st.claim != "SAFE":
+        lines.append(f"  důvod: {st.reason}")
+    if st.defaults:
+        lines.append("  defaults: " + " · ".join(st.defaults))
+    if st.alternatives:
+        lines.append("  alternative_of → " + ", ".join(st.alternatives))
+    alts = [x.id for x in m.statements.values() if sid in x.alternatives and x.status == "active"]
+    if alts:
+        lines.append("  alternativy (hypotézy): " + ", ".join(f"{a} {render_statement(m, m.statements[a])}" for a in alts))
+    if st.parent:
+        lines.append(f"  nested_in → {st.parent}")
+    if st.derived_from or st.rule:
+        lines.append(f"  derived_from → {st.derived_from or '—'} · uses_rule → {st.rule or '—'}")
+    if st.residue:
+        lines.append("  residue: " + ", ".join(f"„{f}“ ({p})" for f, p in st.residue))
+    opens = [o for o in m.open_items_.values() if o.statement == sid]
+    if opens:
+        lines.append("  open: " + " · ".join(f"{o.id} {o.question}" + (f" → {o.answer}" if o.answer else "") for o in opens))
+    for r in st.roles:
+        for t in r.terms:
+            n = m.nodes.get(t)
+            if n is None:
+                continue
+            others = [x for x in m.statements_about(t) if x.id != sid][:5]
+            lines.append(f"  role:{r.name} → {t} {describe_node(m, t)} ({n.kind})" + (" · dále v: " + ", ".join(f"{x.id} {x.pred or x.kind}" for x in others) if others else ""))
+    return "\n".join(lines)
 
 
 def _grade_note(m: Memory, proof: Proof) -> str:

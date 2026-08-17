@@ -27,7 +27,7 @@ from cb6.memory import Memory, OpenItem, Provenance, Statement
 from cb6.oracle import OracleError, Parse, SegmentationError
 from cb6.read import Reading, read
 from cb6.recall import recall
-from cb6.render import describe_node, render_answer, render_statement
+from cb6.render import render_show, describe_node, render_answer, render_statement
 
 
 @dataclass
@@ -403,6 +403,40 @@ class Session:
                 b = ents[0]
             m.add_exception(pred, a.id, b.id)
             return f"výjimka: {pred} o {a.label()} neplatí pro {b.label()}"
+        if cmd in ("ukaž", "ukaz", "show"):
+            return render_show(m, arg.strip())
+        if cmd in ("statusy", "statuses"):
+            counts = {c: len(m.by_claim(c)) for c in ("SAFE", "HYPOTHESIS", "REJECTED")}  # type: ignore[arg-type]
+            know = sum(1 for _ in m.knowledge())
+            moods = {}
+            for st in m.active():
+                moods[st.mood] = moods.get(st.mood, 0) + 1
+            return (f"SAFE {counts['SAFE']} (z toho znalost {know}) · HYPOTHESIS {counts['HYPOTHESIS']} · REJECTED {counts['REJECTED']}"
+                    f" · nálady: " + ", ".join(f"{k} {v}" for k, v in sorted(moods.items())) + f" · otevřené {len(m.open_items())}")
+        if cmd in ("hypotéza", "hypoteza", "hypothesis"):
+            mt = re.match(r"^(s\d+)\s+(potvrď|potvrd|zamítni|zamitni)$", arg.strip())
+            if not mt:
+                return "užití: !hypotéza s0042 potvrď | zamítni"
+            sid, what = mt.group(1), mt.group(2)
+            st = m.statements.get(sid)
+            if st is None or st.claim != "HYPOTHESIS" or st.status != "active":
+                return f"{sid} není aktivní hypotéza"
+            if what.startswith("potvr"):
+                m.set_claim(sid, "SAFE", f"potvrzeno dialogem (tah {self.turn_no})")
+                closed = []
+                for other in m.statements.values():
+                    if other.id != sid and other.status == "active" and other.claim == "HYPOTHESIS" and set(other.alternatives) & set(st.alternatives):
+                        m.set_claim(other.id, "REJECTED", f"vyloučeno potvrzením {sid} (tah {self.turn_no})")
+                        closed.append(other.id)
+                # otevřená položka reference u jádra se uzavře
+                for core in st.alternatives:
+                    for o in list(m.open_items_.values()):
+                        if o.statement == core and o.kind == "reference" and o.answer is None:
+                            o.answer = m.render_short(st)
+                derive(m)
+                return f"{sid} → SAFE" + (f"; vyloučeno: {', '.join(closed)}" if closed else "")
+            m.set_claim(sid, "REJECTED", f"zamítnuto dialogem (tah {self.turn_no})")
+            return f"{sid} → REJECTED"
         if cmd in ("otevřené", "otevrene", "backlog"):
             items = m.open_items()
             if not items:
@@ -446,7 +480,8 @@ class Session:
         return (
             "příkazy: !zapomeň s0001 · !role v+Loc = kde · !synonymum kázat = hlásat · "
             "!pravidlo jet(kam:X) => být(kde:X) · !výjimka létat pták tučňák · !otevřené · "
-            "!odpověz o0001 kde · !program · !popiš Jirásek · !ulož p.json · !načti p.json · !graf g.json"
+            "!odpověz o0001 kde · !program · !popiš Jirásek · !ukaž s0042 · !hypotéza s0042 potvrď · !statusy · "
+            "!ulož p.json · !načti p.json · !graf g.json"
         )
 
     # ---- žurnál ---------------------------------------------------------------------
