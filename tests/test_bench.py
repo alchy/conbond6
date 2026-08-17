@@ -1,6 +1,6 @@
 """Bench: porovnání očekávané odpovědi s výplněmi (jména, tvary, letopočty, počty)."""
 
-from cb6.bench import answer_matches
+from bench.qa import answer_matches
 from cb6.chronos import TimeSpec
 from cb6.memory import Memory
 

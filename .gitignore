@@ -6,3 +6,5 @@ __pycache__/
 data/corpus/
 data/cache/
 *.egg-info/
+mereni/*-strop*
+mereni/*-dirty*

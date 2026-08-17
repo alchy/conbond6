@@ -1,0 +1,2450 @@
+[
+ {
+  "q": "Kde se narodil Alois Jirásek?",
+  "expect": [
+   "Hronově"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 6,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Alois Jirásek se narodil ve východočeském Hronově u Náchoda.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde žil Alois Jirásek?",
+  "expect": [
+   "Litomyšli"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 11,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "Čtrnáct let žil v Litomyšli a působil tam jako gymnaziální profesor českého jazyka, dějepisu a zeměpisu.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy přesídlil Alois Jirásek?",
+  "expect": [
+   "roce 1888"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 18,
+  "typ": "Typ=cas",
+  "verb": "přesídlit",
+  "source_sentence": "V roce 1888 Jirásek přesídlil do Prahy.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy žil Alois Jirásek?",
+  "expect": [
+   "roku 1903"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 20,
+  "typ": "Typ=cas",
+  "verb": "žít",
+  "source_sentence": "V tomto bytě pak žil od roku 1903 až do své smrti v roce 1930.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vystoupil Alois Jirásek?",
+  "expect": [
+   "23 . září 1921"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 38,
+  "typ": "Typ=cas",
+  "verb": "vystoupit",
+  "source_sentence": "Dne 23. září 1921 vystoupil Jirásek z římskokatolické církve; zůstal sice nadále věřícím křesťanem, ale do žádné církve již nevstoupil, zůstal bez vyznání.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy zemřel Alois Jirásek?",
+  "expect": [
+   "1930"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 39,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Alois Jirásek zemřel v Praze 12. 3. 1930, ale pohřben byl v rodném Hronově.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel Alois Jirásek?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 39,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "Alois Jirásek zemřel v Praze 12. 3. 1930, ale pohřben byl v rodném Hronově.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde se narodil Arnošt Lustig?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "arnošt_lustig",
+  "veta": 342,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v Praze- Libni, kde s rodiči a sestrou Hanou bydlel na Královské třídě čp. 428( dnes Sokolovská ulice) a po čase na Královské čp. 137.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy studoval Arnošt Lustig?",
+  "expect": [
+   "roku 1946"
+  ],
+  "dok": "arnošt_lustig",
+  "veta": 354,
+  "typ": "Typ=cas",
+  "verb": "studovat",
+  "source_sentence": "Od roku 1946 studoval na Vysoké škole politické a sociální, začal také přispívat do novin a časopisů.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy odjel Arnošt Lustig?",
+  "expect": [
+   "Roku 1948"
+  ],
+  "dok": "arnošt_lustig",
+  "veta": 355,
+  "typ": "Typ=cas",
+  "verb": "odjet",
+  "source_sentence": "Roku 1948 odjel do Izraele jako zpravodaj Lidových novin v izraelsko- arabské válce.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy zemřel Arnošt Lustig?",
+  "expect": [
+   "26 . února 2011"
+  ],
+  "dok": "arnošt_lustig",
+  "veta": 389,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "V sobotu 26. února 2011 zemřel v Praze na rakovinu.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel Arnošt Lustig?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "arnošt_lustig",
+  "veta": 389,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "V sobotu 26. února 2011 zemřel v Praze na rakovinu.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde přešel Bohumil Hrabal?",
+  "expect": [
+   "Nymburce"
+  ],
+  "dok": "bohumil_hrabal",
+  "veta": 488,
+  "typ": "Typ=misto",
+  "verb": "přejít",
+  "source_sentence": "Po tomto nezdaru přešel na reálku v Nymburce.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy odmaturoval Bohumil Hrabal?",
+  "expect": [
+   "Roku 1934"
+  ],
+  "dok": "bohumil_hrabal",
+  "veta": 490,
+  "typ": "Typ=cas",
+  "verb": "odmaturovat",
+  "source_sentence": "Roku 1934 konečně odmaturoval na nymburském gymnáziu( od roku 2014 nesoucím Hrabalovo jméno).",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde pracoval Bohumil Hrabal?",
+  "expect": [
+   "Kostomlatech"
+  ],
+  "dok": "bohumil_hrabal",
+  "veta": 494,
+  "typ": "Typ=misto",
+  "verb": "pracovat",
+  "source_sentence": "Během války pracoval jako železniční dělník a výpravčí v Kostomlatech nad Labem, což později zpracoval ve slavné novele Ostře sledované vlaky.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde spočívá Bohumil Hrabal?",
+  "expect": [
+   "Hradištku"
+  ],
+  "dok": "bohumil_hrabal",
+  "veta": 518,
+  "typ": "Typ=misto",
+  "verb": "spočívat",
+  "source_sentence": "Spočívá v rodinném hrobě na hřbitově v Hradištku, kde je pohřbena i jeho matka„ Maryška“, nevlastní otec„ Francin“, strýc„ Pepin“, manželka„ Pipsi“ a bratr„ Slávek“.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy se léčila Božena Němcová?",
+  "expect": [
+   "roku 1840"
+  ],
+  "dok": "božena_němcová",
+  "veta": 839,
+  "typ": "Typ=cas",
+  "verb": "léčit_se",
+  "source_sentence": "Od roku 1840 se Němcová léčila u doktora Josefa Čejky, se kterým se spřátelila, a který ji seznámil s tehdejšími vlastenecky smýšlejícími českými spisovateli.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy pobývala Božena Němcová?",
+  "expect": [
+   "1851"
+  ],
+  "dok": "božena_němcová",
+  "veta": 866,
+  "typ": "Typ=cas",
+  "verb": "pobývat",
+  "source_sentence": "V září 1851 pobývala Němcová s dětmi v lázních Na Horách u České Třebové, kam ji pozval Klácel.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde pobývala Božena Němcová?",
+  "expect": [
+   "Třebové"
+  ],
+  "dok": "božena_němcová",
+  "veta": 866,
+  "typ": "Typ=misto",
+  "verb": "pobývat",
+  "source_sentence": "V září 1851 pobývala Němcová s dětmi v lázních Na Horách u České Třebové, kam ji pozval Klácel.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy odjela Božena Němcová?",
+  "expect": [
+   "1852"
+  ],
+  "dok": "božena_němcová",
+  "veta": 872,
+  "typ": "Typ=cas",
+  "verb": "odjet",
+  "source_sentence": "Koncem srpna 1852 odjela Němcová za manželem do Balašských Ďarmot v Uhrách, při tom navštívila kromě Moravy také Banskou Štiavnici a Sliač.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy se zamilovala Božena Němcová?",
+  "expect": [
+   "Roku 1854"
+  ],
+  "dok": "božena_němcová",
+  "veta": 879,
+  "typ": "Typ=cas",
+  "verb": "zamilovat_se",
+  "source_sentence": "Roku 1854 se Němcová znovu zamilovala, a to do mladého studenta lékařství Hanuše Jurenky.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy se umístila Božena Němcová?",
+  "expect": [
+   "roce 2005"
+  ],
+  "dok": "božena_němcová",
+  "veta": 1415,
+  "typ": "Typ=cas",
+  "verb": "umístit_se",
+  "source_sentence": "V anketě Největší Čech, kterou v roce 2005 uspořádala Česká televize, se Němcová umístila na 10. pozici jako nejúspěšnější žena žebříčku.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vystupoval Eduard Bass?",
+  "expect": [
+   "roku 1910"
+  ],
+  "dok": "eduard_bass",
+  "veta": 1534,
+  "typ": "Typ=cas",
+  "verb": "vystupovat",
+  "source_sentence": "Od roku 1910 vystupoval jako herec, recitátor a zpěvák v Schöblově kabaretu U Bílé labutě Na Poříčí.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy sloužil Eduard Bass?",
+  "expect": [
+   "letech 1914"
+  ],
+  "dok": "eduard_bass",
+  "veta": 1538,
+  "typ": "Typ=cas",
+  "verb": "sloužit",
+  "source_sentence": "V letech 1914 – 1917 sloužil ve vojenské nemocnici na Hradčanech, odkud byl uvolňován na vystoupení, a před koncem války byl z armády propuštěn.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde sloužil Eduard Bass?",
+  "expect": [
+   "Hradčanech"
+  ],
+  "dok": "eduard_bass",
+  "veta": 1538,
+  "typ": "Typ=misto",
+  "verb": "sloužit",
+  "source_sentence": "V letech 1914 – 1917 sloužil ve vojenské nemocnici na Hradčanech, odkud byl uvolňován na vystoupení, a před koncem války byl z armády propuštěn.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy pracoval Eduard Bass?",
+  "expect": [
+   "letech 1920"
+  ],
+  "dok": "eduard_bass",
+  "veta": 1540,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "V letech 1920 – 1942 pracoval jako novinář, redaktor Lidových novin.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy bydlel Eduard Bass?",
+  "expect": [
+   "1404"
+  ],
+  "dok": "eduard_bass",
+  "veta": 1548,
+  "typ": "Typ=cas",
+  "verb": "bydlet",
+  "source_sentence": "Bydlel zprvu v Podskalí v Dřevné ulici čp. 1404/ II, naposledy a nejdéle v domě na nároží Jiráskova náměstí a horní Podskalské ulice 19( později přejmenované na Gorazdovu), v bytě, který po jeho smrti užívala rodina spisovatele Jana Drdy.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde bydlel Eduard Bass?",
+  "expect": [
+   "Podskalí"
+  ],
+  "dok": "eduard_bass",
+  "veta": 1548,
+  "typ": "Typ=misto",
+  "verb": "bydlet",
+  "source_sentence": "Bydlel zprvu v Podskalí v Dřevné ulici čp. 1404/ II, naposledy a nejdéle v domě na nároží Jiráskova náměstí a horní Podskalské ulice 19( později přejmenované na Gorazdovu), v bytě, který po jeho smrti užívala rodina spisovatele Jana Drdy.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde se narodil Egon Hostovský?",
+  "expect": [
+   "Hronově"
+  ],
+  "dok": "egon_hostovský",
+  "veta": 1600,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se ve východočeském Hronově v židovské rodině majitele textilní továrny Josefa Hostovského( 1861 – 1942) a jeho manželky Bedřišky jako nejmladší z osmi dětí.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy pracoval Egon Hostovský?",
+  "expect": [
+   "1937"
+  ],
+  "dok": "egon_hostovský",
+  "veta": 1605,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "Studium roku 1930 předčasně ukončil a až do roku 1937 pracoval postupně v různých pražských nakladatelstvích, většinou jako lektor– v roce 1930 se též podílel( spolu s Ottou Františkem Bablerem a Rudolfem Černým) na překladu románu svého bratrance, rakouského spisovatele Stefana Zweiga, který vyšel o rok později pod názvem Dobrodružství života( jde o Hostovského jediný publikovaný překlad).",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se usadil Egon Hostovský?",
+  "expect": [
+   "Yorku"
+  ],
+  "dok": "egon_hostovský",
+  "veta": 1610,
+  "typ": "Typ=misto",
+  "verb": "usadit_se",
+  "source_sentence": "Usadil se v New Yorku a vstoupil do služeb tamějšího československého konzulátu.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy se objevil Egon Hostovský?",
+  "expect": [
+   "roce 1946"
+  ],
+  "dok": "egon_hostovský",
+  "veta": 1611,
+  "typ": "Typ=cas",
+  "verb": "objevit_se",
+  "source_sentence": "Ve své vlasti se znovu objevil až v roce 1946, o rok později se vrátil s úmyslem zůstat natrvalo a začal znovu pracovat na ministerstvu zahraničních věcí.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se živil Egon Hostovský?",
+  "expect": [
+   "Americe"
+  ],
+  "dok": "egon_hostovský",
+  "veta": 1615,
+  "typ": "Typ=misto",
+  "verb": "živit_se",
+  "source_sentence": "V Americe se živil jako učitel češtiny, poradce pro evropské literatury a novinář( přispíval do amerických periodik), spolupracoval také jako redaktor s rozhlasovou stanicí Svobodná Evropa.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zemřel Egon Hostovský?",
+  "expect": [
+   "7 . května 1973"
+  ],
+  "dok": "egon_hostovský",
+  "veta": 1620,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel ve věku 65 let 7. května 1973 ve Spojených státech, ve svém bydlišti v Montclair v New Jersey, kde zanechal svou třetí manželku Reginu, rozenou Weissovou( 1929 – 1993) s dítětem.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel Egon Hostovský?",
+  "expect": [
+   "Montclair"
+  ],
+  "dok": "egon_hostovský",
+  "veta": 1620,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel ve věku 65 let 7. května 1973 ve Spojených státech, ve svém bydlišti v Montclair v New Jersey, kde zanechal svou třetí manželku Reginu, rozenou Weissovou( 1929 – 1993) s dítětem.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde se narodil František Halas?",
+  "expect": [
+   "Brně"
+  ],
+  "dok": "františek_halas",
+  "veta": 1776,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "František Halas se narodil v Brně- Husovicích.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde žil František Halas?",
+  "expect": [
+   "Brně"
+  ],
+  "dok": "františek_halas",
+  "veta": 1788,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "František žil zatím s babičkou v Brně.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zasedal František Halas?",
+  "expect": [
+   "roce 1946"
+  ],
+  "dok": "františek_halas",
+  "veta": 1804,
+  "typ": "Typ=cas",
+  "verb": "zasedat",
+  "source_sentence": "V parlamentu zasedal až do parlamentních voleb v roce 1946.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy zemřel František Halas?",
+  "expect": [
+   "27 . října 1949"
+  ],
+  "dok": "františek_halas",
+  "veta": 1810,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel v Praze 27. října 1949 na selhání srdce.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel František Halas?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "františek_halas",
+  "veta": 1810,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel v Praze 27. října 1949 na selhání srdce.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde se narodil František Hrubín?",
+  "expect": [
+   "Vinohradech"
+  ],
+  "dok": "františek_hrubín",
+  "veta": 1908,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se na Královských Vinohradech v Balbínově ulici čp. 486( dům již neexistuje) v rodině stavitelského asistenta Františka Hrubína z Břežan(* 1880) a Anny, rozené Novotné z Lešan(* 1887).",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy žil František Hrubín?",
+  "expect": [
+   "roku 1945"
+  ],
+  "dok": "františek_hrubín",
+  "veta": 1923,
+  "typ": "Typ=cas",
+  "verb": "žít",
+  "source_sentence": "Od roku 1945 žil v Praze- Holešovicích a v Lešanech.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde žil František Hrubín?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "františek_hrubín",
+  "veta": 1923,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "Od roku 1945 žil v Praze- Holešovicích a v Lešanech.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde pobýval František Hrubín?",
+  "expect": [
+   "Chlumu"
+  ],
+  "dok": "františek_hrubín",
+  "veta": 1924,
+  "typ": "Typ=misto",
+  "verb": "pobývat",
+  "source_sentence": "Často též pobýval v Chlumu u Třeboně, kde později vlastnil dům.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde se narodil Ivan Klíma?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "ivan_klíma",
+  "veta": 2013,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v Praze a za druhé světové války strávil tři a půl roku v koncentračním táboře Terezín, ze kterého se dostal jako čtrnáctiletý.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy pracoval Ivan Klíma?",
+  "expect": [
+   "roce 1956"
+  ],
+  "dok": "ivan_klíma",
+  "veta": 2018,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "Po absolutoriu v roce 1956 pracoval jako redaktor časopisu Květy a v letech 1959 – 1963 v nakladatelství Československý spisovatel.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vstoupil Ivan Klíma?",
+  "expect": [
+   "roce 1953"
+  ],
+  "dok": "ivan_klíma",
+  "veta": 2020,
+  "typ": "Typ=cas",
+  "verb": "vstoupit",
+  "source_sentence": "Vstoupil do KSČ v roce 1953, v roce 1967 byl ze strany vyloučen.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy odjel Ivan Klíma?",
+  "expect": [
+   "roce 1969"
+  ],
+  "dok": "ivan_klíma",
+  "veta": 2023,
+  "typ": "Typ=cas",
+  "verb": "odjet",
+  "source_sentence": "V roce 1969 odjel do USA, kde působil jako hostující profesor na Michiganské univerzitě.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde působil Ivan Olbracht?",
+  "expect": [
+   "Vídni"
+  ],
+  "dok": "ivan_olbracht",
+  "veta": 2135,
+  "typ": "Typ=misto",
+  "verb": "působit",
+  "source_sentence": "Zprvu působil ve Vídni jako redaktor sociálně demokratických Dělnických listů.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy setrval Ivan Olbracht?",
+  "expect": [
+   "roku 1948"
+  ],
+  "dok": "ivan_olbracht",
+  "veta": 2152,
+  "typ": "Typ=cas",
+  "verb": "setrvat",
+  "source_sentence": "V parlamentu setrval do konce funkčního období, tedy do voleb do Národního shromáždění roku 1948.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy zemřel Ivan Olbracht?",
+  "expect": [
+   "30 . prosince 1952"
+  ],
+  "dok": "ivan_olbracht",
+  "veta": 2156,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel 30. prosince 1952 ve Státním sanatoriu v Praze.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel Ivan Olbracht?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "ivan_olbracht",
+  "veta": 2156,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel 30. prosince 1952 ve Státním sanatoriu v Praze.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy pracoval Jan Neruda?",
+  "expect": [
+   "roku 1856"
+  ],
+  "dok": "jan_neruda",
+  "veta": 2318,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "Asi od roku 1856 pracoval v redakcích německých a českých listů.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy se zamiloval Jan Neruda?",
+  "expect": [
+   "roce 1862"
+  ],
+  "dok": "jan_neruda",
+  "veta": 2335,
+  "typ": "Typ=cas",
+  "verb": "zamilovat_se",
+  "source_sentence": "V roce 1862 se znovu zamiloval, tentokrát do patnáctileté dívky Terezie Marie Macháčkové( 1847 – 1865), dcery statkáře a cukrovarníka Josefa Macháčka z Králova Dvora, kde básník často pobýval o letních prázdninách.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy onemocněl Jan Neruda?",
+  "expect": [
+   "Roku 1880"
+  ],
+  "dok": "jan_neruda",
+  "veta": 2346,
+  "typ": "Typ=cas",
+  "verb": "onemocnět",
+  "source_sentence": "Roku 1880 onemocněl zánětem žil, od té doby jej pronásledovala až do smrti řada chorob.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy uklouzl Jan Neruda?",
+  "expect": [
+   "roce 1888"
+  ],
+  "dok": "jan_neruda",
+  "veta": 2347,
+  "typ": "Typ=cas",
+  "verb": "uklouznout",
+  "source_sentence": "V roce 1888 uklouzl v zimě na náledí a roztříštil si čéšku.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy zemřel Jan Neruda?",
+  "expect": [
+   "22 . srpna 1891"
+  ],
+  "dok": "jan_neruda",
+  "veta": 2349,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel 22. srpna 1891 na zánět pobřišnice vyvolaný rakovinou střev.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy přispíval Jaroslav Hašek?",
+  "expect": [
+   "roku 1911"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2555,
+  "typ": "Typ=cas",
+  "verb": "přispívat",
+  "source_sentence": "Od roku 1911 přispíval do Českého slova, dále pak do Pochodně, Humoristických listů, Kopřiv, Karikatur, nějaký čas vedl též Kynologický ústav, což ho později inspirovalo ke knize Můj obchod se psy.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy narukoval Jaroslav Hašek?",
+  "expect": [
+   "roce 1915"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2572,
+  "typ": "Typ=cas",
+  "verb": "narukovat",
+  "source_sentence": "V roce 1915 Hašek narukoval v Českých Budějovicích k 91. pluku a s ním odjel na haličskou frontu v Rusku.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde narukoval Jaroslav Hašek?",
+  "expect": [
+   "Budějovicích"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2572,
+  "typ": "Typ=misto",
+  "verb": "narukovat",
+  "source_sentence": "V roce 1915 Hašek narukoval v Českých Budějovicích k 91. pluku a s ním odjel na haličskou frontu v Rusku.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy padl Jaroslav Hašek?",
+  "expect": [
+   "24 . září 1915"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2574,
+  "typ": "Typ=cas",
+  "verb": "padnout",
+  "source_sentence": "24. září 1915 padl do zajetí v bitvě u Chorupan( cca 12 km severozápadně od ukrajinského města Dubno).",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde padl Jaroslav Hašek?",
+  "expect": [
+   "Chorupan"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2574,
+  "typ": "Typ=misto",
+  "verb": "padnout",
+  "source_sentence": "24. září 1915 padl do zajetí v bitvě u Chorupan( cca 12 km severozápadně od ukrajinského města Dubno).",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy publikoval Jaroslav Hašek?",
+  "expect": [
+   "1917"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2578,
+  "typ": "Typ=cas",
+  "verb": "publikovat",
+  "source_sentence": "Od listopadu 1917 do února 1918 publikoval v časopise Čechoslovan a Čs. voják, byl mj. autorem řady protibolševických článků.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vstoupil Jaroslav Hašek?",
+  "expect": [
+   "1918"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2579,
+  "typ": "Typ=cas",
+  "verb": "vstoupit",
+  "source_sentence": "Koncem února 1918 vstoupil do Českoslovanské sociálně demokratické strany dělnické.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy působil Jaroslav Hašek?",
+  "expect": [
+   "roku 1918"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2585,
+  "typ": "Typ=cas",
+  "verb": "působit",
+  "source_sentence": "Na konci roku 1918 působil jako velitel oddílu Čuvašů v Rudé armádě a jako zástupce vojenského velitele bugulmského okresu.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde působil Jaroslav Hašek?",
+  "expect": [
+   "Sibiři"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2586,
+  "typ": "Typ=misto",
+  "verb": "působit",
+  "source_sentence": "Poté působil na Sibiři, kde vydával několik časopisů.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy přijel Jaroslav Hašek?",
+  "expect": [
+   "1920"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2591,
+  "typ": "Typ=cas",
+  "verb": "přijet",
+  "source_sentence": "V prosinci 1920 přijel do Československa.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy odjel Jaroslav Hašek?",
+  "expect": [
+   "25 . srpna 1921"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2599,
+  "typ": "Typ=cas",
+  "verb": "odjet",
+  "source_sentence": "25. srpna 1921 Hašek odjel s malířem Jaroslavem Panuškou a s manželkou Šurou do Lipnice nad Sázavou.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy zemřel Jaroslav Hašek?",
+  "expect": [
+   "3 . ledna 1923"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2604,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "3. ledna 1923 zemřel na ochrnutí srdce.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy se vyznamenal Jaroslav Hašek?",
+  "expect": [
+   "Roku 1918"
+  ],
+  "dok": "jaroslav_hašek",
+  "veta": 2613,
+  "typ": "Typ=cas",
+  "verb": "vyznamenat_se",
+  "source_sentence": "Roku 1918 se vyznamenal jako odvážný velitel oddílu československých rudoarmějců při obraně Samary.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Jaroslav Seifert?",
+  "expect": [
+   "Žižkově"
+  ],
+  "dok": "jaroslav_seifert",
+  "veta": 2796,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v rodině bankovního úředníka Antonína Seiferta a jeho manželky Marie, rozené Borutové v dnešní Bořivojově ulici čp. 816/ 104( tehdy Riegrově č. 19) na Žižkově, dnes Praha 3, a byl pokřtěn 5. října jako Jaroslav Václav.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy se oženil Jaroslav Seifert?",
+  "expect": [
+   "19 . ledna 1928"
+  ],
+  "dok": "jaroslav_seifert",
+  "veta": 2822,
+  "typ": "Typ=cas",
+  "verb": "oženit_se",
+  "source_sentence": "Dne 19. ledna 1928 se Jaroslav Seifert oženil na magistrátní úřadovně Praha- Žižkov( občanský sňatek).",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se oženil Jaroslav Seifert?",
+  "expect": [
+   "Praha"
+  ],
+  "dok": "jaroslav_seifert",
+  "veta": 2822,
+  "typ": "Typ=misto",
+  "verb": "oženit_se",
+  "source_sentence": "Dne 19. ledna 1928 se Jaroslav Seifert oženil na magistrátní úřadovně Praha- Žižkov( občanský sňatek).",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zemřel Jaroslav Seifert?",
+  "expect": [
+   "1986"
+  ],
+  "dok": "jaroslav_seifert",
+  "veta": 2872,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Počátkem ledna 1986 Jaroslav Seifert zemřel v nemocnici na pražském Strahově.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel Jaroslav Seifert?",
+  "expect": [
+   "Strahově"
+  ],
+  "dok": "jaroslav_seifert",
+  "veta": 2872,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "Počátkem ledna 1986 Jaroslav Seifert zemřel v nemocnici na pražském Strahově.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy lže Jaroslav Seifert?",
+  "expect": [
+   "2018"
+  ],
+  "dok": "jaroslav_seifert",
+  "veta": 3055,
+  "typ": "Typ=cas",
+  "verb": "lež",
+  "source_sentence": "Smlčí- li pravdu spisovatel, lže 23. 10. 2018",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Jaroslav Vrchlický?",
+  "expect": [
+   "Lounech"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3059,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v domě č. p. 103 v Lounech jako syn Jakuba Fridy( zemřel v listopadu 1874) a jeho manželky Marie, rozené Kolářové(* 1823) jako druhé ze sedmi dětí.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy studoval Jaroslav Vrchlický?",
+  "expect": [
+   "roku 1862"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3062,
+  "typ": "Typ=cas",
+  "verb": "studovat",
+  "source_sentence": "Na Gymnáziu ve Slaném studoval od roku 1862.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde studoval Jaroslav Vrchlický?",
+  "expect": [
+   "Slaném"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3062,
+  "typ": "Typ=misto",
+  "verb": "studovat",
+  "source_sentence": "Na Gymnáziu ve Slaném studoval od roku 1862.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy přestoupil Jaroslav Vrchlický?",
+  "expect": [
+   "roce 1873"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3070,
+  "typ": "Typ=cas",
+  "verb": "přestoupit",
+  "source_sentence": "V roce 1873 ale přestoupil na filozofickou fakultu Karlo- Ferdinandovy univerzity v Praze, kde studoval dějepis, filozofii a románskou filologii.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde přestoupil Jaroslav Vrchlický?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3070,
+  "typ": "Typ=misto",
+  "verb": "přestoupit",
+  "source_sentence": "V roce 1873 ale přestoupil na filozofickou fakultu Karlo- Ferdinandovy univerzity v Praze, kde studoval dějepis, filozofii a románskou filologii.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy působil Jaroslav Vrchlický?",
+  "expect": [
+   "roku 1875"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3082,
+  "typ": "Typ=cas",
+  "verb": "působit",
+  "source_sentence": "Od roku 1875 působil jako tajemník a vychovatel synů hraběcí rodiny Montecuccoli- Laderchi nejprve v Meranu nad Panarem u Modeny, později v Livornu.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde působil Jaroslav Vrchlický?",
+  "expect": [
+   "Meranu"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3082,
+  "typ": "Typ=misto",
+  "verb": "působit",
+  "source_sentence": "Od roku 1875 působil jako tajemník a vychovatel synů hraběcí rodiny Montecuccoli- Laderchi nejprve v Meranu nad Panarem u Modeny, později v Livornu.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde působil Jaroslav Vrchlický?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3083,
+  "typ": "Typ=misto",
+  "verb": "působit",
+  "source_sentence": "Po návratu krátce působil na učitelském ústavu v Praze v Panské ulici, vyučování ho však nebavilo.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy se zamiloval Jaroslav Vrchlický?",
+  "expect": [
+   "roce 1874"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3181,
+  "typ": "Typ=cas",
+  "verb": "zamilovat_se",
+  "source_sentence": "V roce 1874 se zamiloval na prázdninách do své vzdálené příbuzné Marie Potěšilové.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se léčil Jaroslav Vrchlický?",
+  "expect": [
+   "Stupčicích"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3215,
+  "typ": "Typ=misto",
+  "verb": "léčit_se",
+  "source_sentence": "Léčil se v sanatoriích ve Stupčicích v jižních Čechách, v istrijské Opatiji a v Domažlicích.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zemřel Jaroslav Vrchlický?",
+  "expect": [
+   "9 . září 1912"
+  ],
+  "dok": "jaroslav_vrchlický",
+  "veta": 3217,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Vrchlický zemřel 9. září 1912 v 59 letech, podle lékařské zprávy následkem sklerózy mozkových cév.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy pobýval Jiří Wolker?",
+  "expect": [
+   "1923"
+  ],
+  "dok": "jiří_wolker",
+  "veta": 3301,
+  "typ": "Typ=cas",
+  "verb": "pobývat",
+  "source_sentence": "V Praze pobýval do června 1923.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde pobýval Jiří Wolker?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "jiří_wolker",
+  "veta": 3301,
+  "typ": "Typ=misto",
+  "verb": "pobývat",
+  "source_sentence": "V Praze pobýval do června 1923.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy vystoupil Jiří Wolker?",
+  "expect": [
+   "roce 1921"
+  ],
+  "dok": "jiří_wolker",
+  "veta": 3302,
+  "typ": "Typ=cas",
+  "verb": "vystoupit",
+  "source_sentence": "V roce 1921 vystoupil Wolker z římskokatolické církve.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se léčil Jiří Wolker?",
+  "expect": [
+   "Tatrách"
+  ],
+  "dok": "jiří_wolker",
+  "veta": 3306,
+  "typ": "Typ=misto",
+  "verb": "léčit_se",
+  "source_sentence": "Od června do prosince téhož roku se léčil ve Vysokých Tatrách, v Tatranské Poliance a na chorvatském ostrově Krk; nakonec byl smrtelně nemocný převezen domů, kde za několik dní zemřel.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde se narodil Josef Čapek?",
+  "expect": [
+   "Hronově"
+  ],
+  "dok": "josef_čapek",
+  "veta": 3401,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v rodině lékaře Antonína Čapka a jeho manželky Boženy, dcery mlynáře Novotného v Hronově.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy pracoval Josef Čapek?",
+  "expect": [
+   "roce 1903"
+  ],
+  "dok": "josef_čapek",
+  "veta": 3406,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "Po jejím absolvování v roce 1903 pracoval rok jako dělník v úpické továrně F. M. Oberländera.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy maloval Josef Čapek?",
+  "expect": [
+   "1904"
+  ],
+  "dok": "josef_čapek",
+  "veta": 3408,
+  "typ": "Typ=cas",
+  "verb": "malovat",
+  "source_sentence": "V létě 1904 maloval šest týdnů se žáky soukromé školy Aloise Kalvody, se kterou vystavoval v červnu 1905.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy odjel Josef Čapek?",
+  "expect": [
+   "1910"
+  ],
+  "dok": "josef_čapek",
+  "veta": 3411,
+  "typ": "Typ=cas",
+  "verb": "odjet",
+  "source_sentence": "Po absolutoriu na Uměleckoprůmyslové škole a po druhé schůzce s budoucí manželkou odjel na podzim 1910 do Paříže, kam za ním přijel i bratr Karel.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vstoupil Josef Čapek?",
+  "expect": [
+   "letech 1913"
+  ],
+  "dok": "josef_čapek",
+  "veta": 3444,
+  "typ": "Typ=cas",
+  "verb": "vstoupit",
+  "source_sentence": "Po rozchodu se Skupinou vstoupil do výtvarného spolku Mánes, kde byl v letech 1913 – 1914 spoluredaktorem jeho časopisu Volné směry.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy přešel Josef Čapek?",
+  "expect": [
+   "roce 1921"
+  ],
+  "dok": "josef_čapek",
+  "veta": 3452,
+  "typ": "Typ=cas",
+  "verb": "přejít",
+  "source_sentence": "V roce 1921 Josef Čapek přešel do skupiny Tvrdošíjní.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy debutoval Josef Čapek?",
+  "expect": [
+   "25 . ledna 1921"
+  ],
+  "dok": "josef_čapek",
+  "veta": 3507,
+  "typ": "Typ=cas",
+  "verb": "debutovat",
+  "source_sentence": "Jako jevištní výtvarník debutoval 25. ledna 1921 kostýmní výpravou ke hře Karla Čapka R. U. R. na pražském Národním divadle.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde studoval Josef Škvorecký?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "josef_škvorecký",
+  "veta": 3636,
+  "typ": "Typ=misto",
+  "verb": "studovat",
+  "source_sentence": "Nejprve krátce studoval na Lékařské fakultě Univerzity Karlovy v Praze, pak 1946 přestoupil na filozofickou fakultu– obor angličtina a filosofie, absolvoval v roce 1949.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde působil Josef Škvorecký?",
+  "expect": [
+   "Broumově"
+  ],
+  "dok": "josef_škvorecký",
+  "veta": 3637,
+  "typ": "Typ=misto",
+  "verb": "působit",
+  "source_sentence": "Na umístěnku působil jako učitel na středních školách v Broumově a Polici nad Metují a Vyšší sociální škole v Hořicích v Podkrkonoší.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy nastoupil Josef Škvorecký?",
+  "expect": [
+   "roku 1953"
+  ],
+  "dok": "josef_škvorecký",
+  "veta": 3639,
+  "typ": "Typ=cas",
+  "verb": "nastoupit",
+  "source_sentence": "Po návratu z ní roku 1953 nastoupil jako redaktor angloamerické redakce Státního nakladatelství krásné literatury a umění( SNKLU, pozdější Odeon).",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy bydlel Josef Škvorecký?",
+  "expect": [
+   "letech 1953"
+  ],
+  "dok": "josef_škvorecký",
+  "veta": 3640,
+  "typ": "Typ=cas",
+  "verb": "bydlet",
+  "source_sentence": "V letech 1953 – 1960 bydlel v ulici Na Březince 1159/ 13 na pražském Smíchově.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde bydlel Josef Škvorecký?",
+  "expect": [
+   "Březince"
+  ],
+  "dok": "josef_škvorecký",
+  "veta": 3640,
+  "typ": "Typ=misto",
+  "verb": "bydlet",
+  "source_sentence": "V letech 1953 – 1960 bydlel v ulici Na Březince 1159/ 13 na pražském Smíchově.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy nastoupil Josef Škvorecký?",
+  "expect": [
+   "roce 1956"
+  ],
+  "dok": "josef_škvorecký",
+  "veta": 3641,
+  "typ": "Typ=cas",
+  "verb": "nastoupit",
+  "source_sentence": "V roce 1956 nastoupil jako redaktor dvouměsíčníku Světová literatura, v letech 1957 – 1958 jako zástupce šéfredaktora.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vyučoval Josef Škvorecký?",
+  "expect": [
+   "letech 1969"
+  ],
+  "dok": "josef_škvorecký",
+  "veta": 3649,
+  "typ": "Typ=cas",
+  "verb": "vyučovat",
+  "source_sentence": "V letech 1969 – 1990 na tamější univerzitě vyučoval– vedl kurz současného českého divadla a filmu, kurzy anglické a americké literatury a od roku 1970 kurzy tvůrčího psaní, na Graduate Centre for Study of Drama Torontské univerzity také vyučoval dějiny a teorii filmu.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy publikoval Josef Škvorecký?",
+  "expect": [
+   "roku 1990"
+  ],
+  "dok": "josef_škvorecký",
+  "veta": 3669,
+  "typ": "Typ=cas",
+  "verb": "publikovat",
+  "source_sentence": "Od roku 1990 publikoval v českých Lidových novinách, Literárních novinách, Respektu, Divadelních novinách, Kritickém sborníku, Iluminaci, Revolver Revui a dalších.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy odcestoval Julius Zeyer?",
+  "expect": [
+   "roce 1873"
+  ],
+  "dok": "julius_zeyer",
+  "veta": 3796,
+  "typ": "Typ=cas",
+  "verb": "odcestovat",
+  "source_sentence": "V roce 1873 odcestoval za přítelem prof. Aloisem Kašparem do Ruska, kde působil v Petrohradu jako vychovatel u šlechtické rodiny Valujevových, s níž odjel do Bavorska.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy cestoval Julius Zeyer?",
+  "expect": [
+   "roku 1899"
+  ],
+  "dok": "julius_zeyer",
+  "veta": 3802,
+  "typ": "Typ=cas",
+  "verb": "cestovat",
+  "source_sentence": "Naposledy cestoval na východ do Ruska roku 1899.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy pobýval Julius Zeyer?",
+  "expect": [
+   "1829"
+  ],
+  "dok": "julius_zeyer",
+  "veta": 3832,
+  "typ": "Typ=cas",
+  "verb": "pobývat",
+  "source_sentence": "Pobýval také v Praze v domě čp. 1829/ II na rohu Legerovy a Rumunské ulice u své sestry Heleny Jungfeldové(* 1840), u níž zemřel 29. ledna 1901 po těžké srdeční nemoci.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde pobýval Julius Zeyer?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "julius_zeyer",
+  "veta": 3832,
+  "typ": "Typ=misto",
+  "verb": "pobývat",
+  "source_sentence": "Pobýval také v Praze v domě čp. 1829/ II na rohu Legerovy a Rumunské ulice u své sestry Heleny Jungfeldové(* 1840), u níž zemřel 29. ledna 1901 po těžké srdeční nemoci.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy se nastěhoval Julius Zeyer?",
+  "expect": [
+   "roce 1878"
+  ],
+  "dok": "julius_zeyer",
+  "veta": 3879,
+  "typ": "Typ=cas",
+  "verb": "nastěhovat_se",
+  "source_sentence": "V roce 1878 se Julius Zeyer se svou matkou nastěhoval do velké vily se zahradou v Libocké ulici 16( čp .261).",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde procházel Julius Zeyer?",
+  "expect": [
+   "Břevnově"
+  ],
+  "dok": "julius_zeyer",
+  "veta": 3880,
+  "typ": "Typ=misto",
+  "verb": "procházet",
+  "source_sentence": "Při návštěvách letohrádku Hvězda či kostela sv. Markéty v Břevnově procházel po cestě alejí.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy se proslavil Karel Havlíček Borovský?",
+  "expect": [
+   "Roku 1845"
+  ],
+  "dok": "karel_havlíček_borovský",
+  "veta": 3989,
+  "typ": "Typ=cas",
+  "verb": "proslavit_se",
+  "source_sentence": "Roku 1845 se proslavil ostrou kritikou nového Tylova románu Poslední Čech.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se usadil Karel Havlíček Borovský?",
+  "expect": [
+   "Kutné"
+  ],
+  "dok": "karel_havlíček_borovský",
+  "veta": 4020,
+  "typ": "Typ=misto",
+  "verb": "usadit_se",
+  "source_sentence": "Usadil se v Kutné Hoře, kde založil časopis Slovan, který vycházel dvakrát týdně.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy přijel Karel Havlíček Borovský?",
+  "expect": [
+   "15 . května 1855"
+  ],
+  "dok": "karel_havlíček_borovský",
+  "veta": 4052,
+  "typ": "Typ=cas",
+  "verb": "přijet",
+  "source_sentence": "Do Prahy přijel 15. května 1855.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde žil Karel Havlíček Borovský?",
+  "expect": [
+   "Brodě"
+  ],
+  "dok": "karel_havlíček_borovský",
+  "veta": 4057,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "V dětství žil ve vesnici Borová na Vysočině a v Německém Brodě, kam se rodina v roce 1830 přestěhovala.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde působil Karel Havlíček Borovský?",
+  "expect": [
+   "Slovan"
+  ],
+  "dok": "karel_havlíček_borovský",
+  "veta": 4081,
+  "typ": "Typ=misto",
+  "verb": "působit",
+  "source_sentence": "Působil v Pražských novinách a v příloze Česká včela( viz výše), v Národních novinách, které sám založil, a konečně také ve vlastním časopise Slovan.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy se narodil Karel Hynek Mácha?",
+  "expect": [
+   "16 . listopadu 1810"
+  ],
+  "dok": "karel_hynek_mácha",
+  "veta": 4222,
+  "typ": "Typ=cas",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se jako Ignác Mácha( jméno Karel si přidal z důvodu obrozeneckého trendu a Hynek je počeštěný Ignác) v pátek 16. listopadu 1810 v Praze, na Újezdě čp. 400/ 3 v domě U Bílého orla; koncem 19. století byl dům zbourán, dnes na jeho místě stojí dům nový( Újezd čp. 401) a je na něm umístěna pamětní deska, upozorňující na Máchův rodný dům.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Karel Hynek Mácha?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "karel_hynek_mácha",
+  "veta": 4222,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se jako Ignác Mácha( jméno Karel si přidal z důvodu obrozeneckého trendu a Hynek je počeštěný Ignác) v pátek 16. listopadu 1810 v Praze, na Újezdě čp. 400/ 3 v domě U Bílého orla; koncem 19. století byl dům zbourán, dnes na jeho místě stojí dům nový( Újezd čp. 401) a je na něm umístěna pamětní deska, upozorňující na Máchův rodný dům.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy vystoupil Karel Hynek Mácha?",
+  "expect": [
+   "letech 1834"
+  ],
+  "dok": "karel_hynek_mácha",
+  "veta": 4239,
+  "typ": "Typ=cas",
+  "verb": "vystoupit",
+  "source_sentence": "Ve Stavovském a Kajetánském divadle v letech 1834 až 1835 ochotnicky vystoupil v 16 hrách( především Klicperových a Štěpánkových).",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vyrazil Karel Hynek Mácha?",
+  "expect": [
+   "4 . srpna 1834"
+  ],
+  "dok": "karel_hynek_mácha",
+  "veta": 4255,
+  "typ": "Typ=cas",
+  "verb": "vyrazit",
+  "source_sentence": "V pondělí 4. srpna 1834 vyrazil Mácha na cestu do severní Itálie.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde vyrazil Karel Hynek Mácha?",
+  "expect": [
+   "Itálie"
+  ],
+  "dok": "karel_hynek_mácha",
+  "veta": 4255,
+  "typ": "Typ=misto",
+  "verb": "vyrazit",
+  "source_sentence": "V pondělí 4. srpna 1834 vyrazil Mácha na cestu do severní Itálie.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zahořel Karel Hynek Mácha?",
+  "expect": [
+   "roku 1832"
+  ],
+  "dok": "karel_hynek_mácha",
+  "veta": 4274,
+  "typ": "Typ=cas",
+  "verb": "zahořet",
+  "source_sentence": "Na konci roku 1832 zahořel láskou k mladé herečce Rošrové, ale výsledkem vzplanutí byla jen báseň Panně Rošrové.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy zemřel Karel Hynek Mácha?",
+  "expect": [
+   "6 . listopadu 1836"
+  ],
+  "dok": "karel_hynek_mácha",
+  "veta": 4299,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel v neděli 6. listopadu 1836 přibližně ve tři hodiny ráno.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy pracoval Karel Hynek Mácha?",
+  "expect": [
+   "1835"
+  ],
+  "dok": "karel_hynek_mácha",
+  "veta": 4320,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "Pracoval na něm od října do prosince 1835.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy proslul Karel Jaromír Erben?",
+  "expect": [
+   "roku 1861"
+  ],
+  "dok": "karel_jaromír_erben",
+  "veta": 4479,
+  "typ": "Typ=cas",
+  "verb": "proslout",
+  "source_sentence": "Nejvíce však Erben proslul sbírkou Kytice z pověstí národních( 1853, zkráceně jen Kytice), která vyšla podruhé roku 1861, a to v rozšířené verzi( s oddílem příležitostných písní) s názvem Kytice z básní K. J. Erbena.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy se narodil Karel Jaromír Erben?",
+  "expect": [
+   "7 . listopadu 1811"
+  ],
+  "dok": "karel_jaromír_erben",
+  "veta": 4481,
+  "typ": "Typ=cas",
+  "verb": "narodit_se",
+  "source_sentence": "Karel Jaromír Erben se narodil v Miletíně 7. listopadu 1811.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Karel Jaromír Erben?",
+  "expect": [
+   "Miletíně"
+  ],
+  "dok": "karel_jaromír_erben",
+  "veta": 4481,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Karel Jaromír Erben se narodil v Miletíně 7. listopadu 1811.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy nastoupil Karel Jaromír Erben?",
+  "expect": [
+   "roku 1825"
+  ],
+  "dok": "karel_jaromír_erben",
+  "veta": 4491,
+  "typ": "Typ=cas",
+  "verb": "nastoupit",
+  "source_sentence": "Na gymnázium nastoupil roku 1825.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy nastoupil Karel Jaromír Erben?",
+  "expect": [
+   "Roku 1831"
+  ],
+  "dok": "karel_jaromír_erben",
+  "veta": 4493,
+  "typ": "Typ=cas",
+  "verb": "nastoupit",
+  "source_sentence": "Roku 1831 nastoupil Erben na filozofickou fakultu v Praze.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde nastoupil Karel Jaromír Erben?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "karel_jaromír_erben",
+  "veta": 4493,
+  "typ": "Typ=misto",
+  "verb": "nastoupit",
+  "source_sentence": "Roku 1831 nastoupil Erben na filozofickou fakultu v Praze.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zemřel Karel Jaromír Erben?",
+  "expect": [
+   "21 . listopadu 1870"
+  ],
+  "dok": "karel_jaromír_erben",
+  "veta": 4511,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel 21. listopadu 1870 v domě U Tří tykví na Starém Městě v Praze v Michalské ulici.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel Karel Jaromír Erben?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "karel_jaromír_erben",
+  "veta": 4511,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel 21. listopadu 1870 v domě U Tří tykví na Starém Městě v Praze v Michalské ulici.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde se narodil Karel Poláček?",
+  "expect": [
+   "Rychnově"
+  ],
+  "dok": "karel_poláček",
+  "veta": 4612,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v Rychnově nad Kněžnou, jeho otec Jindřich( Heinrich) Poláček byl židovský obchodník, matka Žofie( Sophia), ovdovělá Fuchsová, byla rozená Kohnová.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy nastoupil Karel Poláček?",
+  "expect": [
+   "roce 1933"
+  ],
+  "dok": "karel_poláček",
+  "veta": 4632,
+  "typ": "Typ=cas",
+  "verb": "nastoupit",
+  "source_sentence": "V roce 1933 znovu nastoupil do Lidových novin; v roce 1939 byl kvůli zavádění rasových zákonů propuštěn.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Karel Čapek?",
+  "expect": [
+   "Svatoňovicích"
+  ],
+  "dok": "karel_čapek",
+  "veta": 4739,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v Malých Svatoňovicích v rodině venkovského lékaře MUDr. Antonína Čapka.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy se přestěhoval Karel Čapek?",
+  "expect": [
+   "13 . ledna 1890"
+  ],
+  "dok": "karel_čapek",
+  "veta": 4741,
+  "typ": "Typ=cas",
+  "verb": "přestěhovat_se",
+  "source_sentence": "S rodiči se brzy přestěhoval do Úpice, kde byl v místním kostele 13. ledna 1890 pokřtěn.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde studoval Karel Čapek?",
+  "expect": [
+   "Hradci"
+  ],
+  "dok": "karel_čapek",
+  "veta": 4745,
+  "typ": "Typ=misto",
+  "verb": "studovat",
+  "source_sentence": "Po základní škole studoval na gymnáziu v Hradci Králové, odkud musel po odhalení jím organizovaného protirakouského spolku přestoupit na gymnázium v Brně.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zemřel Karel Čapek?",
+  "expect": [
+   "25 . prosince 1938"
+  ],
+  "dok": "karel_čapek",
+  "veta": 4775,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel na plicní edém dne 25. prosince 1938, tedy několik měsíců před okupací Čech a Moravy nacistickým Německem.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel Karel Čapek?",
+  "expect": [
+   "Čech"
+  ],
+  "dok": "karel_čapek",
+  "veta": 4775,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel na plicní edém dne 25. prosince 1938, tedy několik měsíců před okupací Čech a Moravy nacistickým Německem.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy žil Karel Čapek?",
+  "expect": [
+   "roku 1925"
+  ],
+  "dok": "karel_čapek",
+  "veta": 4780,
+  "typ": "Typ=cas",
+  "verb": "žít",
+  "source_sentence": "Do roku 1925 žil Karel Čapek spolu se svým bratrem Josefem Čapkem v bytě na Malé Straně v Říční 11.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde žil Karel Čapek?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "karel_čapek",
+  "veta": 4782,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "Nejprve žil Karel Čapek ve své polovině dvojdomu v dnešní ulici Bratří Čapků 28 v Praze 10 sám, později se svou ženou Olgou Scheinpflugovou.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde se narodil Ludvík Vaculík?",
+  "expect": [
+   "Brumově"
+  ],
+  "dok": "ludvík_vaculík",
+  "veta": 5042,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v Brumově( dnes část města Brumov- Bylnice) jako syn tesaře.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy odmaturoval Ludvík Vaculík?",
+  "expect": [
+   "roce 1946"
+  ],
+  "dok": "ludvík_vaculík",
+  "veta": 5044,
+  "typ": "Typ=cas",
+  "verb": "odmaturovat",
+  "source_sentence": "V roce 1946 však odmaturoval na obchodní akademii a odešel do Prahy, kde v roce 1950 absolvoval v oboru politicko- novinářském na Vysoké škole politické a sociální.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy nastoupil Ludvík Vaculík?",
+  "expect": [
+   "Roku 1965"
+  ],
+  "dok": "ludvík_vaculík",
+  "veta": 5051,
+  "typ": "Typ=cas",
+  "verb": "nastoupit",
+  "source_sentence": "Roku 1965 nastoupil do redakce Literárních novin( po zákazu v roce 1967 přejmenovány na Literární listy, ještě později na Listy), nejvýznamnějšího periodika reformátorské inteligence, kde zůstal až do jejich zákazu v roce 1969.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy žil Milan Kundera?",
+  "expect": [
+   "roku 1975"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5417,
+  "typ": "Typ=cas",
+  "verb": "žít",
+  "source_sentence": "Od roku 1975 žil ve Francii, v roce 1979 byl zbaven československého státního občanství, roku 1981 získal občanství francouzské a v roce 2019 mu bylo vráceno občanství české.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde žil Milan Kundera?",
+  "expect": [
+   "Francii"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5417,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "Od roku 1975 žil ve Francii, v roce 1979 byl zbaven československého státního občanství, roku 1981 získal občanství francouzské a v roce 2019 mu bylo vráceno občanství české.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde se narodil Milan Kundera?",
+  "expect": [
+   "Brně"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5422,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Milan Kundera se narodil v Brně, kde žil s rodiči v Purkyňově ulici č. 6.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy studoval Milan Kundera?",
+  "expect": [
+   "roku 1948"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5428,
+  "typ": "Typ=cas",
+  "verb": "studovat",
+  "source_sentence": "Studoval na gymnáziu na tř. Kapitána Jaroše v Brně, kde roku 1948 maturoval.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde studoval Milan Kundera?",
+  "expect": [
+   "Brně"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5428,
+  "typ": "Typ=misto",
+  "verb": "studovat",
+  "source_sentence": "Studoval na gymnáziu na tř. Kapitána Jaroše v Brně, kde roku 1948 maturoval.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy absolvoval Milan Kundera?",
+  "expect": [
+   "roce 1953"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5430,
+  "typ": "Typ=cas",
+  "verb": "absolvovat",
+  "source_sentence": "Absolvoval v roce 1953.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vstoupil Milan Kundera?",
+  "expect": [
+   "roce 1948"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5433,
+  "typ": "Typ=cas",
+  "verb": "vstoupit",
+  "source_sentence": "V roce 1948 vstoupil do Komunistické strany Československa( KSČ), po dvou letech však byl vyloučen, spolu s přítelem Janem Trefulkou, když Státní bezpečnost( StB) zachytila jejich korespondenci zesměšňující vysokého stranického funkcionáře Jiřího Hendrycha.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vystoupil Milan Kundera?",
+  "expect": [
+   "roce 1967"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5451,
+  "typ": "Typ=cas",
+  "verb": "vystoupit",
+  "source_sentence": "V roce 1967 vystoupil na IV. sjezdu Svazu československých spisovatelů s úvodním referátem Nesamozřejmost existence českého národa.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy žil Milan Kundera?",
+  "expect": [
+   "roku 1975"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5484,
+  "typ": "Typ=cas",
+  "verb": "žít",
+  "source_sentence": "Od roku 1975 žil ve Francii, v roce 1979 byl zbaven československého státního občanství, roku 1981 získal občanství francouzské a v roce 2019 mu bylo vráceno občanství české.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde žil Milan Kundera?",
+  "expect": [
+   "Francii"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5484,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "Od roku 1975 žil ve Francii, v roce 1979 byl zbaven československého státního občanství, roku 1981 získal občanství francouzské a v roce 2019 mu bylo vráceno občanství české.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde publikoval Milan Kundera?",
+  "expect": [
+   "Francii"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5498,
+  "typ": "Typ=misto",
+  "verb": "publikovat",
+  "source_sentence": "Ve Francii Kundera publikoval výhradně v nakladatelství Gallimard.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zemřel Milan Kundera?",
+  "expect": [
+   "11 . července 2023"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5520,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Milan Kundera zemřel v Paříži dne 11. července 2023 po dlouhé nemoci ve věku 94 let.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel Milan Kundera?",
+  "expect": [
+   "Paříži"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5520,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "Milan Kundera zemřel v Paříži dne 11. července 2023 po dlouhé nemoci ve věku 94 let.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy vstoupil Milan Kundera?",
+  "expect": [
+   "roce 1945"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5532,
+  "typ": "Typ=cas",
+  "verb": "vstoupit",
+  "source_sentence": "Do literatury vstoupil Kundera v roce 1945 překladem básní Vladimíra Majakovského, který udělal spolu s bratrancem Ludvíkem Kunderou a publikoval v časopisech Pochod a Čin.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy emigroval Milan Kundera?",
+  "expect": [
+   "roce 1975"
+  ],
+  "dok": "milan_kundera",
+  "veta": 5567,
+  "typ": "Typ=cas",
+  "verb": "emigrovat",
+  "source_sentence": "V roce 1975 Milan Kundera emigroval.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Ota Pavel?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "ota_pavel",
+  "veta": 5682,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v Praze jako třetí, nejmladší syn židovského obchodního cestujícího Lea Poppera( 1899 – 1968) a jeho ženy Hermíny, rozené Netrefové( 1905 – 1977).",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde bydlel Ota Pavel?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "ota_pavel",
+  "veta": 5683,
+  "typ": "Typ=misto",
+  "verb": "bydlet",
+  "source_sentence": "Bydlel s rodiči a bratry v Praze 7 v ulici Farského( dříve Strossmayerova) v domě Husova sboru.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy působil Ota Pavel?",
+  "expect": [
+   "letech 1949"
+  ],
+  "dok": "ota_pavel",
+  "veta": 5694,
+  "typ": "Typ=cas",
+  "verb": "působit",
+  "source_sentence": "V letech 1949 – 1956( s výjimkou let 1951– 1953, kdy absolvoval vojenskou službu) působil v Československém rozhlase, zprvu krátce ve zpravodajské redakci, poté jako sportovní redaktor, kam byl přijat na doporučení svého přítele Arnošta Lustiga.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy se narodil Petr Bezruč?",
+  "expect": [
+   "roce 1867"
+  ],
+  "dok": "petr_bezruč",
+  "veta": 5891,
+  "typ": "Typ=cas",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v roce 1867 v Opavě do rodiny Antonína Vaška a jeho ženy Marie Vaškové( roz. Brožkové).",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Petr Bezruč?",
+  "expect": [
+   "Opavě"
+  ],
+  "dok": "petr_bezruč",
+  "veta": 5891,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v roce 1867 v Opavě do rodiny Antonína Vaška a jeho ženy Marie Vaškové( roz. Brožkové).",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde žil Petr Bezruč?",
+  "expect": [
+   "Brna"
+  ],
+  "dok": "petr_bezruč",
+  "veta": 5926,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "Žil v jakési apatii, ze které jej dokázal dostat jen alkohol, cigarety a první příležitostné výlety do okolí Brna.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kde bydlel Petr Bezruč?",
+  "expect": [
+   "Koloredov"
+  ],
+  "dok": "petr_bezruč",
+  "veta": 5934,
+  "typ": "Typ=misto",
+  "verb": "bydlet",
+  "source_sentence": "Nejprve bydlel v obci Koloredov u Místku, později u řezníka Lyska na Ostravské ulici v Místku.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zemřel Petr Bezruč?",
+  "expect": [
+   "roce 1958"
+  ],
+  "dok": "petr_bezruč",
+  "veta": 5991,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Zemřel v olomoucké nemocnici v roce 1958 ve věku devadesáti let.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Svatopluk Čech?",
+  "expect": [
+   "Ostředku"
+  ],
+  "dok": "svatopluk_čech",
+  "veta": 6144,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v Ostředku u Benešova do rodiny Františka Jaroslava Čecha( 1817 Peruc – 1877 Slupka, Bukovina) a Kláry Čechové, rozené Rakové.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy působil Svatopluk Čech?",
+  "expect": [
+   "letech 1873"
+  ],
+  "dok": "svatopluk_čech",
+  "veta": 6150,
+  "typ": "Typ=cas",
+  "verb": "působit",
+  "source_sentence": "V letech 1873 – 1876 působil jako redaktor Lumíru, krátce působil i v Národních listech.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy žil Svatopluk Čech?",
+  "expect": [
+   "letech 1895"
+  ],
+  "dok": "svatopluk_čech",
+  "veta": 6154,
+  "typ": "Typ=cas",
+  "verb": "žít",
+  "source_sentence": "V letech 1895 až 1903 žil v Obříství u Mělníka.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde žil Svatopluk Čech?",
+  "expect": [
+   "Obříství"
+  ],
+  "dok": "svatopluk_čech",
+  "veta": 6154,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "V letech 1895 až 1903 žil v Obříství u Mělníka.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy studoval Vladimír Holan?",
+  "expect": [
+   "letech 1919"
+  ],
+  "dok": "vladimír_holan",
+  "veta": 6365,
+  "typ": "Typ=cas",
+  "verb": "studovat",
+  "source_sentence": "V letech 1919 – 1926 studoval na pražském gymnáziu v Truhlářské ulici, kde začaly jeho první literární pokusy– svou první básnickou sbírku Blouznivý vějíř( 1926) vydává jako septimán.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy bydlel Vladimír Holan?",
+  "expect": [
+   "letech 1934"
+  ],
+  "dok": "vladimír_holan",
+  "veta": 6369,
+  "typ": "Typ=cas",
+  "verb": "bydlet",
+  "source_sentence": "V letech 1934 – 1948 bydlel se svou ženou Věrou v podkrovním bytě Hlavovy vily ve Strašnicích v ulici V Úžlabině 884, kde měli kuchyň a jeden pokoj.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde bydlel Vladimír Holan?",
+  "expect": [
+   "Strašnicích"
+  ],
+  "dok": "vladimír_holan",
+  "veta": 6369,
+  "typ": "Typ=misto",
+  "verb": "bydlet",
+  "source_sentence": "V letech 1934 – 1948 bydlel se svou ženou Věrou v podkrovním bytě Hlavovy vily ve Strašnicích v ulici V Úžlabině 884, kde měli kuchyň a jeden pokoj.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy působil Vladimír Holan?",
+  "expect": [
+   "letech 1933"
+  ],
+  "dok": "vladimír_holan",
+  "veta": 6370,
+  "typ": "Typ=cas",
+  "verb": "působit",
+  "source_sentence": "V letech 1933 – 1938 působil jako redaktor Umělecké besedy v časopisu Život.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy pracoval Vladimír Holan?",
+  "expect": [
+   "letech 1939"
+  ],
+  "dok": "vladimír_holan",
+  "veta": 6371,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "V letech 1939 – 1940 pracoval jako dramaturg Divadla E. F. Buriana.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy bydlel Vladimír Holan?",
+  "expect": [
+   "roku 1948"
+  ],
+  "dok": "vladimír_holan",
+  "veta": 6385,
+  "typ": "Typ=cas",
+  "verb": "bydlet",
+  "source_sentence": "V letech 1934 – 1948 bydlel se svou ženou Věrou v podkrovním bytě Hlavovy vily ve Strašnicích v ulici V Úžlabině 884, kde měli kuchyň a jeden pokoj.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Vladislav Vančura?",
+  "expect": [
+   "Háji"
+  ],
+  "dok": "vladislav_vančura",
+  "veta": 6475,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v Háji ve Slezsku.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy publikoval Vladislav Vančura?",
+  "expect": [
+   "roku 1920"
+  ],
+  "dok": "vladislav_vančura",
+  "veta": 6512,
+  "typ": "Typ=cas",
+  "verb": "publikovat",
+  "source_sentence": "Od roku 1920 publikoval v mnoha časopisech– Červen, Kmen, Host a Panorama.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy působil Vladislav Vančura?",
+  "expect": [
+   "roce 1924"
+  ],
+  "dok": "vladislav_vančura",
+  "veta": 6516,
+  "typ": "Typ=cas",
+  "verb": "působit",
+  "source_sentence": "V roce 1924 působil v období března až května jako divadelní kritik v deníku Československá samostatnost, později přejmenovaného na Národní osvobození, kde převzal místo po Jindřichu Vodákovi, který odešel do divadelní rubriky Českého slova.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Václav Havel?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "václav_havel",
+  "veta": 6727,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Václav Havel se narodil v Praze v podnikatelské a intelektuálské rodině Václava M. Havla( 1897 – 1979) a jeho manželky Boženy, rozené Vavrečkové( 1913 – 1970).",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy nastoupil Václav Havel?",
+  "expect": [
+   "roce 1951"
+  ],
+  "dok": "václav_havel",
+  "veta": 6736,
+  "typ": "Typ=cas",
+  "verb": "nastoupit",
+  "source_sentence": "Proto nastoupil v roce 1951 do učebního oboru jako chemický laborant a pražskou Střední všeobecně vzdělávací školu pro pracující ve Štěpánské ulici 22 studoval večerně.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy debutoval Václav Havel?",
+  "expect": [
+   "roce 1955"
+  ],
+  "dok": "václav_havel",
+  "veta": 6739,
+  "typ": "Typ=cas",
+  "verb": "debutovat",
+  "source_sentence": "Jako literát Havel debutoval v roce 1955 v časopise Květen.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vystoupil Václav Havel?",
+  "expect": [
+   "roce 1956"
+  ],
+  "dok": "václav_havel",
+  "veta": 6743,
+  "typ": "Typ=cas",
+  "verb": "vystoupit",
+  "source_sentence": "V roce 1956 vystoupil s kritickým projevem na konferenci( sjezdu) Svazu spisovatelů v Dobříši.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde vystoupil Václav Havel?",
+  "expect": [
+   "Dobříši"
+  ],
+  "dok": "václav_havel",
+  "veta": 6743,
+  "typ": "Typ=misto",
+  "verb": "vystoupit",
+  "source_sentence": "V roce 1956 vystoupil s kritickým projevem na konferenci( sjezdu) Svazu spisovatelů v Dobříši.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy pracoval Václav Havel?",
+  "expect": [
+   "letech 1957"
+  ],
+  "dok": "václav_havel",
+  "veta": 6744,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "Po skončení základní vojenské služby, kterou absolvoval v letech 1957– 1959, pracoval jako jevištní technik nejprve v Divadle ABC a od roku 1960 ve stejné pozici v Divadle Na zábradlí.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy pracoval Václav Havel?",
+  "expect": [
+   "Roku 1974"
+  ],
+  "dok": "václav_havel",
+  "veta": 6771,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "Roku 1974 devět měsíců pracoval v trutnovském pivovaru jako dělník.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy odstoupil Václav Havel?",
+  "expect": [
+   "17 . července 1992"
+  ],
+  "dok": "václav_havel",
+  "veta": 6856,
+  "typ": "Typ=cas",
+  "verb": "odstoupit",
+  "source_sentence": "Václav Havel odstoupil z prezidentského úřadu tři měsíce před vypršením mandátu 17. července 1992( s účinností k 20. červenci), poté, co nebyl Federálním shromážděním zvolen na další funkční období a bylo jasné, že zánik Československa je nevyhnutelný.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde odpočíval Václav Havel?",
+  "expect": [
+   "Hrádečku"
+  ],
+  "dok": "václav_havel",
+  "veta": 6885,
+  "typ": "Typ=misto",
+  "verb": "odpočívat",
+  "source_sentence": "Odpočíval na své chalupě v Hrádečku u Trutnova a jezdil do lázní.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy zemřel Václav Havel?",
+  "expect": [
+   "18 . prosince 2011"
+  ],
+  "dok": "václav_havel",
+  "veta": 6888,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Václav Havel zemřel v neděli 18. prosince 2011 v 9.46 hodin na následky dlouhodobých zdravotních problémů.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se narodil Vítězslav Hálek?",
+  "expect": [
+   "Dolínku"
+  ],
+  "dok": "vítězslav_hálek",
+  "veta": 7175,
+  "typ": "Typ=misto",
+  "verb": "narodit_se",
+  "source_sentence": "Narodil se v Dolínku u Odoleny Vody v rodině hostinského.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy pracoval Vítězslav Hálek?",
+  "expect": [
+   "roku 1861"
+  ],
+  "dok": "vítězslav_hálek",
+  "veta": 7184,
+  "typ": "Typ=cas",
+  "verb": "pracovat",
+  "source_sentence": "Od roku 1861 pracoval jako redaktor Národních listů, kde měl na starosti divadelní rubriku a fejeton.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy žil Vítězslav Hálek?",
+  "expect": [
+   "letech 1873"
+  ],
+  "dok": "vítězslav_hálek",
+  "veta": 7206,
+  "typ": "Typ=cas",
+  "verb": "žít",
+  "source_sentence": "Žil zde na Závisti v domku čp. 84, který měl v letech 1873– 1881 pronajatý spolu se svou rodinou nakladatel Jan Otto.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde žil Vítězslav Hálek?",
+  "expect": [
+   "Závisti"
+  ],
+  "dok": "vítězslav_hálek",
+  "veta": 7206,
+  "typ": "Typ=misto",
+  "verb": "žít",
+  "source_sentence": "Žil zde na Závisti v domku čp. 84, který měl v letech 1873– 1881 pronajatý spolu se svou rodinou nakladatel Jan Otto.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy se nachladil Vítězslav Hálek?",
+  "expect": [
+   "roku 1874"
+  ],
+  "dok": "vítězslav_hálek",
+  "veta": 7209,
+  "typ": "Typ=cas",
+  "verb": "nachladit_se",
+  "source_sentence": "V létě roku 1874 na prázdninách v Novém Světě u Harrachova se nachladil při procházce k Mumlavskému vodopádu.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde se nachladil Vítězslav Hálek?",
+  "expect": [
+   "Harrachova"
+  ],
+  "dok": "vítězslav_hálek",
+  "veta": 7209,
+  "typ": "Typ=misto",
+  "verb": "nachladit_se",
+  "source_sentence": "V létě roku 1874 na prázdninách v Novém Světě u Harrachova se nachladil při procházce k Mumlavskému vodopádu.",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy bydlel Vítězslav Nezval?",
+  "expect": [
+   "roku 1903"
+  ],
+  "dok": "vítězslav_nezval",
+  "veta": 7309,
+  "typ": "Typ=cas",
+  "verb": "bydlet",
+  "source_sentence": "Od roku 1903 bydlel v Šemíkovicích, kde navštěvoval jednotřídní školu a na které ve svém díle často vzpomínal( Z mého života, 1959).",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde bydlel Vítězslav Nezval?",
+  "expect": [
+   "Šemíkovicích"
+  ],
+  "dok": "vítězslav_nezval",
+  "veta": 7309,
+  "typ": "Typ=misto",
+  "verb": "bydlet",
+  "source_sentence": "Od roku 1903 bydlel v Šemíkovicích, kde navštěvoval jednotřídní školu a na které ve svém díle často vzpomínal( Z mého života, 1959).",
+  "reason": "valence ok, kde po místní předložce"
+ },
+ {
+  "q": "Kdy vstoupil Vítězslav Nezval?",
+  "expect": [
+   "Roku 1924"
+  ],
+  "dok": "vítězslav_nezval",
+  "veta": 7318,
+  "typ": "Typ=cas",
+  "verb": "vstoupit",
+  "source_sentence": "Roku 1924 vstoupil do KSČ.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy vstoupil Vítězslav Nezval?",
+  "expect": [
+   "roce 1924"
+  ],
+  "dok": "vítězslav_nezval",
+  "veta": 7329,
+  "typ": "Typ=cas",
+  "verb": "vstoupit",
+  "source_sentence": "Roku 1924 vstoupil do KSČ.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy onemocněl Vítězslav Nezval?",
+  "expect": [
+   "roku 1950"
+  ],
+  "dok": "vítězslav_nezval",
+  "veta": 7349,
+  "typ": "Typ=cas",
+  "verb": "onemocnět",
+  "source_sentence": "Koncem roku 1950 onemocněl spálou a těsně po jejím vyléčení jej postihl infarkt zadní srdeční stěny.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kdy zemřel Vítězslav Nezval?",
+  "expect": [
+   "6 . dubna 1958"
+  ],
+  "dok": "vítězslav_nezval",
+  "veta": 7352,
+  "typ": "Typ=cas",
+  "verb": "zemřít",
+  "source_sentence": "Dne 6. dubna 1958, na Velikonoční neděli, zemřel v Praze na akutní zápal plic a následné selhání srdce.",
+  "reason": "valence ok, kdy s časem"
+ },
+ {
+  "q": "Kde zemřel Vítězslav Nezval?",
+  "expect": [
+   "Praze"
+  ],
+  "dok": "vítězslav_nezval",
+  "veta": 7352,
+  "typ": "Typ=misto",
+  "verb": "zemřít",
+  "source_sentence": "Dne 6. dubna 1958, na Velikonoční neděli, zemřel v Praze na akutní zápal plic a následné selhání srdce.",
+  "reason": "valence ok, kde po místní předložce"
+ }
+]

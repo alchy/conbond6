@@ -1,0 +1,254 @@
+"""Běh benche nad dokumenty a sadami; zpráva JSON + Markdown do `mereni/`.
+
+Jeden dokument = jedna čerstvá paměť (otázky jsou vázané na dokument).
+Pořadí kroků za dokument: ingest → metriky ingestu → QA (každá otázka
+`Session.say`) → dosah → (Task 4) audit grafu → (Task 5) precision audit.
+Zpráva nese commit, otisk dat, časy a — je‑li k dispozici předchozí zpráva
+— regresní rozdíl (`diff.py`).
+
+Determinismus (I‑7): `twice=True` vloží dokument podruhé do čerstvé paměti
+a porovná otisk JSON paměti; nerovnost je chyba běhu.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Any
+
+from cb6.dialog import Session
+from cb6.memory import Memory
+from cb6.oracle import CachedOracle, OracleUnavailable, UDPipeOracle
+from cb6.render import describe_node
+
+from bench.data import Doc, ROOT, data_fingerprint, load_config, load_sada
+from bench.metrics import ingest_metrics, qa_metrics, reach
+from bench.qa import anchor_words, answer_matches, classify_miss, find_answer_sentence, norm, years
+
+
+def git_info() -> tuple[str, str, bool]:
+    """(datum posledního commitu YYYY-MM-DD, krátký hash, dirty?) — žádné hodiny."""
+    try:
+        date = subprocess.run(["git", "log", "-1", "--format=%cs"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+        h = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+        dirty = bool(subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip())
+        return date, h, dirty
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return "0000-00-00", "nogit", True
+
+
+def make_oracle(cfg: dict[str, Any]) -> CachedOracle:
+    """UDPipe s keší na disku; bez služby jede jen z keše (a hlásí to)."""
+    cache = ROOT / cfg["cache"]
+    try:
+        return CachedOracle(UDPipeOracle(), cache)
+    except OracleUnavailable:
+        print("bench: služba UDPipe neběží — jedu jen z keše", file=sys.stderr)
+        return CachedOracle(None, cache)
+
+
+def memory_fingerprint(memory: Memory) -> str:
+    """Otisk paměti pro determinismus."""
+    return hashlib.sha256(json.dumps(memory.to_json(), ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def _sentences(memory: Memory) -> list[Any]:
+    return sorted((n for n in memory.nodes.values() if n.kind == "sentence"), key=lambda n: int(n.lemma.rsplit("#", 1)[-1]))
+
+
+def ingest_doc(doc: Doc, oracle: CachedOracle, strop: int) -> tuple[Session, list[dict[str, Any]], float, int]:
+    """Vlož dokument (nejvýš `strop` řádků) do čerstvé paměti."""
+    lines = [l for l in doc.text.splitlines() if l.strip()]
+    if strop:
+        lines = lines[:strop]
+    text = "\n".join(lines)
+    n_words = sum(len(l.split()) for l in lines)
+    session = Session(Memory(), oracle)
+    t0 = time.time()
+    reports = session.ingest(text, doc.name)
+    return session, reports, time.time() - t0, n_words
+
+
+def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = False) -> dict[str, Any]:
+    """Celý běh nad jedním dokumentem: ingest, metriky, QA s dosahem, determinismus.
+
+    Args:
+        doc: dokument se zlatými otázkami; oracle: UDPipe s keší;
+        strop: nejvýš N řádků (0 = vše); twice: druhý běh pro determinismus.
+    Returns:
+        Řádek zprávy: `doc`, `sada`, `ingest` (metriky), `qa` (souhrn),
+        `results` (za otázku), `fingerprint`, `determinism`, časy.
+    """
+    session, reports, t_ingest, n_words = ingest_doc(doc, oracle, strop)
+    m = session.memory
+    fp = memory_fingerprint(m)  # před otázkami — dotazy mění aktivaci
+    ing = ingest_metrics(m, n_words, reports)
+    sentences = _sentences(m)
+    pairs = [(int(n.lemma.rsplit("#", 1)[-1]), n.text) for n in sentences]
+    doc_text_norm = norm("\n".join(t for _, t in pairs))
+    results: list[dict[str, Any]] = []
+    t1 = time.time()
+    for q in doc.questions:
+        row: dict[str, Any] = {"q": q.q, "expect": q.expect, "sada": q.sada, "curated": q.curated}
+        row["coverage"] = any(norm(e) in doc_text_norm or (years(e) and years(e) & years(doc_text_norm)) for e in q.expect)
+        ans_no = find_answer_sentence(pairs, q.expect)
+        row["answer_sent"] = ans_no
+        row["reach"] = reach(m, ans_no, anchor_words(q.q, doc.topic), sentences) if ans_no is not None else None
+        try:
+            a = session.say(q.q)
+        except Exception as exc:  # noqa: BLE001  pylint: disable=broad-exception-caught  — bench nesmí spadnout na jedné otázce
+            row.update({"ok": False, "text_ok": False, "why": f"pád: {type(exc).__name__}: {exc}"})
+            results.append(row)
+            continue
+        v = a.verdict
+        fillers = [t for t, _ in v.fillers] if v is not None else []
+        ok, text_ok = answer_matches(m, list(q.expect), fillers, a.text)
+        row.update({
+            "ok": ok, "text_ok": text_ok, "verdict": v.value if v else None,
+            "fillers": [describe_node(m, f) if not f.startswith("count:") else f for f in fillers][:6],
+            "why": "" if ok else classify_miss(v), "reading": a.reading,
+            "proof_statements": sorted({sid for p in (v.proofs if v else []) for sid in p.statements} | {sid for _, p in (v.fillers if v else []) for sid in p.statements}),
+        })
+        results.append(row)
+    t_ask = time.time() - t1
+    determinism: bool | None = None
+    if twice:
+        s2, _, _, _ = ingest_doc(doc, oracle, strop)
+        determinism = memory_fingerprint(s2.memory) == fp
+    return {
+        "doc": doc.name, "sada": doc.sada, "ingest": ing, "qa": qa_metrics(results), "results": results,
+        "fingerprint": fp, "determinism": determinism, "t_ingest": round(t_ingest, 1), "t_ask": round(t_ask, 1),
+        "session": session,  # pro audit grafu a precision audit (Task 4–5); do JSON se nezapisuje
+    }
+
+
+def totals(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Součty přes dokumenty (yield vážený slovy)."""
+    words = sum(r["ingest"]["words"] for r in rows)
+    safe = sum(r["ingest"]["safe"] for r in rows)
+    safe_main = sum(r["ingest"]["safe_main"] for r in rows)
+    sents = sum(r["ingest"]["sentences"] for r in rows)
+    toks = sum(r["ingest"]["tokens"] for r in rows)
+    res = sum(r["ingest"]["residue_tokens"] for r in rows)
+    opn = sum(r["ingest"]["open"] for r in rows)
+    claims = {k: sum(r["ingest"]["claims"].get(k, 0) for r in rows) for k in ("SAFE", "HYPOTHESIS", "REJECTED")}
+    qa = [r["qa"] for r in rows]
+    by_reach: dict[str, list[int]] = {}
+    by_sada: dict[str, list[int]] = {}
+    for q in qa:
+        for k, (h, n) in q["by_reach"].items():
+            by_reach.setdefault(k, [0, 0])
+            by_reach[k][0] += h
+            by_reach[k][1] += n
+        for k, (h, n) in q["by_sada"].items():
+            by_sada.setdefault(k, [0, 0])
+            by_sada[k][0] += h
+            by_sada[k][1] += n
+    return {
+        "docs": len(rows), "sentences": sents, "words": words, "safe": safe,
+        "yield": round(1000.0 * safe / words, 2) if words else 0.0,
+        "yield_main": round(1000.0 * safe_main / words, 2) if words else 0.0, "safe_main": safe_main,
+        "claims": claims, "derived": sum(r["ingest"]["derived"] for r in rows), "rules": sum(r["ingest"]["rules"] for r in rows),
+        "residue_pct": round(100.0 * res / toks, 1) if toks else 0.0,
+        "open_per_sent": round(opn / sents, 2) if sents else 0.0,
+        "written_pct": round(100.0 * sum(1 for r in rows if r["ingest"]["written_pct"] >= 100.0) / len(rows), 1) if rows else 0.0,
+        "questions": sum(q["questions"] for q in qa), "coverage": sum(q["coverage"] for q in qa),
+        "hits": sum(q["hits"] for q in qa), "text_hits": sum(q["text_hits"] for q in qa),
+        "curated_questions": sum(q["curated_questions"] for q in qa), "curated_hits": sum(q["curated_hits"] for q in qa),
+        "by_reach": by_reach, "by_sada": by_sada,
+        "determinism": all(r["determinism"] is not False for r in rows),
+        "unsupported": None, "graph_violations": None,
+    }
+
+
+def run(sady: list[str], *, strop: int = 0, docs: list[str] | None = None, twice: bool = False,
+        with_auto: bool = True, cfg: dict[str, Any] | None = None, verbose: bool = False) -> dict[str, Any]:
+    """Běh nad sadami; vrací zprávu (bez `session` objektů — ty jdou volajícímu
+    v `rows_live` pro audity).
+
+    Returns:
+        `{"commit","date","dirty","data_fingerprint","sady","strop","rows","totals","rows_live"}`
+    """
+    cfg = cfg or load_config()
+    oracle = make_oracle(cfg)
+    all_docs: list[Doc] = []
+    for s in sady:
+        all_docs.extend(load_sada(s, cfg, only=docs, with_auto=with_auto))
+    if docs:
+        all_docs = [d for d in all_docs if d.name in docs]
+    rows: list[dict[str, Any]] = []
+    for d in all_docs:
+        print(f"… {d.sada}/{d.name} ({len(d.questions)} otázek)", file=sys.stderr, flush=True)
+        try:
+            row = run_doc(d, oracle, strop=strop, twice=twice)
+        except KeyError as exc:  # chybějící rozbor bez služby
+            print(f"   přeskočeno: {exc}", file=sys.stderr)
+            continue
+        oracle.flush()
+        rows.append(row)
+        if verbose:
+            for r in row["results"]:
+                mark = "✓" if r["ok"] else ("~" if r.get("text_ok") else "✗")
+                print(f"  {mark} [{r['sada']}] {r['q']}  →  {r.get('fillers')}  (čekáno {r['expect']}) {r.get('why', '')} dosah={r.get('reach')}")
+    date, h, dirty = git_info()
+    report = {
+        "commit": h, "date": date, "dirty": dirty, "data_fingerprint": data_fingerprint(all_docs),
+        "sady": sady, "strop": strop, "with_auto": with_auto,
+        "rows": [{k: v for k, v in r.items() if k != "session"} for r in rows],
+        "totals": totals(rows),
+        "rows_live": rows,
+    }
+    return report
+
+
+def render_report(report: dict[str, Any]) -> str:
+    """Markdown zpráva: tabulka po dokumentech + celkem + rozklad."""
+    t = report["totals"]
+    head = (f"# bench {report['date']} · {report['commit']}{' (dirty)' if report.get('dirty') else ''} · sady {', '.join(report['sady'])}"
+            f" · strop {report['strop'] or '—'} · data {report['data_fingerprint']}\n\n")
+    cols = "| dokument | vět | slov | yield hl./vše | SAFE | HYP | REJ | zbytek % | open/větu | otázek | správně | kurát. | pokrytí | dosah 0 / 1‑3 / 4‑10 / >10 | unsupp. | graf |"
+    sep = "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|"
+    lines = [head, cols, sep]
+    for r in report["rows"]:
+        i, q = r["ingest"], r["qa"]
+        br = q["by_reach"]
+        reach_s = " / ".join(f"{br[b][0]}/{br[b][1]}" for b in ("0", "1-3", "4-10", ">10"))
+        uns = r.get("audit", {}).get("unsupported")
+        gv = r.get("graph_violations")
+        lines.append(f"| {r['doc']} | {i['sentences']} | {i['words']} | {i['yield_main']} / {i['yield']} | {i['claims']['SAFE']} | {i['claims']['HYPOTHESIS']} | {i['claims']['REJECTED']} | {i['residue_pct']} | {i['open_per_sent']} | {q['questions']} | {q['hits']} | {q['curated_hits']}/{q['curated_questions']} | {q['coverage']} | {reach_s} | {'—' if uns is None else f'{100*uns:.1f} %'} | {'—' if gv is None else gv} |")
+    br = t["by_reach"]
+    reach_s = " / ".join(f"{br.get(b, [0, 0])[0]}/{br.get(b, [0, 0])[1]}" for b in ("0", "1-3", "4-10", ">10"))
+    uns = t.get("unsupported")
+    lines.append(f"| **celkem** | {t['sentences']} | {t['words']} | **{t['yield_main']} / {t['yield']}** | {t['claims']['SAFE']} | {t['claims']['HYPOTHESIS']} | {t['claims']['REJECTED']} | {t['residue_pct']} | {t['open_per_sent']} | {t['questions']} | **{t['hits']}** | **{t['curated_hits']}/{t['curated_questions']}** | {t['coverage']} | {reach_s} | {'—' if uns is None else f'{100*uns:.1f} %'} | {'—' if t.get('graph_violations') is None else t['graph_violations']} |")
+    lines.append("")
+    pct = f"{100.0 * t['hits'] / t['questions']:.1f} %" if t["questions"] else "—"
+    cpct = f"{100.0 * t['curated_hits'] / t['curated_questions']:.1f} %" if t["curated_questions"] else "—"
+    lines.append(f"QA: {t['hits']}/{t['questions']} = {pct} (kurátorované {t['curated_hits']}/{t['curated_questions']} = {cpct}); po sadách: "
+                 + ", ".join(f"{k} {v[0]}/{v[1]}" for k, v in sorted(t["by_sada"].items())))
+    misses: dict[str, int] = {}
+    for r in report["rows"]:
+        for k, v in r["qa"]["misses"].items():
+            misses[k] = misses.get(k, 0) + v
+    lines.append("Rozklad chyb: " + ("; ".join(f"{k}: {v}" for k, v in sorted(misses.items(), key=lambda x: -x[1])) or "—"))
+    lines.append(f"Determinismus: {'ano' if t['determinism'] else 'NE'} · pravidel {t['rules']} · odvozeno {t['derived']} · zapsáno 100 % vět u {t['written_pct']} % dokumentů")
+    if report.get("diff_md"):
+        lines.append("\n" + report["diff_md"])
+    return "\n".join(lines) + "\n"
+
+
+def write_report(report: dict[str, Any], mereni: Path) -> tuple[Path, Path]:
+    """Ulož zprávu jako `mereni/<datum>-<hash>[-dirty][-strop].json` + `.md`."""
+    mereni.mkdir(exist_ok=True)
+    stem = f"{report['date']}-{report['commit']}" + ("-dirty" if report.get("dirty") else "") + (f"-strop{report['strop']}" if report.get("strop") else "")
+    if report.get("label"):
+        stem += f"-{report['label']}"
+    j = mereni / f"{stem}.json"
+    m = mereni / f"{stem}.md"
+    payload = {k: v for k, v in report.items() if k not in ("rows_live", "diff_md")}
+    j.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
+    m.write_text(render_report(report), encoding="utf-8")
+    return j, m

@@ -1,0 +1,9 @@
+{
+  "wiki": {"root": "data/corpus/conBond2", "raw": "data/raw", "gold": "data/gold", "git": "https://github.com/alchy/conBond2.git"},
+  "korpus": {"root": "/Users/j/Projects/conBondCorpus/corpus"},
+  "cache": "data/cache/parses.json",
+  "mereni": "mereni",
+  "audit_sample": 50,
+  "human_min": 30,
+  "judge": {"kind": "ollama", "model": "qwen3.6:27b-mlx", "endpoint": "http://127.0.0.1:11434", "prompt_version": "1"}
+}
