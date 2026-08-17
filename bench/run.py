@@ -25,8 +25,10 @@ from cb6.memory import Memory
 from cb6.oracle import CachedOracle, OracleUnavailable, UDPipeOracle
 from cb6.render import describe_node
 
+from bench.audit import run_audit
 from bench.data import Doc, ROOT, data_fingerprint, load_config, load_sada
 from bench.graphcheck import check_answer, check_graph
+from bench.judge import Judge
 from bench.metrics import ingest_metrics, qa_metrics, reach
 from bench.qa import anchor_words, answer_matches, classify_miss, find_answer_sentence, norm, years
 
@@ -74,12 +76,17 @@ def ingest_doc(doc: Doc, oracle: CachedOracle, strop: int) -> tuple[Session, lis
     return session, reports, time.time() - t0, n_words
 
 
-def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = False) -> dict[str, Any]:
-    """Celý běh nad jedním dokumentem: ingest, metriky, QA s dosahem, determinismus.
+def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = False,
+            judge: Judge | None = None, audit_n: int = 0, audit_dir: Path | None = None, seed: str = "") -> dict[str, Any]:
+    """Celý běh nad jedním dokumentem: ingest, metriky, QA s dosahem, audit grafu,
+    precision audit, determinismus.
 
     Args:
         doc: dokument se zlatými otázkami; oracle: UDPipe s keší;
-        strop: nejvýš N řádků (0 = vše); twice: druhý běh pro determinismus.
+        strop: nejvýš N řádků (0 = vše); twice: druhý běh pro determinismus;
+        judge: soudce věrnosti (None = jen lidské odpovědi); audit_n: velikost
+        vzorku (0 = bez auditu); audit_dir: adresář lidských odpovědí; seed:
+        otisk commitu pro deterministický vzorek.
     Returns:
         Řádek zprávy: `doc`, `sada`, `ingest` (metriky), `qa` (souhrn),
         `results` (za otázku), `fingerprint`, `determinism`, časy.
@@ -129,6 +136,9 @@ def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = Fal
     by_check: dict[str, int] = {}
     for viol in violations:
         by_check[str(viol["check"])] = by_check.get(str(viol["check"]), 0) + 1
+    audit: dict[str, Any] | None = None
+    if audit_n and audit_dir is not None:
+        audit = run_audit(m, doc.name, judge, audit_dir / f"audit-{doc.name}.json", audit_n, seed or doc.name)
     determinism: bool | None = None
     if twice:
         s2, _, _, _ = ingest_doc(doc, oracle, strop)
@@ -137,6 +147,7 @@ def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = Fal
         "doc": doc.name, "sada": doc.sada, "ingest": ing, "qa": qa_metrics(results), "results": results,
         "fingerprint": fp, "determinism": determinism, "t_ingest": round(t_ingest, 1), "t_ask": round(t_ask, 1),
         "graph_violations": len(violations), "graph_violations_by_check": by_check, "graph_violation_examples": violations[:25],
+        "audit": audit,
         "session": session,  # pro audit grafu a precision audit (Task 4–5); do JSON se nezapisuje
     }
 
@@ -176,8 +187,42 @@ def totals(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "curated_questions": sum(q["curated_questions"] for q in qa), "curated_hits": sum(q["curated_hits"] for q in qa),
         "by_reach": by_reach, "by_sada": by_sada,
         "determinism": all(r["determinism"] is not False for r in rows),
-        "unsupported": None, "graph_violations": sum(r.get("graph_violations", 0) for r in rows),
+        **_audit_totals(rows),
+        "graph_violations": sum(r.get("graph_violations", 0) for r in rows),
         "graph_violations_by_check": _sum_dicts(r.get("graph_violations_by_check", {}) for r in rows),
+    }
+
+
+def _audit_totals(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Souhrn precision auditu přes dokumenty (vážený počtem posouzených)."""
+    from bench.audit import wilson  # pylint: disable=import-outside-toplevel
+    auds = [r["audit"] for r in rows if r.get("audit")]
+    judged = sum(a["judged"] for a in auds)
+    ne = sum(a["netvrdí"] for a in auds)
+    cast = sum(a["částečně"] for a in auds)
+    hn = sum(a["human_n"] for a in auds)
+    hun = [a["human_unsupported"] * a["human_n"] for a in auds if a["human_unsupported"] is not None]
+    agree_n = sum(a["agreement_n"] for a in auds)
+    agree = sum((a["agreement"] or 0) * a["agreement_n"] for a in auds)
+    rn = [a for a in auds if a.get("readable_no_pct") is not None]
+    lo, hi = wilson(ne + cast // 2, judged) if judged else (0.0, 1.0)
+    by_kind: dict[str, dict[str, int]] = {}
+    for a in auds:
+        for k, b in (a.get("by_kind") or {}).items():
+            t = by_kind.setdefault(k, {"tvrdí": 0, "netvrdí": 0, "částečně": 0})
+            for v in ("tvrdí", "netvrdí", "částečně"):
+                t[v] += b.get(v, 0)
+    kind_rates = {k: {"n": sum(b[v] for v in ("tvrdí", "netvrdí", "částečně")),
+                      "unsupported": round((b["netvrdí"] + 0.5 * b["částečně"]) / max(1, sum(b[v] for v in ("tvrdí", "netvrdí", "částečně"))), 3)}
+                  for k, b in by_kind.items()}
+    return {
+        "audit_by_kind": kind_rates,
+        "audit_n": sum(a["n"] for a in auds), "audit_judged": judged,
+        "unsupported": round((ne + 0.5 * cast) / judged, 4) if judged else None, "unsupported_wilson": [round(lo, 4), round(hi, 4)],
+        "human_n": hn, "human_unsupported": round(sum(hun) / hn, 4) if hn and hun else None,
+        "agreement": round(agree / agree_n, 3) if agree_n else None, "agreement_n": agree_n,
+        "judge": next((a["judge"] for a in auds if a.get("judge")), None),
+        "readable_no_pct": round(sum(a["readable_no_pct"] for a in rn) / len(rn), 1) if rn else None,
     }
 
 
@@ -190,7 +235,8 @@ def _sum_dicts(ds: Any) -> dict[str, int]:
 
 
 def run(sady: list[str], *, strop: int = 0, docs: list[str] | None = None, twice: bool = False,
-        with_auto: bool = True, cfg: dict[str, Any] | None = None, verbose: bool = False) -> dict[str, Any]:
+        with_auto: bool = True, cfg: dict[str, Any] | None = None, verbose: bool = False,
+        judge: Judge | None = None, audit_n: int = 0, audit_docs: int = 0) -> dict[str, Any]:
     """Běh nad sadami; vrací zprávu (bez `session` objektů — ty jdou volajícímu
     v `rows_live` pro audity).
 
@@ -204,21 +250,29 @@ def run(sady: list[str], *, strop: int = 0, docs: list[str] | None = None, twice
         all_docs.extend(load_sada(s, cfg, only=docs, with_auto=with_auto))
     if docs:
         all_docs = [d for d in all_docs if d.name in docs]
+    date, h, dirty = git_info()
+    audit_set = {d.name for d in all_docs}
+    if audit_docs and audit_docs < len(all_docs):
+        # deterministický výběr dokumentů k auditu (rozprostřený, ne abecední začátek)
+        audit_set = set(sorted((d.name for d in all_docs), key=lambda n: hashlib.sha1(n.encode()).hexdigest())[:audit_docs])
+    mereni_dir = ROOT / cfg.get("mereni", "mereni")
     rows: list[dict[str, Any]] = []
     for d in all_docs:
         print(f"… {d.sada}/{d.name} ({len(d.questions)} otázek)", file=sys.stderr, flush=True)
         try:
-            row = run_doc(d, oracle, strop=strop, twice=twice)
+            row = run_doc(d, oracle, strop=strop, twice=twice, judge=judge,
+                          audit_n=audit_n if d.name in audit_set else 0, audit_dir=mereni_dir, seed=h)
         except KeyError as exc:  # chybějící rozbor bez služby
             print(f"   přeskočeno: {exc}", file=sys.stderr)
             continue
         oracle.flush()
+        if judge is not None and hasattr(judge, "flush"):
+            judge.flush()
         rows.append(row)
         if verbose:
             for r in row["results"]:
                 mark = "✓" if r["ok"] else ("~" if r.get("text_ok") else "✗")
                 print(f"  {mark} [{r['sada']}] {r['q']}  →  {r.get('fillers')}  (čekáno {r['expect']}) {r.get('why', '')} dosah={r.get('reach')}")
-    date, h, dirty = git_info()
     report = {
         "commit": h, "date": date, "dirty": dirty, "data_fingerprint": data_fingerprint(all_docs),
         "sady": sady, "strop": strop, "with_auto": with_auto,
@@ -261,6 +315,21 @@ def render_report(report: dict[str, Any]) -> str:
     lines.append(f"Determinismus: {'ano' if t['determinism'] else 'NE'} · pravidel {t['rules']} · odvozeno {t['derived']} · zapsáno 100 % vět u {t['written_pct']} % dokumentů")
     gv = t.get("graph_violations")
     lines.append(f"Audit grafu: {'0 porušení' if not gv else f'{gv} porušení — ' + ', '.join(f'{k} {v}' for k, v in sorted(t['graph_violations_by_check'].items()))}")
+    if t.get("audit_n"):
+        uns = t.get("unsupported")
+        w = t.get("unsupported_wilson") or [0, 0]
+        hu = t.get("human_unsupported")
+        uns_s = "—" if uns is None else f"{100 * uns:.1f} % [{100 * w[0]:.1f}–{100 * w[1]:.1f}]"
+        hu_s = "—" if hu is None else f"{100 * hu:.1f} %"
+        ag = t.get("agreement")
+        ag_s = "—" if ag is None else f"{100 * ag:.0f} % (n={t['agreement_n']})"
+        rd = t.get("readable_no_pct")
+        rd_s = "—" if rd is None else f"{rd} %"
+        lines.append(f"Precision audit: vzorek {t['audit_n']} výroků · soudce {t.get('judge') or '—'} posoudil {t['audit_judged']} → unsupported {uns_s}"
+                     f" · člověk {t['human_n']} → {hu_s} · shoda soudce/člověk {ag_s} · „nechápu z grafu“ {rd_s}")
+        bk = t.get("audit_by_kind") or {}
+        if bk:
+            lines.append("  podle druhu: " + " · ".join(f"{k} {100 * v['unsupported']:.0f} % (n={v['n']})" for k, v in sorted(bk.items())))
     if report.get("diff_md"):
         lines.append("\n" + report["diff_md"])
     return "\n".join(lines) + "\n"

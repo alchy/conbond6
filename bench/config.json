@@ -5,5 +5,5 @@
   "mereni": "mereni",
   "audit_sample": 50,
   "human_min": 30,
-  "judge": {"kind": "ollama", "model": "qwen3.6:27b-mlx", "endpoint": "http://127.0.0.1:11434", "prompt_version": "1"}
+  "judge": {"kind": "ollama", "model": "gemma4:latest", "endpoint": "http://127.0.0.1:11434", "prompt_version": "1"}
 }
