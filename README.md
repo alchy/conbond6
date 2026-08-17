@@ -5,6 +5,7 @@ vysvětlitelnou, dotazovatelnou a bezpečnou vůči domýšlení** — a který 
 o sobě dokáže *změřit*. Vychází z conbond5 (klon s historií, balíček `cb5 →
 cb6`); mění se měřítko, ne motor.
 
+- **Koncept (proč takhle):** [`docs/KONCEPT.md`](docs/KONCEPT.md) · **Handover (stav, jak pokračovat):** [`docs/HANDOVER.md`](docs/HANDOVER.md)
 - **Zadání a invarianty I‑1…I‑12:** [`docs/superpowers/specs/2026-08-17-conbond6-design.md`](docs/superpowers/specs/2026-08-17-conbond6-design.md)
 - **Plán v1:** [`docs/superpowers/plans/2026-08-17-conbond6-v1.md`](docs/superpowers/plans/2026-08-17-conbond6-v1.md)
 - **Hypotézy a výsledky každého tahu:** [`mereni/HYPOTEZY.md`](mereni/HYPOTEZY.md) · zprávy `mereni/<datum>-<commit>.md`
