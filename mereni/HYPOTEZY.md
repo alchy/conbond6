@@ -24,3 +24,9 @@ Yield hl./vše 160/298 na 1 000 slov; QA 12/17 (kurátorované 3/3); graf 0 poru
 **Změna:** `derive()` (pevný bod pravidel z podmínek), zamítnutí/hypotézy v odpovědi (`Verdict.notes`); registr referentů jako pohled nad hranami `mention`, nejednoznačná koreference → jádro bez termu + HYPOTHESIS alternativy + OPEN; segmenty (nadpis/prázdný řádek), okno registru = tento + předchozí segment; dosah zná pásmo „jiný segment“.
 **Hypotéza:** unsupported hlavních klesne (méně chybných pro‑drop podmětů), HYPOTHESIS vzroste, QA beze změny.
 **Výsledek (tytéž 2 dokumenty, strop 40, vzorek 100):** unsupported 30,5 → **23,0 %** [15,8–32,1], hlavní 22 %; HYPOTHESIS 61 → 69; QA 12/17 beze změny; yield 89/94 beze změny; graf 0 porušení; determinismus ano.
+
+## 2026-08-17 · Task 10 · dialog G — nálezy
+- **G‑1** otázka „Kdy napsal R.U.R.?“: parser čte R.U.R. jako podmět (kdo) → NEVÍM. Mez čtení otázek s pro‑dropem a PROPN předmětem (řešit v čtení otázek, měřený tah).
+- **G‑2** „Čapek se narodil v Praze.“ po Svatoňovicích → zapsáno bez konfliktu: otevřený svět nezná funkční role. Kandidát: `FUNCTIONAL_ROLES` jako data (narodit_se.kde/kdy, zemřít.kde/kdy) → hlásit KONFLIKT jako hypotézu nesrovnalosti.
+- **G‑3** „Jeho bratr Josef Čapek“ → entita „bratr Josef Čapek“ (přístavek přilepen ke jménu).
+- **G‑4** „Kde pracoval Čapek?“ → NEVÍM: `v+Loc: noviny` není místo → role zůstává povrchová (správně dle specu; učení `!role v+Loc = kde` nebo tabulka institucí jako míst).
