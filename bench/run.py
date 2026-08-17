@@ -26,6 +26,7 @@ from cb6.oracle import CachedOracle, OracleUnavailable, UDPipeOracle
 from cb6.render import describe_node
 
 from bench.data import Doc, ROOT, data_fingerprint, load_config, load_sada
+from bench.graphcheck import check_answer, check_graph
 from bench.metrics import ingest_metrics, qa_metrics, reach
 from bench.qa import anchor_words, answer_matches, classify_miss, find_answer_sentence, norm, years
 
@@ -112,9 +113,21 @@ def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = Fal
             "fillers": [describe_node(m, f) if not f.startswith("count:") else f for f in fillers][:6],
             "why": "" if ok else classify_miss(v), "reading": a.reading,
             "proof_statements": sorted({sid for p in (v.proofs if v else []) for sid in p.statements} | {sid for _, p in (v.fillers if v else []) for sid in p.statements}),
+            "hard": sorted({h for p in (v.proofs if v else []) for h in p.hard} | {h for _, p in (v.fillers if v else []) for h in p.hard}),
         })
         results.append(row)
     t_ask = time.time() - t1
+    # audit grafu (I‑11, I‑12) — jen nad exportem
+    g = m.graph()
+    violations = [v.__dict__ for v in check_graph(g)]
+    for row in results:
+        if row.get("verdict") in ("ANO", "NE", "KONFLIKT") or row.get("fillers"):
+            vs = check_answer(g, list(row.get("proof_statements", [])), [tuple(h) for h in row.get("hard", [])])
+            row["graph_violations"] = len(vs)
+            violations.extend({**v.__dict__, "q": row["q"]} for v in vs)
+    by_check: dict[str, int] = {}
+    for v in violations:
+        by_check[v["check"]] = by_check.get(v["check"], 0) + 1
     determinism: bool | None = None
     if twice:
         s2, _, _, _ = ingest_doc(doc, oracle, strop)
@@ -122,6 +135,7 @@ def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = Fal
     return {
         "doc": doc.name, "sada": doc.sada, "ingest": ing, "qa": qa_metrics(results), "results": results,
         "fingerprint": fp, "determinism": determinism, "t_ingest": round(t_ingest, 1), "t_ask": round(t_ask, 1),
+        "graph_violations": len(violations), "graph_violations_by_check": by_check, "graph_violation_examples": violations[:25],
         "session": session,  # pro audit grafu a precision audit (Task 4–5); do JSON se nezapisuje
     }
 
@@ -161,8 +175,17 @@ def totals(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "curated_questions": sum(q["curated_questions"] for q in qa), "curated_hits": sum(q["curated_hits"] for q in qa),
         "by_reach": by_reach, "by_sada": by_sada,
         "determinism": all(r["determinism"] is not False for r in rows),
-        "unsupported": None, "graph_violations": None,
+        "unsupported": None, "graph_violations": sum(r.get("graph_violations", 0) for r in rows),
+        "graph_violations_by_check": _sum_dicts(r.get("graph_violations_by_check", {}) for r in rows),
     }
+
+
+def _sum_dicts(ds: Any) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for d in ds:
+        for k, v in d.items():
+            out[k] = out.get(k, 0) + v
+    return out
 
 
 def run(sady: list[str], *, strop: int = 0, docs: list[str] | None = None, twice: bool = False,
@@ -235,6 +258,8 @@ def render_report(report: dict[str, Any]) -> str:
             misses[k] = misses.get(k, 0) + v
     lines.append("Rozklad chyb: " + ("; ".join(f"{k}: {v}" for k, v in sorted(misses.items(), key=lambda x: -x[1])) or "—"))
     lines.append(f"Determinismus: {'ano' if t['determinism'] else 'NE'} · pravidel {t['rules']} · odvozeno {t['derived']} · zapsáno 100 % vět u {t['written_pct']} % dokumentů")
+    gv = t.get("graph_violations")
+    lines.append(f"Audit grafu: {'0 porušení' if not gv else f'{gv} porušení — ' + ', '.join(f'{k} {v}' for k, v in sorted(t['graph_violations_by_check'].items()))}")
     if report.get("diff_md"):
         lines.append("\n" + report["diff_md"])
     return "\n".join(lines) + "\n"

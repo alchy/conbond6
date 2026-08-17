@@ -732,6 +732,10 @@ class Memory:
                 attrs["no"] = n.lemma.rsplit("#", 1)[-1]
             if n.kind == "segment":
                 attrs["title"] = n.text
+            if n.kind == "time" and n.time is not None:
+                attrs["t_kind"] = n.time.kind
+                attrs["t_start"] = list(n.time.start) if n.time.start else None
+                attrs["t_end"] = list(n.time.end) if n.time.end else None
             g.add_node(n.id, **attrs)
             if n.kind in ("sentence", "segment") and n.base:
                 g.add_edge(n.id, n.base, type="part_of", soft=False)
@@ -757,11 +761,12 @@ class Memory:
                 g.add_edge(st.id, st.rule, type="uses_rule", soft=False)
             for alt in st.alternatives:
                 g.add_edge(st.id, alt, type="alternative_of", soft=False)
-            if st.status == "active" and st.kernel and not st.neg and st.claim == "SAFE" and st.mood == "assert":
+            if st.status == "active" and st.kernel and st.claim == "SAFE" and st.mood == "assert":
                 a, b = self._kernel_pair(st)
+                etype = st.kernel if not st.neg else ("disjoint" if st.kernel == "subset" else f"not_{st.kernel}")
                 for x in a:
                     for y in b:
-                        g.add_edge(x, y, type=st.kernel, soft=False, statement=st.id)
+                        g.add_edge(x, y, type=etype, soft=False, statement=st.id)
         for o in self.open_items_.values():
             g.add_node(o.id, kind="open", label=o.question, question=o.question, open_kind=o.kind,
                        answered=o.answer is not None, activation=0.0)

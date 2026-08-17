@@ -37,6 +37,11 @@ class Proof:
     steps: list[str] = field(default_factory=list)
     defaults: list[str] = field(default_factory=list)
     grade: Grade = "said"
+    #: Tvrdé kroky strojově: (jádro, a, b) — `member`/`subset`/`within`/`same_as`
+    #: jsou cesty po tvrdých hranách grafu, `time` je obsažení časů, `disjoint`
+    #: existence `¬subset`. Audit grafu (bench/graphcheck) je ověřuje jen
+    #: z exportu — odpověď musí být rekonstruovatelná z grafu (I‑12).
+    hard: list[tuple[str, str, str]] = field(default_factory=list)
 
     def merged(self, other: "Proof") -> "Proof":
         return Proof(
@@ -44,6 +49,7 @@ class Proof:
             self.steps + other.steps,
             self.defaults + [d for d in other.defaults if d not in self.defaults],
             weakest(self.grade, other.grade),
+            self.hard + [h for h in other.hard if h not in self.hard],
         )
 
 
@@ -106,36 +112,36 @@ class Evaluator:
             return Proof()
         same = m.same_as_star(q, f)
         if same is not None:
-            return Proof(same, [f"{m.node(q).label()} = {m.node(f).label()}"])
+            return Proof(same, [f"{m.node(q).label()} = {m.node(f).label()}"], hard=[("same_as", q, f)])
         qk, fk = self._kind(q), self._kind(f)
         # místa: kde/kam/odkud dotazu obsahuje místo výroku
         if qk == "place" and fk == "place":
             w = m.within_star(f, q)
             if w is not None:
-                return Proof(w, [f"{m.node(f).label()} ⊆ {m.node(q).label()} (místo)"], grade="derived")
+                return Proof(w, [f"{m.node(f).label()} ⊆ {m.node(q).label()} (místo)"], grade="derived", hard=[("within", f, q)])
             return None
         if qk == "time" and fk == "time":
             if m.time_within(f, q):
-                return Proof([], [f"{m.node(f).label()} je v {m.node(q).label()}"])
+                return Proof([], [f"{m.node(f).label()} je v {m.node(q).label()}"], hard=[("time", f, q)])
             return None
         # entita / instance dotazu × group výroku
         if qk in ("entity", "place") and fk == "group":
             if fquant == "∀":
                 mem = m.member_star(q, f)
                 if mem is not None:
-                    return Proof(mem, [f"{m.node(q).label()} ∈ {m.node(f).label()} (∀ se přenáší dolů)"], grade="derived")
+                    return Proof(mem, [f"{m.node(q).label()} ∈ {m.node(f).label()} (∀ se přenáší dolů)"], grade="derived", hard=[("member", q, f)])
             return None
         # group dotazu × group výroku
         if qk == "group" and fk == "group":
             if fquant == "∀":
                 sub = m.subset_star(q, f)
                 if sub is not None:
-                    return Proof(sub, [f"{m.node(q).label()} ⊆ {m.node(f).label()} (∀ se přenáší dolů)"], grade="derived" if sub else "read")
+                    return Proof(sub, [f"{m.node(q).label()} ⊆ {m.node(f).label()} (∀ se přenáší dolů)"], grade="derived" if sub else "read", hard=[("subset", q, f)] if sub else [])
                 return None
             # ∃ / · výrok: dotaz sedí, když je výrok stejně nebo víc konkrétní
             sub = m.subset_star(f, q)
             if sub is not None and qquant != "∀":
-                return Proof(sub, [f"{m.node(f).label()} ⊆ {m.node(q).label()}"] if sub else [], grade="derived" if sub else "read")
+                return Proof(sub, [f"{m.node(f).label()} ⊆ {m.node(q).label()}"] if sub else [], grade="derived" if sub else "read", hard=[("subset", f, q)] if sub else [])
             return None
         # group dotazu × instance výroku („Napsal román?“ × r1 ∈ román)
         if qk == "group" and fk in ("entity", "place"):
@@ -143,7 +149,7 @@ class Evaluator:
                 return None
             mem = m.member_star(f, q)
             if mem is not None:
-                return Proof(mem, [f"{m.node(f).label()} ∈ {m.node(q).label()}"], grade="derived")
+                return Proof(mem, [f"{m.node(f).label()} ∈ {m.node(q).label()}"], grade="derived", hard=[("member", f, q)])
             return None
         return None
 
@@ -219,12 +225,12 @@ class Evaluator:
                 if q.kernel == "within" or (q.kernel is None and self._kind(o) == "place" and q.role("kde") is not None):
                     w = m.within_star(s, o)
                     if w is not None:
-                        proofs.append(Proof(w, [f"{m.node(s).label()} ⊆ {m.node(o).label()}"], grade=self._grade_of(w)))
+                        proofs.append(Proof(w, [f"{m.node(s).label()} ⊆ {m.node(o).label()}"], grade=self._grade_of(w), hard=[("within", s, o)]))
                     continue
                 if sk in ("entity", "place"):
                     mem = m.member_star(s, o)
                     if mem is not None:
-                        proofs.append(Proof(mem, [f"{m.node(s).label()} ∈ {m.node(o).label()}"], grade=self._grade_of(mem)))
+                        proofs.append(Proof(mem, [f"{m.node(s).label()} ∈ {m.node(o).label()}"], grade=self._grade_of(mem), hard=[("member", s, o)]))
                         continue
                     # disjunktnost: s ∈ H, H ∦ o
                     for st in m.active():
@@ -233,15 +239,15 @@ class Evaluator:
                             for h in (st_co.terms if st_co else []):
                                 d = m.disjoint(h, o)
                                 if d is not None:
-                                    counter.append(Proof([st.id, d], [f"{m.node(s).label()} ∈ {m.node(h).label()}", f"{m.node(h).label()} ∦ {m.node(o).label()}"], grade="derived"))
+                                    counter.append(Proof([st.id, d], [f"{m.node(s).label()} ∈ {m.node(h).label()}", f"{m.node(h).label()} ∦ {m.node(o).label()}"], grade="derived", hard=[("member", s, h), ("disjoint", h, o)]))
                 elif sk == "group":
                     sub = m.subset_star(s, o)
                     if sub is not None:
-                        proofs.append(Proof(sub, [f"{m.node(s).label()} ⊆ {m.node(o).label()}"], grade=self._grade_of(sub)))
+                        proofs.append(Proof(sub, [f"{m.node(s).label()} ⊆ {m.node(o).label()}"], grade=self._grade_of(sub), hard=[("subset", s, o)]))
                         continue
                     d = m.disjoint(s, o)
                     if d is not None:
-                        counter.append(Proof([d], [f"{m.node(s).label()} ∦ {m.node(o).label()}"], grade="derived"))
+                        counter.append(Proof([d], [f"{m.node(s).label()} ∦ {m.node(o).label()}"], grade="derived", hard=[("disjoint", s, o)]))
         if proofs and counter:
             return Verdict("KONFLIKT", proofs, counter)
         if proofs:
