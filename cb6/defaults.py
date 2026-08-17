@@ -134,61 +134,9 @@ PLACE_PREPS = frozenset({"v", "do", "z", "u", "na", "k", "od", "přes", "po", "z
 #: Zájmena, která odkazují (osobní), a jejich rod/číslo pro shodu.
 PERSONAL_PRONOUNS = frozenset({"on", "ona", "ono", "oni", "ony", "já", "ty", "my", "vy", "sebe"})
 
-#: Třídy synonym predikátů — OSIVO. Shoda dotazu s výrokem bere i synonymum
-#: a důkaz to přizná (`[synonymum: kázat ~ hlásat]`). Dialog přidává
-#: `!synonymum kázat = hlásat`. Klíč je reprezentant, hodnota členové.
-SYNONYMS: dict[str, frozenset[str]] = {
-    "říci": frozenset({"říci", "říkat", "tvrdit", "hlásat", "kázat", "prohlásit", "prohlašovat",
-                        "uvést", "uvádět", "pravit", "sdělit", "sdělovat", "oznámit", "oznamovat",
-                        "konstatovat", "vyhlásit", "vyhlašovat", "učit", "vyučovat", "poučit"}),
-    "pracovat": frozenset({"pracovat", "působit", "sloužit", "zaměstnat_se", "dělat", "vykonávat"}),
-    "narodit_se": frozenset({"narodit_se", "přijít_na_svět"}),
-    "zemřít": frozenset({"zemřít", "umřít", "skonat", "zahynout", "padnout", "zesnout"}),
-    "bydlet": frozenset({"bydlet", "žít", "sídlit", "pobývat", "přebývat", "usadit_se", "usídlit_se"}),
-    "napsat": frozenset({"napsat", "sepsat", "psát", "vydat", "vydávat", "publikovat", "uveřejnit",
-                         "sepisovat", "zveřejnit"}),
-    "studovat": frozenset({"studovat", "vystudovat", "absolvovat", "navštěvovat", "chodit"}),
-    "založit": frozenset({"založit", "zakládat", "ustavit", "zřídit", "vytvořit", "vybudovat"}),
-    "stát_se": frozenset({"stát_se", "stávat_se"}),
-    "získat": frozenset({"získat", "získávat", "obdržet", "dostat", "dostávat", "vyhrát"}),
-    "odejít": frozenset({"odejít", "odjet", "odcestovat", "emigrovat", "odstěhovat_se", "opustit"}),
-    "vrátit_se": frozenset({"vrátit_se", "vracet_se", "navrátit_se"}),
-    "obsahovat": frozenset({"obsahovat", "zahrnovat", "mít"}),
-    "jet": frozenset({"jet", "jezdit", "cestovat", "odjet", "přijet", "dojet"}),
-    "létat": frozenset({"létat", "letět"}),
-    "vyžadovat": frozenset({"vyžadovat", "potřebovat", "vyžádat_si"}),
-    "oženit_se": frozenset({"oženit_se", "vdát_se", "vzít_si", "uzavřít_sňatek"}),
-    "zúčastnit_se": frozenset({"zúčastnit_se", "účastnit_se", "podílet_se"}),
-    "začít": frozenset({"začít", "začínat", "zahájit", "započít"}),
-}
-
-
-def synonym_class(pred: str, learned: dict[str, str] | None = None) -> str:
-    """Reprezentant třídy synonym (nebo predikát sám, když třídu nemá).
-
-    `learned` jsou dvojice `a → b` naučené dialogem (drží je paměť);
-    slučují třídy obou stran, takže reprezentant je ten seedový."""
-    def seed_rep(x: str) -> str:
-        for rep, members in SYNONYMS.items():
-            if x == rep or x in members:
-                return rep
-        return x
-    rep = seed_rep(pred)
-    if not learned:
-        return rep
-    # union-find nad naučenými dvojicemi
-    parent: dict[str, str] = {}
-    def find(x: str) -> str:
-        parent.setdefault(x, x)
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-        return x
-    for a, b in learned.items():
-        ra, rb = find(seed_rep(a)), find(seed_rep(b))
-        if ra != rb:
-            parent[max(ra, rb)] = min(ra, rb)
-    return find(rep)
+#: Synonyma predikátů tu už NEJSOU: jsou to znalostní vazby (mění verdikt), a ty
+#: žijí jako řádky dat v `cb6/lexikon/*.jsonl` (`cb6/lexicon.py`) — se sílou
+#: `same/implies/related` a proveniencí v grafu. Tady zůstávají jen čtecí tabulky.
 
 
 # ---- triáž (spec conbond6 § 3.3) — tabulky jako data ---------------------------

@@ -78,12 +78,15 @@ def test_rule_command_bridges(s: Session) -> None:
 
 
 def test_synonym_command(s: Session) -> None:
-    s.say("Hrabal napsal Postřižiny.")
-    s.say("!synonymum napsat = stvořit")
-    from cb6.defaults import synonym_class
-    assert synonym_class("stvořit", s.memory.learned["synonyms"]) == synonym_class("napsat")
-    assert synonym_class("stvořit") != synonym_class("napsat")  # bez paměti nic
-    assert s.say("Kdo stvořil Postřižiny?").verdict.value == "ANO"  # type: ignore[union-attr]
+    """`!uč` píše řádek lexikonu s autoritou `said` — jen do této paměti, ne do seedu."""
+    from cb6.lexicon import Lexicon
+    r = s.say("!uč napsat = stvořit")
+    assert "naučeno lex:said:" in r.text and "napsat ~ stvořit" in r.text
+    assert Lexicon.for_memory(s.memory).match("napsat", "stvořit") is not None
+    assert Lexicon.for_memory(Memory()).match("napsat", "stvořit") is None  # bez paměti nic
+    r2 = s.say("!uč vydat ~ napsat")
+    assert "related" in r2.text
+    assert "užití" in s.say("!uč nesmysl").text
 
 
 def test_quantifier_fix(s: Session) -> None:

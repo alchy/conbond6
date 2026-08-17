@@ -161,3 +161,14 @@ Chov domácích zvířat může mít negativní dopad na jejich zdraví.
 Přijde Jana?
 Namaloval Josef obraz?
 Přijde Marie?
+
+# lexikon (krok 1): implikace je jednosměrná
+Petr žil v Praze.
+Kde bydlí Petr?
+Kdo něco obsahuje, ten to má.
+Jablko obsahuje vitamíny.
+Má jablko vitamíny?
+Obsahuje jablko vitamíny?
+Pokud Petr žije v Praze, platí Petr daně v Praze.
+Petr bydlí v Praze.
+Platí Petr daně?

@@ -9,6 +9,7 @@
 | repo | `~/Projects/conbond6` · https://github.com/alchy/conbond6 (větve `main` = `v1`) |
 | zadání, invarianty I‑1…I‑12 | `docs/superpowers/specs/2026-08-17-conbond6-design.md` |
 | znalostní vazby jako data (návrh) | `docs/superpowers/specs/2026-08-17-znalostni-vazby-design.md` |
+| lexikon vazeb (krok 1 hotový) | `cb6/lexicon.py` (operátory `třída`, `implikace`; loader, shoda, materializace) · seed `cb6/lexikon/synonyma.jsonl` (88 řádků se sílou `same/implies/related`) · dialog `!uč a = b | a => b | a ~ b` |
 | koncept (proč takhle) | `docs/KONCEPT.md` |
 | plán v1 + stav provedení | `docs/superpowers/plans/2026-08-17-conbond6-v1.md` |
 | hypotézy a výsledky tahů | `mereni/HYPOTEZY.md` |
@@ -16,9 +17,9 @@
 | lidské odpovědi auditu | `mereni/audit-<dokument>.json` (otisk → [verdikt, pozn, chápu‑z‑grafu a/n]) |
 | keš verdiktů soudce | `mereni/audit-cache.json` (klíč = otisk · soudce · verze promptu) |
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
-| jádro | `cb6/` — `oracle chronos defaults read triage discourse memory ground logic recall render dialog cli viewbase_app` |
+| jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` |
 | bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff __main__` |
-| testy | `tests/` (146 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
+| testy | `tests/` (159 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
 | paralelní větev | conbond5 (`~/Projects/conbond5`, jiné sezení, HEAD c503b68) — do něj nesahat |
 | související | inventura conbond0–4: artefakt „Inventura conBond 0–5“ (Claude artifacts, 17. 8.) |
@@ -62,6 +63,8 @@ Zelený řádek: víc pravdivé (unsupported neroste), doložitelné (každý z�
 
 Paměť v2 (`claim`, `mood`, `parent`, `rule`, `alternatives`; JSON v2 čte v1) · export grafu s proveniencí (source, part_of, nested_in, derived_from, uses_rule, alternative_of, about, residue_of, mention; časy s atributy; `disjoint`) · `bench/` (sady wiki+korpus, gold v repu, valenční filtr auto 204/682, yield, statusy, QA s dosahem, precision audit soudce+člověk s Wilsonem a rozkladem podle druhu, audit grafu + rekonstrukce odpovědi, diff, determinismus, `gold-gen`) · triáž (podmínka→pravidlo if/only_if/iff, `když` jen v prézentu; vnořený obsah→reported; disjunkce/kardinalita→REJECTED; nmod→REJECTED kromě „místo uvnitř fráze“; fragment mimo znalost; typing zvlášť) · `derive()` (pevný bod, odvolání kaskáduje) · registr referentů (projekce hran `mention`, ambiguita → hypotézy + OPEN, segmenty) · `!ukaž` / `!hypotéza potvrď|zamítni` / `!statusy` · doložky statusu v odpovědích, zamítnutí a hypotézy hlášené (Verdict.notes) · dialogy G (7 zelených, 2 xfail nálezy) a H · viewBase2 adaptér.
 
+**Lexikon vazeb, krok 1** (`cb6/lexicon.py`): vazby jako řádky dat `{id, op, args, síla, autorita, zdroj, pozn}`; operátory `třída` (union‑find → reprezentant) a `implikace` (orientované hrany), shoda predikátů = cesta od výroku k dotazu po `same` (oběma směry) a `implies` (po směru), `related` jen pro recall; seed `cb6/lexikon/synonyma.jsonl` migrací `SYNONYMS` — 88 řádků, z toho `same` 32 (vidové dvojice, skutečné záměny), `implies` 32 (bydlet ⇒ žít, obsahovat ⇒ mít, vystudovat ⇒ studovat…), `related` 24 (kde tabulka lhala: vydat ≁ napsat, padnout ≁ zemřít, chodit ≁ studovat…); líná materializace použitých řádků do paměti (`Memory.links`) → uzly `kind="vazba"` v exportu, `uses_rule` z odvozených výroků, tvrdý krok `lex` v důkazu ověřovaný graphcheckem jen z exportu (`lex_path`); `!uč` píše řádky `said` (`Memory.learned["synonyms"]` zaniklo, staré JSON se převedou při načtení); `defaults.SYNONYMS`/`synonym_class` odstraněny; `bench run --bez-lexikonu` = ablace seed vrstvy.
+
 Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná závorka jen u osob s tvarem „A – B“ bez slovesa; přivlastnění → `mít` jako HYPOTHESIS; částečná shoda jména jen s příjmením; tvary jmen jako jedno jméno; výčet „děti: Helena, Josef…“ = member, ne same_as; typing není odpověď; otázky nezanechávají osiřelé uzly.
 
 ## 6. Otevřené tahy (pořadí podle toho, co ukázal bench)
@@ -73,7 +76,7 @@ Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná z
 5. Prostor modelů pro disjunkci/ekvivalenci/kardinalitu (přenos `conBond3/cb_logic/models.py`) — dnes REJECTED s důvodem.
 6. Adaptéry conbond1/conbond4 pro zpětný běh QA (Task 12 — neproveden).
 7. Valence jako data (`valence.json` conbond1 / VALLEX), relativní čas (conbond1 chronos), nominalizace, rekurze v dotazu (jellyAI3 SubQuery) — každý jako měřený tah, až bench ukáže potřebu.
-8. **Znalostní vazby jako data** (návrh `2026-08-17-znalostni-vazby-design.md`): operátory v kódu (8), vazby jako řádky se sílou/autoritou/zdrojem, líná materializace do grafu s `uses_rule`; pořadí: synonyma se sílou (migrace `SYNONYMS`, `learned`) → překryv/porovnání + veličiny ("mohli se potkat", "vejde se", "Jaká je délka") → příbuzenství (inverze/skládání, G‑3) → antonyma až na otázku. Nahrazuje čtyři dnešní místa (`defaults.SYNONYMS`, `Memory.learned`, `Memory.rules`, `kind=rule`) jedním.
+8. **Znalostní vazby jako data** (návrh `2026-08-17-znalostni-vazby-design.md`): **krok 1 hotový** (synonyma se sílou, lexikon, materializace — viz § 5). Dál: krok 2 překryv/porovnání + veličiny ("mohli se potkat", "vejde se", "Jaká je délka") → krok 3 příbuzenství (inverze/skládání, G‑3) → antonyma až na otázku → krok 5 `Memory.rules` (můstky) jako řádky `implikace` s mapou rolí. Zbývá sjednotit dvě dnešní místa (`Memory.rules`, `kind=rule`) s lexikonem.
 9. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
 
 ## 7. Deník rozhodnutí
@@ -89,6 +92,7 @@ Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná z
 - 17. 8. — ∀ z generického prézentu jen v jednoduché obecné větě (kořen, nekoordinovaný podmět, bez PROPN); hlavní predikace 35 → 31–32 % nepodložených.
 - 17. 8. — Návrh conbond5 „Q(A,B) ⇐ TEST(…)“ přijat jako operátory `překryv`/`porovnání` v lexikonu vazeb; pravidlo je řádek dat s modalitou a proveniencí, materializovaný do grafu při použití; ne pátý slovník. Síla vazby `same/implies/related` (dnešní `SYNONYMS` je únik precision).
 - 17. 8. — conbond5 (paralelně) jde cestou šíře konstrukcí (ruční otázky 59/70); conbond6 cestou věrnosti; další tah conbond6 = přebírat konstrukce z conbond5 po jedné přes bránu benche.
+- 17. 8. — Lexikon krok 1: síla vazby se rozhoduje podle významu páru, ne podle počtu zásahů (např. `pracovat ~ působit` same — životopisné „působil v/jako“; jiné významy chrání rámec rolí; `absolvovat`, `vyhrát`, `uvést`, `dostat`… zváženy jednotlivě, viz `pozn` v seedu). Shoda přes `implies` snižuje stupeň důkazu na `derived` (je to odvození, ne záměna). Otázka je vždy první argument shody (`same_pred(dotaz, výrok)`); u můstkových pravidel se pořadí opravilo (`dst_pred` je výrok). Použitý řádek se materializuje i při dotazu (uzel `vazba` v exportu) — jinak by krok `lex` nebyl z grafu doložitelný; nepoužité seed řádky graf nezatěžují.
 
 ## 8. Jak předat dál (checklist pro nové sezení)
 

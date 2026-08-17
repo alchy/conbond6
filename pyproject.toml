@@ -11,6 +11,9 @@ dev = ["pytest>=8.0", "mypy>=1.8"]
 [tool.setuptools]
 packages = ["cb6", "bench"]
 
+[tool.setuptools.package-data]
+cb6 = ["lexikon/*.jsonl"]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]

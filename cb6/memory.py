@@ -27,6 +27,7 @@ from typing import Any, Iterator, Literal, Sequence
 import networkx as nx
 
 from cb6.chronos import TimeSpec, before as time_before, within as time_within
+from cb6.lexicon import Link, links_for_graph
 
 Grade = Literal["said", "read", "derived"]
 Quant = Literal["∀", "∃", "·"]
@@ -159,6 +160,8 @@ class Statement:
     alternatives: list[str] = field(default_factory=list)
     #: `grade == "derived"`: id pravidla (výrok `kind="rule"`), kterým vznikl.
     rule: str | None = None
+    #: Řádky lexikonu (`lex:…`), které shoda při odvození použila — v grafu hrany `uses_rule`.
+    links: list[str] = field(default_factory=list)
     #: Výrok, do něhož je tento vnořen (`Role.nested`) — vztažná věta, obsah
     #: promluvy, vzor pravidla. Vnoření není odvození, proto zvlášť.
     parent: str | None = None
@@ -194,6 +197,7 @@ class Statement:
             tense=d.get("tense"), mood=str(d.get("mood", "assert")),  # type: ignore[arg-type]
             claim=str(d.get("claim", "SAFE")), alternatives=list(d.get("alternatives", [])),  # type: ignore[arg-type,call-overload]
             rule=d.get("rule"), parent=d.get("parent"),  # type: ignore[arg-type]
+            links=list(d.get("links", [])),  # type: ignore[call-overload]
         )
 
 
@@ -223,7 +227,11 @@ class Memory:
         self.counters: dict[str, int] = defaultdict(int)
         self.activation_: dict[str, float] = defaultdict(float)
         self.soft: dict[tuple[str, str], float] = defaultdict(float)
-        self.learned: dict[str, dict[str, str]] = {"roles": {}, "synonyms": {}}
+        #: Naučené přepisy rolí (`!role`); synonyma tu už nejsou — jsou řádky lexikonu (`links`).
+        self.learned: dict[str, dict[str, str]] = {"roles": {}}
+        #: Řádky lexikonu, které paměť drží: `said` z dialogu a líně materializované
+        #: seed řádky, které verdikt/odvození použily (I‑12 — v exportu jako `vazba`).
+        self.links: dict[str, Link] = {}
         self.exceptions: list[tuple[str, str, str]] = []  # (pred, group_id, excluded_id)
         #: Zmínky: (věta, uzel, role, tvar, segment) — projekce diskurzu do grafu
         #: (hrana `mention`); registr referentů je jen pohled nad tímto seznamem.
@@ -556,6 +564,22 @@ class Memory:
         self.rules.append(rule)
         return rule
 
+    def add_link(self, op: str, args: Sequence[str], strength: str, authority: str, source: str, note: str = "") -> Link:
+        """Zapiš řádek lexikonu s vlastní autoritou (dialog `!uč` → `said`).
+        Proč sem: řádek je součást paměti (JSON, export), ne kódu; id `lex:said:NNNN`.
+        Vstup: operátor, argumenty, síla, autorita, zdroj, poznámka. Výstup: `Link`."""
+        link = Link(self._next("lex:said:"), op, tuple(args), strength, authority, source, note)
+        link.validate()
+        self.links[link.id] = link
+        return link
+
+    def use_links(self, links: Sequence[Link]) -> None:
+        """Líná materializace: řádky, které verdikt nebo `derive()` použil, se
+        stanou součástí paměti (a tedy exportu grafu). Idempotentní; nepoužité
+        seed řádky graf nezatěžují. Vstup: řádky. Výstup: nic."""
+        for l in links:
+            self.links.setdefault(l.id, l)
+
     def add_exception(self, pred: str, group_id: str, excluded_id: str) -> None:
         """`∀`‑výrok o `group_id` neplatí pro `excluded_id` (algebra NOT)."""
         self.exceptions.append((pred, group_id, excluded_id))
@@ -768,7 +792,10 @@ class Memory:
         drží, s proveniencí — uzly dokumentů, segmentů, vět, termů, výroků a
         otevřených položek; hrany rolí a jader (tvrdé), spoluvýskytu (měkké),
         a strukturní hrany `source`, `part_of`, `nested_in`, `derived_from`,
-        `uses_rule`, `alternative_of`, `about`, `residue_of`, `mention`.
+        `uses_rule`, `alternative_of`, `about`, `residue_of`, `mention`;
+        uzly `vazba` = řádky lexikonu, které paměť drží (řečené + použité), s
+        atributy `op`, `args`, `síla`, `autorita`, `zdroj` (provenience až na
+        soubor a řádek); `uses_rule` z odvozeného výroku vede i na ně.
 
         Atributy výroku: `claim`, `grade`, `life` (active/revoked), `defaults`,
         `reason`, `residue`, `pred`, `neg`, `mood`, `kind`, `role_authorities`.
@@ -813,6 +840,8 @@ class Memory:
                 g.add_edge(st.id, st.derived_from, type="derived_from", soft=False, rule=st.rule or "")
             if st.rule:
                 g.add_edge(st.id, st.rule, type="uses_rule", soft=False)
+            for lid in st.links:
+                g.add_edge(st.id, lid, type="uses_rule", soft=False)
             for alt in st.alternatives:
                 g.add_edge(st.id, alt, type="alternative_of", soft=False)
             if st.status == "active" and st.kernel and st.claim == "SAFE" and st.mood == "assert":
@@ -821,6 +850,8 @@ class Memory:
                 for x in a:
                     for y in b:
                         g.add_edge(x, y, type=etype, soft=False, statement=st.id)
+        for lid, attrs_ in links_for_graph(sorted(self.links.values(), key=lambda l: l.id)):
+            g.add_node(lid, **attrs_)
         for o in self.open_items_.values():
             g.add_node(o.id, kind="open", label=o.question, question=o.question, open_kind=o.kind,
                        answered=o.answer is not None, activation=0.0)
@@ -875,6 +906,7 @@ class Memory:
             "rules": [asdict(r) for r in self.rules],
             "exceptions": [list(x) for x in self.exceptions],
             "learned": self.learned,
+            "links": [l.to_json() for l in self.links.values()],
             "soft": [[a, b, w] for (a, b), w in sorted(self.soft.items())],
             "mentions": [list(x) for x in self.mentions],
             "activation": dict(sorted(self.activation_.items())),
@@ -905,6 +937,12 @@ class Memory:
             m.rules.append(Rule(**rd))
         m.exceptions = [tuple(x) for x in d.get("exceptions", [])]  # type: ignore[misc,union-attr]
         m.learned = d.get("learned", m.learned)  # type: ignore[assignment]
+        for ld in d.get("links", []):  # type: ignore[union-attr]
+            link = Link.from_json(ld)
+            m.links[link.id] = link
+        # migrace paměti před lexikonem: `learned["synonyms"]` (a → b) → řádky `said`
+        for a, b in (m.learned.pop("synonyms", None) or {}).items():
+            m.add_link("třída", (a, b), "same", "said", "migrace learned.synonyms")
         m.mentions = [tuple(x) for x in d.get("mentions", [])]  # type: ignore[misc,union-attr]
         for a, b, w in d.get("soft", []):  # type: ignore[union-attr]
             m.soft[(a, b)] = w

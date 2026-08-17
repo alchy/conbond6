@@ -11,11 +11,14 @@ Kontroly (`check_graph`, spec § 5.7):
     status      – `REJECTED` má `reason`; `HYPOTHESIS` má `alternative_of` nebo `alternatives` prázdné jen u pro‑drop (tolerováno)
     osiřelost   – term bez `mention` i bez `role:*`; věta bez `source`/`residue_of`/`mention`
     open        – uzel `open` má `about`
+    vazba       – uzel `vazba` (řádek lexikonu) má `zdroj` a známý `op`/`síla`
 `check_answer` ověří odpověď: výroky důkazu existují, jsou znalost
 (claim SAFE, mood assert, grade read/said/derived), mají provenienci; každý
-tvrdý krok (`member`/`subset`/`within`/`same_as`/`time`/`disjoint`) je cesta
+tvrdý krok (`member`/`subset`/`within`/`same_as`/`time`/`disjoint`/`lex`) je cesta
 po hranách daného typu (BFS), obsažení časů z atributů `t_start`/`t_end`,
-disjunkce existence hrany `disjoint` mezi nadtřídami.
+disjunkce existence hrany `disjoint` mezi nadtřídami, `lex` cesta od predikátu
+výroku k predikátu dotazu po uzlech `vazba` (`třída`+`same` oběma směry,
+`implikace`+`implies` po směru; `related` se nepočítá — ve verdiktu být nesmí).
 """
 
 from __future__ import annotations
@@ -98,7 +101,59 @@ def check_graph(g: nx.MultiDiGraph) -> list[Violation]:
         elif kind == "open":
             if not _out(g, n, "about"):
                 out.append(Violation("open", n, "otevřená položka bez about"))
+        elif kind == "vazba":
+            if not d.get("zdroj"):
+                out.append(Violation("provenience", n, "vazba bez zdroje"))
+            if d.get("op") not in LEX_OPS or d.get("síla") not in LEX_STRENGTHS:
+                out.append(Violation("vazba", n, f"neznámý operátor/síla ({d.get('op')}, {d.get('síla')})"))
     return out
+
+
+LEX_OPS = ("třída", "implikace", "protiklad", "inverze", "skládání", "podřazení", "překryv", "porovnání")
+LEX_STRENGTHS = ("same", "implies", "related")
+
+
+def lex_path(g: nx.MultiDiGraph, fact_pred: str, query_pred: str, limit: int = 4) -> list[str] | None:
+    """Cesta od predikátu výroku k predikátu dotazu po uzlech `vazba` v exportu.
+
+    Proč jen z grafu: audit nesmí sahat do `cb6.lexicon` — kdyby řádek nebyl
+    materializovaný (uzel v exportu), krok není doložený, i když ho jádro zná.
+    Vstup: graf, predikát výroku, predikát dotazu, mez délky. Výstup: id
+    použitých uzlů `vazba` v pořadí, nebo `None`."""
+    if fact_pred == query_pred:
+        return []
+    adj: dict[str, list[tuple[str, str]]] = {}
+    for n, d in g.nodes(data=True):
+        if d.get("kind") != "vazba" or d.get("op") not in ("třída", "implikace"):
+            continue
+        args = list(d.get("args", []))
+        if len(args) != 2:
+            continue
+        a, b = args
+        if d.get("síla") == "same":
+            adj.setdefault(a, []).append((b, n))
+            adj.setdefault(b, []).append((a, n))
+        elif d.get("síla") == "implies":
+            adj.setdefault(a, []).append((b, n))
+    prev: dict[str, tuple[str, str] | None] = {fact_pred: None}
+    queue: deque[tuple[str, int]] = deque([(fact_pred, 0)])
+    while queue:
+        node, depth = queue.popleft()
+        if node == query_pred:
+            path: list[str] = []
+            cur = node
+            while prev[cur] is not None:
+                p_, via = prev[cur]  # type: ignore[misc]
+                path.append(via)
+                cur = p_
+            return list(reversed(path))
+        if depth >= limit:
+            continue
+        for nxt, via in sorted(adj.get(node, ())):
+            if nxt not in prev:
+                prev[nxt] = (node, via)
+                queue.append((nxt, depth + 1))
+    return None
 
 
 def hard_path(g: nx.MultiDiGraph, kernel: str, a: str, b: str) -> list[str] | None:
@@ -208,6 +263,8 @@ def check_answer(g: nx.MultiDiGraph, proof_statement_ids: list[str], hard_steps:
             ok = _time_within(g, a, b)
         elif kernel == "disjoint":
             ok = _disjoint(g, a, b)
+        elif kernel == "lex":
+            ok = lex_path(g, a, b) is not None
         if not ok:
             out.append(Violation("rekonstrukce", a, f"krok {kernel}({a}, {b}) není v grafu"))
     return out

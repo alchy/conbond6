@@ -45,6 +45,8 @@ TYPES = {
     "statement_hypothesis": dict(shape="sphere", color="#ffd166", size=0.6),
     "statement_rejected": dict(shape="sphere", color="#666666", size=0.5),
     "statement_pattern": dict(shape="sphere", color="#9b5de5", size=0.5),
+    #: řádek lexikonu (znalostní vazba), materializovaný při použití — provenience v atributu `zdroj`
+    "vazba": dict(shape="box", color="#4cc9f0", size=0.6),
 }
 #: Uzly, které v živém pohledu nezobrazujeme (jsou v grafu kvůli auditu a
 #: introspekci — `!ukaž`, bench/graphcheck): věty, dokumenty, segmenty,

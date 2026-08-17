@@ -28,10 +28,16 @@ def _cmd_run(args: argparse.Namespace) -> int:
         sady = ["wiki", "korpus"]
     judge = make_judge(cfg) if args.soudce else None
     audit_n = int(cfg.get("audit_sample", 50)) if (args.soudce or args.audit) else 0
+    if args.bez_lexikonu:
+        # ablace seed vrstvy lexikonu (návrh vazeb § 3): řádky `said` zůstávají, seed ne
+        from cb6.lexicon import set_seed_enabled  # pylint: disable=import-outside-toplevel
+        set_seed_enabled(False)
     report = run(sady, strop=args.strop, docs=args.dok, twice=args.dvakrat, with_auto=not args.bez_auto, cfg=cfg, verbose=args.vypis,
                  judge=judge, audit_n=audit_n, audit_docs=args.audit_doky)
     if args.label:
         report["label"] = args.label
+    if args.bez_lexikonu:
+        report["label"] = (report.get("label", "") + "-bez-lexikonu").lstrip("-")
     mereni = ROOT / cfg["mereni"]
     prev = _previous_report(mereni, args.proti)
     if prev is not None:
@@ -113,6 +119,7 @@ def main(argv: list[str]) -> int:
     r.add_argument("--dok", nargs="*", help="jen tyto dokumenty")
     r.add_argument("--dvakrat", action="store_true", help="determinismus: dokument dvakrát")
     r.add_argument("--bez-auto", action="store_true", help="bez automatické (filtrované) sady otázek")
+    r.add_argument("--bez-lexikonu", action="store_true", help="ablace: bez seed vrstvy lexikonu (cb6/lexikon/*.jsonl)")
     r.add_argument("--vypis", action="store_true", help="vypsat každou otázku")
     r.add_argument("--proti", help="JSON zprávy pro diff (jinak poslední v mereni/)")
     r.add_argument("--label", help="přípona jména zprávy")

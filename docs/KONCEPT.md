@@ -45,6 +45,11 @@ data (výchozí volby, statusy, hrany). Nic se neschovává do „skrytého stav
    regrese.
 4. **Paměť je graf a nic než graf (I‑11, I‑12).** Registr referentů,
    alternativy, pravidla, zbytek, otevřené položky — všechno jsou uzly a hrany.
+   I znalostní vazby (synonyma, implikace; později míry, příbuzenství) jsou
+   **řádky dat** (`cb6/lexikon/*.jsonl`, `!uč`), ne kód, a řádek, který
+   verdikt použil, je v grafu jako uzel `vazba` s proveniencí až na soubor a
+   řádek — nepoužité graf nezatěžují (líná materializace). Hranice: *co mění
+   verdikt* patří do lexikonu, *co mění čtení* zůstává tabulkou v `defaults.py`.
    Odpověď musí být rekonstruovatelná jen z exportu grafu; bench to ověřuje
    (`bench/graphcheck.py`) bez přístupu k Python objektům. Kontrolní otázka:
    *„Když se podívám jen na graf a jeho provenienci, chápu, proč systém této

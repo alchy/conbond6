@@ -130,7 +130,15 @@ def test_synonym_match(oracle: RecordedOracle) -> None:
     b = Box(oracle)
     b.say("Petr bydlí v Praze.")
     v = b.ask("Kde žije Petr?")
-    assert b.labels(v) == ["Praha"] and any("synonymum" in s for s in v.proofs[0].steps)
+    # bydlet ⇒ žít je implikace (řádek lexikonu): krok v důkazu, tvrdý krok `lex`, stupeň odvozený,
+    # a použitý řádek je materializovaný v paměti (→ uzel `vazba` v exportu)
+    p = v.fillers[0][1]
+    assert b.labels(v) == ["Praha"] and any(s.startswith("implikace: bydlet ⇒ žít [lex:") for s in p.steps)
+    assert ("lex", "bydlet", "žít") in p.hard and p.grade == "derived" and p.links and set(p.links) <= set(b.m.links)
+    # obráceně ne: „žil v Praze“ neodpovídá na „Kde bydlí?“
+    b2 = Box(oracle)
+    b2.say("Petr žil v Praze.")
+    assert b2.ask("Kde bydlí Petr?").fillers == []
 
 
 def test_rule_bridges(oracle: RecordedOracle) -> None:

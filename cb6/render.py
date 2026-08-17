@@ -131,8 +131,13 @@ def render_show(m: Memory, sid: str) -> str:
         lines.append("  alternativy (hypotézy): " + ", ".join(f"{a} {render_statement(m, m.statements[a])}" for a in alts))
     if st.parent:
         lines.append(f"  nested_in → {st.parent}")
-    if st.derived_from or st.rule:
-        lines.append(f"  derived_from → {st.derived_from or '—'} · uses_rule → {st.rule or '—'}")
+    if st.derived_from or st.rule or st.links:
+        used = ([st.rule] if st.rule else []) + list(st.links)
+        lines.append(f"  derived_from → {st.derived_from or '—'} · uses_rule → {', '.join(used) or '—'}")
+        for lid in st.links:
+            link = m.links.get(lid)
+            if link is not None:
+                lines.append(f"    vazba {lid}: {link.label()} ({link.op}, {link.strength}, {link.authority}; zdroj {link.source})")
     if st.residue:
         lines.append("  residue: " + ", ".join(f"„{f}“ ({p})" for f, p in st.residue))
     opens = [o for o in m.open_items_.values() if o.statement == sid]

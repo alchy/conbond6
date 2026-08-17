@@ -1,0 +1,93 @@
+# Synonyma predikátů — migrace `defaults.SYNONYMS` (17. 8. 2026) se sílou vazby.
+# op třída + síla same = vidová dvojice nebo skutečná záměna (oběma směry ve verdiktu);
+# op implikace + síla implies = jen jeden směr (fakt vlevo odpovídá na otázku vpravo);
+# op třída + síla related = jen nápověda/recall, nikdy verdikt (tam, kde stará tabulka lhala).
+# zdroj = tento soubor#řádek (doplní loader), autorita = seed.
+{"id": "lex:syn:0001", "op": "třída", "args": ["říci", "říkat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0002", "op": "třída", "args": ["říci", "pravit"], "síla": "same", "pozn": "archaické"}
+{"id": "lex:syn:0003", "op": "třída", "args": ["prohlásit", "prohlašovat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0004", "op": "třída", "args": ["uvést", "uvádět"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0005", "op": "třída", "args": ["sdělit", "sdělovat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0006", "op": "třída", "args": ["oznámit", "oznamovat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0007", "op": "třída", "args": ["vyhlásit", "vyhlašovat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0008", "op": "třída", "args": ["učit", "vyučovat"], "síla": "same"}
+{"id": "lex:syn:0009", "op": "implikace", "args": ["tvrdit", "říci"], "síla": "implies"}
+{"id": "lex:syn:0010", "op": "implikace", "args": ["prohlásit", "říci"], "síla": "implies"}
+{"id": "lex:syn:0011", "op": "třída", "args": ["uvést", "říci"], "síla": "related", "pozn": "uvést hru / do provozu — víc významů"}
+{"id": "lex:syn:0012", "op": "implikace", "args": ["sdělit", "říci"], "síla": "implies"}
+{"id": "lex:syn:0013", "op": "implikace", "args": ["oznámit", "říci"], "síla": "implies"}
+{"id": "lex:syn:0014", "op": "implikace", "args": ["konstatovat", "říci"], "síla": "implies"}
+{"id": "lex:syn:0015", "op": "implikace", "args": ["vyhlásit", "oznámit"], "síla": "implies"}
+{"id": "lex:syn:0016", "op": "implikace", "args": ["kázat", "hlásat"], "síla": "implies"}
+{"id": "lex:syn:0017", "op": "třída", "args": ["hlásat", "říci"], "síla": "related", "pozn": "hlásat myšlenku ≠ říci"}
+{"id": "lex:syn:0018", "op": "třída", "args": ["poučit", "učit"], "síla": "related"}
+{"id": "lex:syn:0019", "op": "třída", "args": ["učit", "říci"], "síla": "related", "pozn": "stará tabulka měla same — učit není říci"}
+{"id": "lex:syn:0020", "op": "třída", "args": ["pracovat", "působit"], "síla": "same", "pozn": "životopisné „působil v/jako“ = pracoval; jiné významy (působit na, dojmem) chrání rámec rolí"}
+{"id": "lex:syn:0021", "op": "implikace", "args": ["zaměstnat_se", "pracovat"], "síla": "implies"}
+{"id": "lex:syn:0022", "op": "třída", "args": ["sloužit", "pracovat"], "síla": "related"}
+{"id": "lex:syn:0023", "op": "třída", "args": ["dělat", "pracovat"], "síla": "related", "pozn": "dělat je příliš široké"}
+{"id": "lex:syn:0024", "op": "třída", "args": ["vykonávat", "pracovat"], "síla": "related"}
+{"id": "lex:syn:0025", "op": "třída", "args": ["narodit_se", "přijít_na_svět"], "síla": "same"}
+{"id": "lex:syn:0026", "op": "třída", "args": ["zemřít", "umřít"], "síla": "same"}
+{"id": "lex:syn:0027", "op": "třída", "args": ["zemřít", "skonat"], "síla": "same"}
+{"id": "lex:syn:0028", "op": "třída", "args": ["zemřít", "zesnout"], "síla": "same"}
+{"id": "lex:syn:0029", "op": "implikace", "args": ["zahynout", "zemřít"], "síla": "implies"}
+{"id": "lex:syn:0030", "op": "třída", "args": ["padnout", "zemřít"], "síla": "related", "pozn": "padla vláda ≠ zemřela; stará tabulka lhala"}
+{"id": "lex:syn:0031", "op": "implikace", "args": ["bydlet", "žít"], "síla": "implies", "pozn": "kdo někde bydlí, tam žije; ne naopak"}
+{"id": "lex:syn:0032", "op": "implikace", "args": ["přebývat", "žít"], "síla": "implies"}
+{"id": "lex:syn:0033", "op": "třída", "args": ["usadit_se", "usídlit_se"], "síla": "same"}
+{"id": "lex:syn:0034", "op": "implikace", "args": ["usadit_se", "bydlet"], "síla": "implies"}
+{"id": "lex:syn:0035", "op": "třída", "args": ["pobývat", "žít"], "síla": "related", "pozn": "pobyt není život někde"}
+{"id": "lex:syn:0036", "op": "třída", "args": ["sídlit", "bydlet"], "síla": "related", "pozn": "instituce sídlí"}
+{"id": "lex:syn:0037", "op": "třída", "args": ["napsat", "sepsat"], "síla": "same"}
+{"id": "lex:syn:0038", "op": "třída", "args": ["napsat", "psát"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0039", "op": "třída", "args": ["sepsat", "sepisovat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0040", "op": "třída", "args": ["vydat", "vydávat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0041", "op": "třída", "args": ["publikovat", "uveřejnit"], "síla": "same"}
+{"id": "lex:syn:0042", "op": "třída", "args": ["uveřejnit", "zveřejnit"], "síla": "same"}
+{"id": "lex:syn:0043", "op": "implikace", "args": ["publikovat", "vydat"], "síla": "implies", "pozn": "vydat má i rozkaz/svědectví — jen jeden směr"}
+{"id": "lex:syn:0044", "op": "třída", "args": ["vydat", "napsat"], "síla": "related", "pozn": "vydal knihu ≠ napsal knihu (nakladatel); stará tabulka lhala"}
+{"id": "lex:syn:0045", "op": "třída", "args": ["publikovat", "napsat"], "síla": "related"}
+{"id": "lex:syn:0046", "op": "implikace", "args": ["vystudovat", "studovat"], "síla": "implies"}
+{"id": "lex:syn:0047", "op": "třída", "args": ["absolvovat", "studovat"], "síla": "related", "pozn": "absolvovat operaci/cestu"}
+{"id": "lex:syn:0048", "op": "třída", "args": ["navštěvovat", "studovat"], "síla": "related", "pozn": "navštěvovat přítele"}
+{"id": "lex:syn:0049", "op": "třída", "args": ["chodit", "studovat"], "síla": "related", "pozn": "chodit je příliš široké"}
+{"id": "lex:syn:0050", "op": "třída", "args": ["založit", "zakládat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0051", "op": "implikace", "args": ["zřídit", "založit"], "síla": "implies"}
+{"id": "lex:syn:0052", "op": "implikace", "args": ["ustavit", "založit"], "síla": "implies"}
+{"id": "lex:syn:0053", "op": "implikace", "args": ["založit", "vytvořit"], "síla": "implies"}
+{"id": "lex:syn:0054", "op": "implikace", "args": ["vybudovat", "vytvořit"], "síla": "implies"}
+{"id": "lex:syn:0055", "op": "třída", "args": ["vybudovat", "založit"], "síla": "related"}
+{"id": "lex:syn:0056", "op": "třída", "args": ["stát_se", "stávat_se"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0057", "op": "třída", "args": ["získat", "získávat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0058", "op": "implikace", "args": ["obdržet", "získat"], "síla": "implies"}
+{"id": "lex:syn:0059", "op": "třída", "args": ["dostat", "dostávat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0060", "op": "implikace", "args": ["dostat", "získat"], "síla": "implies"}
+{"id": "lex:syn:0061", "op": "třída", "args": ["vyhrát", "získat"], "síla": "related", "pozn": "vyhrál zápas ≠ získal zápas"}
+{"id": "lex:syn:0062", "op": "implikace", "args": ["emigrovat", "odejít"], "síla": "implies"}
+{"id": "lex:syn:0063", "op": "implikace", "args": ["odstěhovat_se", "odejít"], "síla": "implies"}
+{"id": "lex:syn:0064", "op": "implikace", "args": ["odjet", "odejít"], "síla": "implies"}
+{"id": "lex:syn:0065", "op": "implikace", "args": ["odcestovat", "odejít"], "síla": "implies"}
+{"id": "lex:syn:0066", "op": "třída", "args": ["opustit", "odejít"], "síla": "related", "pozn": "jiný rámec rolí (opustit co × odejít odkud)"}
+{"id": "lex:syn:0067", "op": "třída", "args": ["vrátit_se", "vracet_se"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0068", "op": "třída", "args": ["vrátit_se", "navrátit_se"], "síla": "same"}
+{"id": "lex:syn:0069", "op": "třída", "args": ["obsahovat", "zahrnovat"], "síla": "same"}
+{"id": "lex:syn:0070", "op": "implikace", "args": ["obsahovat", "mít"], "síla": "implies", "pozn": "co něco obsahuje, to má; mít ≠ obsahovat"}
+{"id": "lex:syn:0071", "op": "třída", "args": ["jet", "jezdit"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0072", "op": "implikace", "args": ["odjet", "jet"], "síla": "implies"}
+{"id": "lex:syn:0073", "op": "implikace", "args": ["přijet", "jet"], "síla": "implies"}
+{"id": "lex:syn:0074", "op": "implikace", "args": ["dojet", "jet"], "síla": "implies"}
+{"id": "lex:syn:0075", "op": "třída", "args": ["cestovat", "jet"], "síla": "related"}
+{"id": "lex:syn:0076", "op": "třída", "args": ["létat", "letět"], "síla": "same"}
+{"id": "lex:syn:0077", "op": "třída", "args": ["vyžadovat", "vyžádat_si"], "síla": "related", "pozn": "vyžádat si = požádat"}
+{"id": "lex:syn:0078", "op": "implikace", "args": ["vyžadovat", "potřebovat"], "síla": "implies"}
+{"id": "lex:syn:0079", "op": "implikace", "args": ["oženit_se", "uzavřít_sňatek"], "síla": "implies"}
+{"id": "lex:syn:0080", "op": "implikace", "args": ["vdát_se", "uzavřít_sňatek"], "síla": "implies"}
+{"id": "lex:syn:0081", "op": "třída", "args": ["oženit_se", "vdát_se"], "síla": "related", "pozn": "rod podmětu"}
+{"id": "lex:syn:0082", "op": "třída", "args": ["vzít_si", "oženit_se"], "síla": "related", "pozn": "vzít si kabát"}
+{"id": "lex:syn:0083", "op": "třída", "args": ["vzít_si", "vdát_se"], "síla": "related"}
+{"id": "lex:syn:0084", "op": "třída", "args": ["zúčastnit_se", "účastnit_se"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0085", "op": "třída", "args": ["podílet_se", "zúčastnit_se"], "síla": "related"}
+{"id": "lex:syn:0086", "op": "třída", "args": ["začít", "začínat"], "síla": "same", "pozn": "vid"}
+{"id": "lex:syn:0087", "op": "třída", "args": ["začít", "započít"], "síla": "same"}
+{"id": "lex:syn:0088", "op": "implikace", "args": ["zahájit", "začít"], "síla": "implies"}

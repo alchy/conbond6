@@ -3,7 +3,7 @@
 Proč (spec § 8): dialog je jediné místo, které mění paměť, a dělá to
 třemi cestami — `ingest` (dokument, stupeň `read`), `say` (tvrzení
 `said` / otázka bez zápisu / oprava = odvolání + zápis) a příkazy `!…`
-(doučení rolí, synonym, pravidel, výjimek; backlog). Žurnál tahů +
+(doučení rolí, vazeb lexikonu `!uč`, pravidel, výjimek; backlog). Žurnál tahů +
 deterministické čtení ⇒ `replay` dá týž program.
 
 Sliding window: každá věta aktivuje své uzly, po každé větě `tick()`
@@ -22,6 +22,7 @@ from typing import Sequence
 import networkx as nx
 
 from cb6.ground import Grounded, ground
+from cb6.lexicon import parse_teach
 from cb6.logic import Verdict, derive, enumerate_, evaluate, rejected_notes
 from cb6.memory import Memory, OpenItem, Provenance, Statement
 from cb6.oracle import OracleError, Parse, SegmentationError
@@ -66,7 +67,6 @@ class Session:
 
     def _restore_learned(self) -> None:
         self.memory.learned.setdefault("roles", {})
-        self.memory.learned.setdefault("synonyms", {})
 
     def _read(self, parse: Parse, mood: str | None = None) -> Reading:
         return read(parse, mood, learned_roles=self.memory.learned.get("roles", {}))
@@ -369,13 +369,15 @@ class Session:
                 if o.kind == "role_name" and o.about == surface:
                     o.answer = name
             return f"naučeno: {surface} = {name}; přejmenováno v {n} výrocích"
-        if cmd in ("synonymum", "synonym"):
-            mt = re.match(r"^(\S+)\s*=\s*(\S+)$", arg)
-            if not mt:
-                return "užití: !synonymum kázat = hlásat"
-            a, b = mt.group(1), mt.group(2)
-            m.learned.setdefault("synonyms", {})[a] = b
-            return f"naučeno: {a} ~ {b}"
+        if cmd in ("uč", "uc", "synonymum", "synonym"):
+            # vazba jako řádek dat s autoritou `said` (lexikon, krok 1): `=` třída/same,
+            # `=>` implikace/implies (fakt vlevo odpovídá na otázku vpravo), `~` jen nápověda
+            parsed = parse_teach(arg)
+            if parsed is None:
+                return "užití: !uč kázat = hlásat · !uč bydlet => žít · !uč vydat ~ napsat"
+            op, args, strength = parsed
+            link = m.add_link(op, args, strength, "said", f"dialog tah {self.turn_no}")
+            return f"naučeno {link.id}: {link.label()} ({op}, {strength})"
         if cmd == "pravidlo":
             mt = re.match(r"^(\S+?)\((.*?)\)\s*=>\s*(\S+?)\((.*?)\)$", arg)
             if not mt:
@@ -481,7 +483,7 @@ class Session:
     @staticmethod
     def _help() -> str:
         return (
-            "příkazy: !zapomeň s0001 · !role v+Loc = kde · !synonymum kázat = hlásat · "
+            "příkazy: !zapomeň s0001 · !role v+Loc = kde · !uč kázat = hlásat | bydlet => žít | vydat ~ napsat · "
             "!pravidlo jet(kam:X) => být(kde:X) · !výjimka létat pták tučňák · !otevřené · "
             "!odpověz o0001 kde · !program · !popiš Jirásek · !ukaž s0042 · !hypotéza s0042 potvrď · !statusy · "
             "!ulož p.json · !načti p.json · !graf g.json"

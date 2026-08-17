@@ -20,7 +20,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from cb6.defaults import PLACE_NOUNS, synonym_class
+from cb6.defaults import PLACE_NOUNS
+from cb6.lexicon import Lexicon, LexMatch
 from cb6.memory import Memory, Role, Statement
 
 Grade = Literal["said", "read", "derived"]
@@ -39,9 +40,12 @@ class Proof:
     grade: Grade = "said"
     #: Tvrdé kroky strojově: (jádro, a, b) — `member`/`subset`/`within`/`same_as`
     #: jsou cesty po tvrdých hranách grafu, `time` je obsažení časů, `disjoint`
-    #: existence `¬subset`. Audit grafu (bench/graphcheck) je ověřuje jen
-    #: z exportu — odpověď musí být rekonstruovatelná z grafu (I‑12).
+    #: existence `¬subset`, `lex` = cesta od predikátu výroku k predikátu dotazu
+    #: po uzlech `vazba` (řádky lexikonu). Audit grafu (bench/graphcheck) je
+    #: ověřuje jen z exportu — odpověď musí být rekonstruovatelná z grafu (I‑12).
     hard: list[tuple[str, str, str]] = field(default_factory=list)
+    #: Id řádků lexikonu (`lex:…`), které důkaz použil — u odvozených výroků `Statement.links`.
+    links: list[str] = field(default_factory=list)
 
     def merged(self, other: "Proof") -> "Proof":
         return Proof(
@@ -50,6 +54,7 @@ class Proof:
             self.defaults + [d for d in other.defaults if d not in self.defaults],
             weakest(self.grade, other.grade),
             self.hard + [h for h in other.hard if h not in self.hard],
+            self.links + [l for l in other.links if l not in self.links],
         )
 
 
@@ -71,18 +76,26 @@ def weakest(a: str, b: str) -> Grade:
     return a if GRADE_RANK[a] <= GRADE_RANK[b] else b  # type: ignore[return-value]
 
 
-def _same_pred(a: str | None, b: str | None, learned: dict[str, str] | None = None) -> str | None:
-    """Shoda predikátu: přesná, nebo přes třídu synonym (vrací popis kroku)."""
+def _same_pred(a: str | None, b: str | None, lexicon: Lexicon) -> LexMatch | None:
+    """Shoda predikátu dotazu/vzoru `a` s predikátem výroku `b`: přesná, nebo
+    přes lexikon (třída synonym / řetěz implikací — viz `Lexicon.match`).
+
+    Proč směr: `bydlet ⇒ žít` znamená, že výrok „bydlí“ odpovídá na otázku
+    „žije“, ne naopak; první argument je vždy to, na co se ptáme (dotaz,
+    podmínka pravidla), druhý to, co paměť má.
+    Vstup: `a` dotaz/vzor, `b` výrok, `lexicon`. Výstup: `LexMatch` (prázdný
+    řetěz = přesná shoda) nebo `None`."""
     if a is None or b is None:
         return None
-    if a == b:
-        return ""
-    if synonym_class(a, learned) == synonym_class(b, learned):
-        return f"synonymum: {a} ~ {b}"
-    # zvratné „se/si“ jako slabá shoda („uprchnout_se“ z otázky × „uprchnout“)
+    m = lexicon.match(a, b)
+    if m is not None:
+        return m
+    # zvratné „se/si“ jako slabá shoda („uprchnout_se“ z otázky × „uprchnout“) — heuristika čtení, ne vazba
     sa, sb = a.split("_se")[0].split("_si")[0], b.split("_se")[0].split("_si")[0]
-    if sa == sb or synonym_class(sa, learned) == synonym_class(sb, learned):
-        return f"zvratné se: {a} ~ {b}"
+    if sa != a or sb != b:
+        m2 = lexicon.match(sa, sb)
+        if m2 is not None:
+            return LexMatch(m2.links, f"zvratné se: {b} ~ {a}" + (f"; {m2.step}" if m2.step else ""), m2.derived)
     return None
 
 
@@ -93,10 +106,27 @@ TIME_FAMILY = ("kdy", "od_kdy", "do_kdy", "po_kdy", "před_kdy", "jak_dlouho")
 class Evaluator:
     def __init__(self, memory: Memory) -> None:
         self.m = memory
-        self.syn = memory.learned.get("synonyms", {})
+        #: lexikon vazeb pro tuto paměť (seed + řádky `said`); staví se za mikrosekundy
+        self.lex = Lexicon.for_memory(memory)
 
-    def same_pred(self, a: str | None, b: str | None) -> str | None:
-        return _same_pred(a, b, self.syn)
+    def same_pred(self, a: str | None, b: str | None) -> LexMatch | None:
+        """Shoda predikátů (dotaz/vzor `a` × výrok `b`) přes lexikon; viz `_same_pred`."""
+        return _same_pred(a, b, self.lex)
+
+    def lex_proof(self, q_pred: str | None, f_pred: str | None, lm: LexMatch, base: Proof) -> Proof:
+        """Zapiš použití lexikonu do důkazu: krok, tvrdý krok `lex`, stupeň
+        `derived` u implikace — a **materializuj** použité řádky do paměti
+        (uzly `vazba` v exportu; I‑12: odpověď je rekonstruovatelná z grafu).
+        Vstup: predikáty, shoda, důkaz. Výstup: týž důkaz (upravený)."""
+        if not lm.links:
+            return base
+        self.m.use_links(lm.links)
+        base.steps.append(lm.step)
+        base.hard.append(("lex", str(f_pred), str(q_pred)))
+        base.links.extend(l.id for l in lm.links if l.id not in base.links)
+        if lm.derived:
+            base.grade = weakest(base.grade, "derived")
+        return base
 
     # ---- termy ---------------------------------------------------------------
 
@@ -188,12 +218,12 @@ class Evaluator:
 
     def match(self, q: Statement, f: Statement, *, depth: int = 0) -> Proof | None:
         """Shoda dotazu `q` s výrokem `f` (bez ohledu na polaritu — tu řeší volající)."""
-        step = self.same_pred(q.pred, f.pred)
-        if step is None:
+        lm = self.same_pred(q.pred, f.pred)
+        if lm is None:
             return None
         if f.mood == "question":
             return None
-        proof = Proof([f.id], [step] if step else [], list(f.defaults), f.grade)
+        proof = self.lex_proof(q.pred, f.pred, lm, Proof([f.id], [], list(f.defaults), f.grade))
         # modalita
         if q.modality is None and f.modality in ("možnost", "vůle", "fáze"):
             proof.steps.append(f"výrok je jen {f.modality}")
@@ -302,7 +332,8 @@ class Evaluator:
         # pravidla (můstky)
         if depth == 0:
             for rule in m.rules:
-                if self.same_pred(rule.dst_pred, q.pred) is None:
+                lm = self.same_pred(q.pred, rule.dst_pred)
+                if lm is None:
                     continue
                 inv = {v: k for k, v in rule.role_map.items()}
                 q2 = Statement("", rule.src_pred, q.kind, roles=[Role(inv.get(r.name, r.name), list(r.terms), r.quant, r.authority, r.surface, wh=r.wh, wh_kind=r.wh_kind, counts=dict(r.counts)) for r in q.roles], mood="question")
@@ -310,6 +341,7 @@ class Evaluator:
                 for p in v2.proofs:
                     p.steps.append(f"pravidlo {rule.id}: {rule.src_pred}→{rule.dst_pred}")
                     p.grade = weakest(p.grade, "derived")
+                    self.lex_proof(q.pred, rule.dst_pred, lm, p)
                     pos.append(p)
                 for p in v2.counter:
                     neg.append(p)
@@ -404,7 +436,8 @@ class Evaluator:
                 fillers.append((fr.nested, p))
         # pravidla
         for rule in m.rules:
-            if self.same_pred(rule.dst_pred, q.pred) is None:
+            lm = self.same_pred(q.pred, rule.dst_pred)
+            if lm is None:
                 continue
             inv = {v: k for k, v in rule.role_map.items()}
             q2 = Statement("", rule.src_pred, q.kind, roles=[Role(inv.get(r.name, r.name), list(r.terms), r.quant, r.authority, r.surface, wh=r.wh, wh_kind=r.wh_kind) for r in q.roles], mood="question")
@@ -413,6 +446,7 @@ class Evaluator:
                 if t not in seen:
                     seen.add(t)
                     p.steps.append(f"pravidlo {rule.id}: {rule.src_pred}→{rule.dst_pred}")
+                    self.lex_proof(q.pred, rule.dst_pred, lm, p)
                     fillers.append((t, p))
         # rodina rolí: „kde“ bez `kde` → sourozenci (kam/odkud/kudy) s přiznáním; totéž čas
         family = PLACE_FAMILY if hole.name in PLACE_FAMILY else TIME_FAMILY if hole.name in TIME_FAMILY else ()
@@ -577,9 +611,9 @@ def derive(memory: Memory, evaluator: "Evaluator | None" = None) -> list[Stateme
                     continue
                 st = Statement("", cons.pred, cons.kind, neg=cons.neg, modality=cons.modality, kernel=cons.kernel,
                                roles=[Role(r.name, list(r.terms), r.quant, r.authority, r.surface, r.nested, dict(r.counts)) for r in cons.roles],
-                               grade="derived", defaults=list(rule.defaults) + list(cons.defaults) + [f"odvozeno pravidlem {rule.id} z {f.id}"],
+                               grade="derived", defaults=list(rule.defaults) + list(cons.defaults) + [f"odvozeno pravidlem {rule.id} z {f.id}"] + [s_ for s_ in proof.steps if s_.startswith(("synonymum", "implikace"))],
                                prov=rule.prov, sentence=rule.sentence, tense=cons.tense, mood="assert", claim="SAFE",
-                               rule=rule.id, derived_from=f.id)
+                               rule=rule.id, derived_from=f.id, links=list(proof.links))
                 memory.attach(st)
                 new.append(st)
                 changed = True
