@@ -49,16 +49,17 @@ to o sobě změřit.** Není to „další verze motoru“; úkol je *prokázat 
 - `.venv` (Python 3.11): `.venv/bin/python -m pytest -q` musí být zelené (167 + 2 xfail).
 - UDPipe služba z conBond3 na `127.0.0.1:42200` (bench, nové rozbory).
 - Ollama `gemma4:latest` na `127.0.0.1:11434` (soudce auditu, `gold-gen`).
-- Živý graf: `.venv/bin/python -m cb6.viewbase_app --pamet data/pamet-graf.json --port 8081`.
+- Živý graf: `.venv/bin/python -m cb6.viewbase_app --pamet data/pamet-graf.json --port 8081`
+  (viewBase2 HEAD dnes vyžaduje Python ≥ 3.12 → použij `.venv314/bin/python`, viz HANDOVER § 2; ukončit `kill -INT`).
 - Rychlá smyčka: `python -m bench run --sada wiki --strop 40 --dok alois_jirásek karel_čapek --soudce`;
   plný běh: `python -m bench run --vse --dvakrat --soudce --audit-doky 8`.
 
 ## Kde to stojí (17. 8. 2026, večer) a co je další tah
 
-- Stabilní baseline `ad5d41b` (zpráva `mereni/2026-08-17-ad5d41b.md`): unsupported
-  **31,4 %** [26,9–35,9] na 400 výrocích (8 dok.), yield 77/90, QA **178/334**
-  (kurátorované 29/130, etalon 14/32), audit grafu 0, determinismus ano.
-  Podrobně HANDOVER § 4.
+- Stabilní baseline `b75d8d5` (zpráva `mereni/2026-08-17-b75d8d5.md`): unsupported
+  **30,5 %** [26,2–35,2] na 400 výrocích (8 dok.), yield 77/90, QA **184/343**
+  (stará sada 179/334, gen výpis 5/9 neověřené; kurátorované 29/130, etalon 14/32),
+  audit grafu 0, determinismus ano. Podrobně HANDOVER § 4.
 - **Hotový krok 1 znalostních vazeb:** `cb6/lexicon.py` (operátory `třída`,
   `implikace`; řádky `{id, op, args, síla, autorita, zdroj}`), seed
   `cb6/lexikon/synonyma.jsonl` (88 ř.: same 32 · implies 32 · related 24), líná
