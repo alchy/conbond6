@@ -272,6 +272,18 @@ class Grounder:
             if rf.authority == "surface" and not rf.wh and p.kind not in ("nmod", "appos"):
                 self._pending_open.append(("role_name", rf.surface, f"Co znamená role „{rf.name}“ ({rf.surface})? (kde, kdy, kudy, čím, …)", ["kde", "kdy", "kam", "odkud", "kudy", "čím", "s_kým", "komu"]))
             st.roles.append(role)
+        # výčet členů skupiny („děti: Helena, Josef, Emílie“ → Helena ∈ dítě, …) není
+        # totožnost (same_as by spojila všechny navzájem — otrava identity); převeď na member
+        kdo_r, co_r = st.role("kdo"), st.role("co")
+        if st.kernel == "same_as" and kdo_r and co_r and len(kdo_r.terms) == 1 and len(co_r.terms) > 1 \
+                and self.m.nodes.get(kdo_r.terms[0], Node("", "")).kind == "group" \
+                and all(self.m.nodes.get(t, Node("", "")).kind in ("entity", "place") for t in co_r.terms):
+            group_id = kdo_r.terms[0]
+            members = list(co_r.terms)
+            kdo_r.terms, co_r.terms = members, [group_id]
+            kdo_r.quant, co_r.quant = "·", "∃"
+            st.kernel = "member"
+            self._defaults.append(f"výčet: {self.m.nodes[group_id].label()}: {', '.join(self.m.nodes[t].label() for t in members)} → každý ∈ {self.m.nodes[group_id].label()} [výchozí]")
         st.defaults = list(dict.fromkeys(self._defaults))
         pending = list(self._pending_open)
         ambiguous_roles = list(self._ambiguous)

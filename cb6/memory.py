@@ -294,9 +294,11 @@ class Memory:
             full = " ".join(name_lemmas)
             if full not in n.names:
                 n.names.append(full)
-            for f in forms:
-                if f not in n.names:
-                    n.names.append(f)
+            # povrchový tvar jako JEDNO jméno („Josefa Jiráska“), ne po slovech —
+            # jinak by „Josef“ ze seznamu dětí exaktně sedl na otce „Josef Jirásek“
+            surface = " ".join(forms)
+            if surface and surface not in n.names:
+                n.names.append(surface)
             return n, False
         if len(found) > 1:
             # víc kandidátů: téma dokumentu, jinak nejaktivnější
@@ -306,7 +308,7 @@ class Memory:
             if full not in best.names:
                 best.names.append(full)
             return best, False
-        names = [" ".join(name_lemmas)] + [f for f in forms if f]
+        names = [" ".join(name_lemmas)] + ([" ".join(forms)] if forms and " ".join(forms) else [])
         return self.new_node(kind, " ".join(name_lemmas), names=names, gender=gender, number=number, doc=doc), True
 
     def ensure_group(self, lemma: str, attrs: Sequence[str] = ()) -> Node:

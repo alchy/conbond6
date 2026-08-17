@@ -515,15 +515,20 @@ def rejected_notes(memory: Memory, q: Statement) -> list[str]:
         return False
 
     out: list[str] = []
-    for st in memory.by_claim("REJECTED"):
-        if overlaps(st) and (st.pred == q.pred or st.kind == "nmod" or q.pred is None):
-            z = memory.nodes.get(st.sentence)
-            src = f" (věta {z.lemma.rsplit('#', 1)[-1]}: „{z.text[:90]}“)" if z else ""
-            out.append(f"text o tom mluví{src}, ale interpretaci neurčuje: {st.reason}")
+    rej = [st for st in memory.by_claim("REJECTED") if overlaps(st) and (st.pred == q.pred or st.kind == "nmod" or q.pred is None)]
+    # napřed zamítnutí téhož predikátu / disjunkce (věcná), fráze `nmod` až nakonec — a jen když
+    # sdílejí s dotazem víc než jeden term (jinak jsou to jen zmínky tématu)
+    rej.sort(key=lambda st: (st.kind == "nmod", st.id))
+    for st in rej:
+        if st.kind == "nmod" and sum(1 for a in st.term_ids() for b in terms if a == b) < 2:
+            continue
+        z = memory.nodes.get(st.sentence)
+        src = f" (věta {z.lemma.rsplit('#', 1)[-1]}: „{z.text[:90]}“)" if z else ""
+        out.append(f"text o tom mluví{src}, ale interpretaci neurčuje: {st.reason}")
     for st in memory.by_claim("HYPOTHESIS"):
         if overlaps(st) and st.pred == q.pred:
             out.append(f"hypotéza, ne znalost: {memory.render_short(st)} [{st.id}] — {st.reason or 'nejistá volba'}")
-    return out[:5]
+    return out[:3]
 
 
 def derive(memory: Memory, evaluator: "Evaluator | None" = None) -> list[Statement]:

@@ -46,7 +46,7 @@ TYPES = {
 HIDDEN_KINDS = ("sentence", "document", "segment", "open")
 
 
-def build(session: Session, *, title: str = "conbond5") -> object:
+def build(session: Session, *, title: str = "conbond6") -> object:
     import viewbase as vb  # type: ignore[import-not-found]
 
     canvas = vb.Canvas(title=title, theme="cyber", highlight_neighbors=1)

@@ -54,7 +54,7 @@ def main(argv: list[str]) -> int:
         print(s.say(args.otazka).text)
         return 0
     s = _session(args.pamet)
-    print("conbond5 — piš věty (zapíšu), otázky (odpovím), !nápověda pro příkazy, prázdný řádek končí.")
+    print("conbond6 — piš věty (zapíšu), otázky (odpovím), !nápověda pro příkazy, prázdný řádek končí.")
     while True:
         try:
             line = input("» ").strip()
