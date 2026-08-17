@@ -13,7 +13,7 @@
 | koncept (proč takhle) | `docs/KONCEPT.md` |
 | plán v1 + stav provedení | `docs/superpowers/plans/2026-08-17-conbond6-v1.md` |
 | hypotézy a výsledky tahů | `mereni/HYPOTEZY.md` |
-| zprávy benche | `mereni/<datum>-<commit>.md/.json` (poslední plný, **stabilní vzorek**: `2026-08-17-234ca26`) |
+| zprávy benche | `mereni/<datum>-<commit>.md/.json` (poslední plný, **stabilní vzorek**: `2026-08-17-ad5d41b`; předchozí `234ca26`) |
 | lidské odpovědi auditu | `mereni/audit-<dokument>.json` (otisk → [verdikt, pozn, chápu‑z‑grafu a/n]) |
 | keš verdiktů soudce | `mereni/audit-cache.json` (klíč = otisk · soudce · verze promptu) |
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
@@ -47,13 +47,14 @@ Zelený řádek: víc pravdivé (unsupported neroste), doložitelné (každý z�
 | měřítko | conbond5 (výchozí) | conbond6 v1 |
 |---|---|---|
 | unsupported, 2 dok. / vzorek 100 (soudce gemma4) | **76,5 %** | **23,0 %** [15,8–32,1] |
-| unsupported, plný běh 8 dok. / 400 (**stabilní vzorek po větách, 234ca26**) | — | **31,4 %** [26,9–35,9] (hlavní 32 %, appos 37 %, nmod‑místo 13 %) |
+| unsupported, plný běh 8 dok. / 400 (**stabilní vzorek po větách, 234ca26 = ad5d41b**) | — | **31,4 %** [26,9–35,9] (hlavní 32 %, appos 37 %, nmod‑místo 13 %) |
 | yield hl./vše (2 dok.) | 160 / 298 | 89 / 94 |
 | yield hl./vše (plný běh, 182 853 slov) | — | 77 / 90 |
-| statusy (plný běh) | — | SAFE 27 164 · HYPOTHESIS 3 218 · REJECTED 20 553; pravidel 59, odvozeno 4 |
+| statusy (plný běh) | — | SAFE 27 175 · HYPOTHESIS 3 287 · REJECTED 20 553; pravidel 59, odvozeno 4 |
 | QA stejné 2 dok. | 12/17 | 12/17 |
-| QA plný běh | 60,9 % na staré sadě (682 auto) | 175/334; **kurátorované 29/130** (etalon 14/32, conbond 8/8, korpus 7/90); otazky‑filtr 146/204 (72 %) |
-| audit grafu | — | 0 porušení (bylo 33, opraveno) |
+| QA plný běh | 60,9 % na staré sadě (682 auto) | **178/334** (ad5d41b; bylo 175 — +3 z přitvrzení síly synonym); **kurátorované 29/130** (etalon 14/32, conbond 8/8, korpus 7/90); otazky‑filtr 149/204 (73 %) |
+| audit grafu | — | 0 porušení (bylo 33, opraveno; krok `lex` se rekonstruuje z uzlů `vazba`) |
+| lexikon v odpovědích (plný běh) | — | krok `lex` u 11/334 otázek (9 správně); ablace `--bez-lexikonu`: 177/334 → seed vrstva nese 1 zásah (obsahovat ⇒ mít) |
 | determinismus | — | ano |
 | lidský audit | — | 1 výrok (J.), shoda se soudcem 1/1 — **potřeba ≥ 30 na dokument** |
 

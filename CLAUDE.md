@@ -37,38 +37,41 @@ to o sobě změřit.** Není to „další verze motoru“; úkol je *prokázat 
 
 1. `docs/HANDOVER.md` — stav, čísla, otevřené tahy, deník rozhodnutí, checklist.
 2. `docs/KONCEPT.md` — proč je to postavené takhle (5 zásad, kde je stavovost).
-3. `docs/superpowers/specs/2026-08-17-znalostni-vazby-design.md` — **aktuální
-   rozpracovaný návrh** (synonyma/antonyma/příbuzenství/míry/čas jako data).
+3. `docs/superpowers/specs/2026-08-17-znalostni-vazby-design.md` — návrh
+   znalostních vazeb jako data (krok 1 hotový, kroky 2–5 čekají).
 4. Poslední záznam v `mereni/HYPOTEZY.md` a poslední zpráva `mereni/<datum>-<commit>.md`.
-5. Kód: `cb6/` (oracle chronos defaults read triage discourse memory ground logic
-   recall render dialog cli viewbase_app), `bench/`, `tests/` (hermetické,
+5. Kód: `cb6/` (oracle chronos defaults lexicon read triage discourse memory ground
+   logic recall render dialog cli viewbase_app; seed `cb6/lexikon/*.jsonl`), `bench/`, `tests/` (hermetické,
    rozbory v `tests/data/parses.json`; nové věty → `sentences.txt` + `python -m cb6.record`).
 
 ## Prostředí (ověř na začátku)
 
-- `.venv` (Python 3.11): `.venv/bin/python -m pytest -q` musí být zelené (146 + 2 xfail).
+- `.venv` (Python 3.11): `.venv/bin/python -m pytest -q` musí být zelené (159 + 2 xfail).
 - UDPipe služba z conBond3 na `127.0.0.1:42200` (bench, nové rozbory).
 - Ollama `gemma4:latest` na `127.0.0.1:11434` (soudce auditu, `gold-gen`).
 - Živý graf: `.venv/bin/python -m cb6.viewbase_app --pamet data/pamet-graf.json --port 8081`.
 - Rychlá smyčka: `python -m bench run --sada wiki --strop 40 --dok alois_jirásek karel_čapek --soudce`;
   plný běh: `python -m bench run --vse --dvakrat --soudce --audit-doky 8`.
 
-## Kde to stojí (17. 8. 2026) a co je další tah
+## Kde to stojí (17. 8. 2026, večer) a co je další tah
 
-- Stabilní baseline `234ca26`/`eec584f`: unsupported **31,4 %** [26,9–35,9] na
-  400 výrocích (8 dok.), yield 77/90, QA 175/334 (kurátorované 29/130, etalon
-  14/32), audit grafu 0, determinismus ano. Podrobně HANDOVER § 4.
-- **Rozpracováno (jen návrh, kód netknutý):** znalostní vazby jako data —
-  operátory v kódu (třída, implikace, protiklad, inverze, skládání, podřazení,
-  překryv, porovnání), vazby jako řádky `{op, args, síla, autorita, zdroj}`,
-  líná materializace do grafu s `uses_rule`. Nahrazuje čtyři dnešní místa
-  (`defaults.SYNONYMS`, `Memory.learned`, `Memory.rules`, výroky `kind="rule"`).
-- **Další tah = krok 1 návrhu:** `cb6/lexicon.py` + `cb6/lexikon/synonyma.jsonl`
-  (migrace `SYNONYMS` se sílou `same/implies/related`), `!uč` píše řádky `said`,
-  `Memory.learned["synonyms"]` zaniká. Hypotéza do HYPOTEZY: QA beze změny,
-  unsupported hlavních predikací neroste (spíš klesne o `vydat ≠ napsat`), graf
-  ukáže `uses_rule` na `lex:` uzly, graphcheck 0. Pak krok 2 (překryv/porovnání
-  + veličiny: „Mohli se potkat?“, „Jaká je délka…?“), krok 3 (příbuzenství, G‑3).
+- Stabilní baseline `ad5d41b` (zpráva `mereni/2026-08-17-ad5d41b.md`): unsupported
+  **31,4 %** [26,9–35,9] na 400 výrocích (8 dok.), yield 77/90, QA **178/334**
+  (kurátorované 29/130, etalon 14/32), audit grafu 0, determinismus ano.
+  Podrobně HANDOVER § 4.
+- **Hotový krok 1 znalostních vazeb:** `cb6/lexicon.py` (operátory `třída`,
+  `implikace`; řádky `{id, op, args, síla, autorita, zdroj}`), seed
+  `cb6/lexikon/synonyma.jsonl` (88 ř.: same 32 · implies 32 · related 24), líná
+  materializace použitých řádků do grafu (uzly `vazba`, `uses_rule`, tvrdý krok
+  `lex` v graphchecku), `!uč a = b | a => b | a ~ b`; `defaults.SYNONYMS` a
+  `Memory.learned["synonyms"]` zanikly. Přitvrzení síly dalo +3 QA (napsat ≠
+  publikovat, chodit ≠ studovat), 0 ztrát, unsupported beze změny.
+- **Další tah = krok 2 návrhu:** operátory `překryv` + `porovnání` a veličiny
+  (hodnota, jednotka → dimenze; `!uč překryv …`, `!uč porovnání …`; otázky
+  „Jaká je délka …?“, „Je A delší než B?“, „Mohli se potkat?“ s modalitou
+  *možnost* v řádku). Hypotéza do HYPOTEZY: etalon 14/32 → ≥ 18/32, unsupported
+  hlavních beze změny, graphcheck 0. Pak krok 3 (příbuzenství: `inverze` +
+  `skládání` + nález G‑3), krok 5 (`Memory.rules` → řádky `implikace` s mapou rolí).
 - Vstupy, které čekají na J. (měření, ne návrh): lidský audit
   `python -m bench audit --dok alois_jirásek --rucne` (≥ 30 výroků) a ověření
   otázek `python -m bench gold-gen --dok karel_čapek --n 12` → `--overit`.
