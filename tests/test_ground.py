@@ -51,7 +51,7 @@ def test_prodrop_resolves_by_activation(oracle: RecordedOracle) -> None:
     jir = g1.main.role("kdo").terms[0]  # type: ignore[union-attr]
     kdo = g2.main.role("kdo")  # type: ignore[union-attr]
     assert kdo and kdo.terms == [jir]
-    assert any("nevyslovený podmět" in d and "aktivace" in d for d in g2.main.defaults)  # type: ignore[union-attr]
+    assert any("nevyslovený podmět" in d and ("registr" in d or "aktivace" in d) for d in g2.main.defaults)  # type: ignore[union-attr]
     kde = g2.main.role("kde")  # type: ignore[union-attr]
     assert kde and {m.node(x).label() for x in kde.terms} == {"gymnázium", "Litomyšl", "Praha"}
 

@@ -30,7 +30,7 @@ from bench.data import Doc, ROOT, data_fingerprint, load_config, load_sada
 from bench.graphcheck import check_answer, check_graph
 from bench.judge import Judge
 from bench.metrics import ingest_metrics, qa_metrics, reach
-from bench.qa import anchor_words, answer_matches, classify_miss, find_answer_sentence, norm, years
+from bench.qa import anchor_words, answer_matches, classify_miss, find_answer_sentence, last_anchor_sentence, norm, years
 
 
 def git_info() -> tuple[str, str, bool]:
@@ -59,16 +59,35 @@ def memory_fingerprint(memory: Memory) -> str:
     return hashlib.sha256(json.dumps(memory.to_json(), ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
 
 
+def _segment_of(memory: Memory, doc: str, no: int | None) -> str | None:
+    """Segment (uzel) věty číslo `no` v dokumentu, nebo None."""
+    if no is None:
+        return None
+    for n in memory.nodes.values():
+        if n.kind == "sentence" and n.doc == doc and n.lemma == f"{doc}#{no}":
+            base = memory.nodes.get(n.base or "")
+            return n.base if base is not None and base.kind == "segment" else None
+    return None
+
+
 def _sentences(memory: Memory) -> list[Any]:
     return sorted((n for n in memory.nodes.values() if n.kind == "sentence"), key=lambda n: int(n.lemma.rsplit("#", 1)[-1]))
 
 
 def ingest_doc(doc: Doc, oracle: CachedOracle, strop: int) -> tuple[Session, list[dict[str, Any]], float, int]:
     """Vlož dokument (nejvýš `strop` řádků) do čerstvé paměti."""
-    lines = [l for l in doc.text.splitlines() if l.strip()]
+    lines = doc.text.splitlines()
     if strop:
-        lines = lines[:strop]
-    text = "\n".join(lines)
+        kept: list[str] = []
+        n = 0
+        for l in lines:
+            if l.strip():
+                n += 1
+                if n > strop:
+                    break
+            kept.append(l)
+        lines = kept
+    text = "\n".join(lines)  # prázdné řádky zůstávají — segmentace (spec § 4.2)
     n_words = sum(len(l.split()) for l in lines)
     session = Session(Memory(), oracle)
     t0 = time.time()
@@ -105,7 +124,11 @@ def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = Fal
         row["coverage"] = any(norm(e) in doc_text_norm or (years(e) and years(e) & years(doc_text_norm)) for e in q.expect)
         ans_no = find_answer_sentence(pairs, q.expect)
         row["answer_sent"] = ans_no
-        row["reach"] = reach(m, ans_no, anchor_words(q.q, doc.topic), sentences) if ans_no is not None else None
+        anchor = anchor_words(q.q, doc.topic)
+        row["reach"] = reach(m, ans_no, anchor, sentences) if ans_no is not None else None
+        if ans_no is not None and row["reach"] is not None:
+            last = last_anchor_sentence(pairs, ans_no, anchor)
+            row["other_segment"] = _segment_of(m, doc.name, ans_no) != _segment_of(m, doc.name, last) if last is not None else False
         try:
             a = session.say(q.q)
         except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -288,18 +311,18 @@ def render_report(report: dict[str, Any]) -> str:
     t = report["totals"]
     head = (f"# bench {report['date']} · {report['commit']}{' (dirty)' if report.get('dirty') else ''} · sady {', '.join(report['sady'])}"
             f" · strop {report['strop'] or '—'} · data {report['data_fingerprint']}\n\n")
-    cols = "| dokument | vět | slov | yield hl./vše | SAFE | HYP | REJ | zbytek % | open/větu | otázek | správně | kurát. | pokrytí | dosah 0 / 1‑3 / 4‑10 / >10 | unsupp. | graf |"
+    cols = "| dokument | vět | slov | yield hl./vše | SAFE | HYP | REJ | zbytek % | open/větu | otázek | správně | kurát. | pokrytí | dosah 0 / 1‑3 / 4‑10 / >10 / jiný seg. | unsupp. | graf |"
     sep = "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|"
     lines = [head, cols, sep]
     for r in report["rows"]:
         i, q = r["ingest"], r["qa"]
         br = q["by_reach"]
-        reach_s = " / ".join(f"{br[b][0]}/{br[b][1]}" for b in ("0", "1-3", "4-10", ">10"))
-        uns = r.get("audit", {}).get("unsupported")
+        reach_s = " / ".join(f"{br[b][0]}/{br[b][1]}" for b in ("0", "1-3", "4-10", ">10", "jiný segment"))
+        uns = (r.get("audit") or {}).get("unsupported")
         gv = r.get("graph_violations")
         lines.append(f"| {r['doc']} | {i['sentences']} | {i['words']} | {i['yield_main']} / {i['yield']} | {i['claims']['SAFE']} | {i['claims']['HYPOTHESIS']} | {i['claims']['REJECTED']} | {i['residue_pct']} | {i['open_per_sent']} | {q['questions']} | {q['hits']} | {q['curated_hits']}/{q['curated_questions']} | {q['coverage']} | {reach_s} | {'—' if uns is None else f'{100*uns:.1f} %'} | {'—' if gv is None else gv} |")
     br = t["by_reach"]
-    reach_s = " / ".join(f"{br.get(b, [0, 0])[0]}/{br.get(b, [0, 0])[1]}" for b in ("0", "1-3", "4-10", ">10"))
+    reach_s = " / ".join(f"{br.get(b, [0, 0])[0]}/{br.get(b, [0, 0])[1]}" for b in ("0", "1-3", "4-10", ">10", "jiný segment"))
     uns = t.get("unsupported")
     lines.append(f"| **celkem** | {t['sentences']} | {t['words']} | **{t['yield_main']} / {t['yield']}** | {t['claims']['SAFE']} | {t['claims']['HYPOTHESIS']} | {t['claims']['REJECTED']} | {t['residue_pct']} | {t['open_per_sent']} | {t['questions']} | **{t['hits']}** | **{t['curated_hits']}/{t['curated_questions']}** | {t['coverage']} | {reach_s} | {'—' if uns is None else f'{100*uns:.1f} %'} | {'—' if t.get('graph_violations') is None else t['graph_violations']} |")
     lines.append("")

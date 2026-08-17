@@ -102,15 +102,41 @@ class Session:
 
     # ---- vkládání textu ----------------------------------------------------------
 
+    @staticmethod
+    def _is_heading(raw: str) -> bool:
+        """Nadpis: řádek v `==` (wiki) nebo krátký řádek bez koncové interpunkce."""
+        if raw.startswith("="):
+            return True
+        return len(raw.split()) < 8 and not raw.rstrip().endswith((".", "!", "?", ":", ";", "…"))
+
     def ingest(self, text: str, doc: str = "dialog") -> list[dict[str, object]]:
-        """Dokument → věty → čtení → zápis (`read`). Vrací zprávu za větu."""
+        """Dokument → segmenty → věty → čtení → zápis (`read`). Vrací zprávu za větu.
+
+        Segmentace (spec § 4.2): prázdný řádek nebo nadpis začíná nový segment
+        (uzel `segment`, věty na něj vedou hranou `part_of`); na hranici klesne
+        aktivace (dvakrát `tick`), registr referentů zůstává; okno registru pro
+        zájmena je tento + předchozí segment.
+        """
         self._turn("ingest", text, doc)
         self.memory.ensure_document(doc)
         reports: list[dict[str, object]] = []
+        segment: str | None = None
+        seg_no = 0
+        boundary = False
         for line in text.splitlines():
             raw = line.strip()
             if not raw:
+                boundary = True
                 continue
+            heading = self._is_heading(raw)
+            if segment is None or boundary or heading:
+                seg_no += 1
+                seg = self.memory.new_segment(doc, seg_no, raw.strip("= ").strip() if heading else "")
+                segment = seg.id
+                if seg_no > 1:
+                    self.memory.tick()
+                    self.memory.tick()
+                boundary = False
             raw = raw.strip("= ").strip() or raw
             try:
                 parses = self._parses(raw)
@@ -118,13 +144,13 @@ class Session:
                 reports.append({"text": raw, "error": str(exc)})
                 continue
             for parse in parses:
-                reports.append(self._ingest_sentence(parse, doc))
+                reports.append(self._ingest_sentence(parse, doc, segment))
         return reports
 
-    def _ingest_sentence(self, parse: Parse, doc: str) -> dict[str, object]:
+    def _ingest_sentence(self, parse: Parse, doc: str, segment: str | None = None) -> dict[str, object]:
         reading = self._read(parse, "assert")
         prov = self._prov(doc, parse.text)
-        g = ground(reading, self.memory, prov, "read", topic=self.topics.get(doc))
+        g = ground(reading, self.memory, prov, "read", topic=self.topics.get(doc), segment=segment)
         self._update_topic(doc, g)
         derived = derive(self.memory)
         self.memory.tick()

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from cb6.discourse import Registry, ambiguous
 from cb6.memory import Memory, Node, OpenItem, Provenance, Role, Statement
 from cb6.read import Predication, Reading, TermSpec
 from cb6.triage import Decision, Rule, Triaged, triage
@@ -36,7 +37,7 @@ class Grounder:
     """Jedno zakotvení jedné věty (drží paměť, provenienci a poznámky)."""
 
     def __init__(self, memory: Memory, prov: Provenance, grade: str, *, topic: str | None, write: bool,
-                 triaged: Triaged | None = None) -> None:
+                 triaged: Triaged | None = None, segment: str | None = None) -> None:
         self.m = memory
         self.prov = prov
         self.grade = grade
@@ -44,6 +45,12 @@ class Grounder:
         self.write = write
         #: rozhodnutí triáže (status/nálada predikací, pravidla); None = vše SAFE/assert
         self.triaged = triaged
+        #: aktuální segment dokumentu (hrany `mention` a okno registru)
+        self.segment = segment
+        self.registry = Registry(memory)
+        #: nejednoznačná koreference: (jméno role, kandidáti) — po zápisu jádra
+        #: vzniknou HYPOTHESIS alternativy (I‑3, I‑8)
+        self._ambiguous: list[tuple[str, list[str], str]] = []
         self.out = Grounded()
         self._defaults: list[str] = []
         self._pending_open: list[tuple[str, str, str, list[str]]] = []  # (kind, about, question, options)
@@ -54,8 +61,18 @@ class Grounder:
         """Term → id uzlu (nebo `None`, když se rozřešit nedá).
 
         Zaznamená výchozí volby do `self._defaults` a otevřené položky do
-        `self._pending_open`.
+        `self._pending_open`; každý rozřešený term entity/místa je zmínka →
+        hrana `mention` (registr referentů, I‑11).
         """
+        nid = self._resolve_term_inner(t, role=role, subject_specific=subject_specific, pred=pred)
+        if nid is not None and self.write and self.out.sentence:
+            n = self.m.nodes.get(nid)
+            if n is not None and n.kind in ("entity", "place"):
+                self.m.note_mention(self.out.sentence, nid, role, " ".join(t.forms), self.segment or "")
+        return nid
+
+    def _resolve_term_inner(self, t: TermSpec, *, role: str, subject_specific: bool, pred: str | None) -> str | None:
+        """Vlastní rozřešení termu (viz `resolve_term`)."""
         if t.kind == "wh":
             return None
         if t.kind == "entity":
@@ -115,30 +132,53 @@ class Grounder:
         self.out.statements.append(st)
 
     def _resolve_pron(self, t: TermSpec, role: str) -> str | None:
-        """Zájmeno / nevyslovený podmět → nejaktivnější uzel se shodou rodu a
-        čísla; jinak téma dokumentu; jinak otevřená položka."""
+        """Zájmeno / nevyslovený podmět → registr referentů (spec § 4).
+
+        1. kandidáti = uzly se zmínkou v tomto/předchozím segmentu se shodou rodu
+           a čísla (entity; když žádná, místa), řazení aktivace → role → čerstvost;
+        2. téma dokumentu má přednost, dokud není jiný kandidát VÝRAZNĚ
+           čerstvější (encyklopedický text: vedlejší osoby se zmíní jednou, téma
+           se vrací) — beze změny proti conbond5;
+        3. když nevítězí téma a první dva kandidáti jsou blízko (`ambiguous`),
+           nevolí se: role zůstane bez termu, vzniknou HYPOTHESIS alternativy
+           a otevřená položka (I‑3, I‑8);
+        4. bez kandidáta → téma dokumentu; bez tématu → otevřená položka.
+        """
         if t.lemma in ("se", "sebe", "si"):
             return None
-        # entity mají přednost před místy (podmět „oženil se“ není město); místo až
-        # když žádná entita v kontextu není
-        cands = self.m.most_active(kinds=("entity",), gender=t.gender, number=t.number) or self.m.most_active(kinds=("place",), gender=t.gender, number=t.number)
+        label = t.lemma if t.lemma != "∅" else "nevyslovený podmět"
         if t.person in ("1", "2"):
-            cands = []
+            self._pending_open.append(("reference", t.lemma, f"Na koho odkazuje „{label}“ v roli {role}?", []))
+            return None
+        cands = self.registry.candidates(gender=t.gender, number=t.number, segment=self.segment, kinds=("entity",))
+        if not cands:
+            cands = self.registry.candidates(gender=t.gender, number=t.number, segment=self.segment, kinds=("place",))
+        if not cands:
+            # registr prázdný (např. testy bez vět) → aktivace jako v conbond5
+            fallback = self.m.most_active(kinds=("entity",), gender=t.gender, number=t.number) or self.m.most_active(kinds=("place",), gender=t.gender, number=t.number)
+            if fallback:
+                node = fallback[0]
+                self._defaults.append(f"{role}: „{label}“ = {node.label()} (z aktivace)")
+                return node.id
         if cands:
-            node = cands[0]
-            # téma dokumentu má přednost, dokud není jiný kandidát VÝRAZNĚ čerstvější
-            # (encyklopedický text: vedlejší osoby se zmíní jednou, téma se vrací)
+            node = cands[0].node
             topic = self.m.nodes.get(self.topic) if self.topic else None
-            if topic is not None and topic in cands and topic is not node:
+            if topic is not None and any(c.node is topic for c in cands) and topic is not node:
                 if self.m.activation(topic.id) * 3.0 >= self.m.activation(node.id):
                     node = topic
-            self._defaults.append(f"{role}: „{t.lemma if t.lemma != '∅' else 'nevyslovený podmět'}“ = {node.label()} (z aktivace)")
+            if node is not topic and ambiguous(cands):
+                ids = [c.node.id for c in cands[:3]]
+                self._ambiguous.append((role, ids, label))
+                self._pending_open.append(("reference", t.lemma, f"Na koho odkazuje „{label}“ v roli {role}? Kandidáti: " + ", ".join(self.m.nodes[i].label() for i in ids), [self.m.nodes[i].label() for i in ids]))
+                self._defaults.append(f"{role}: „{label}“ nejednoznačné — kandidáti {', '.join(self.m.nodes[i].label() for i in ids)} (hypotézy)")
+                return None
+            self._defaults.append(f"{role}: „{label}“ = {node.label()} (koref: registr{', téma dokumentu' if node is topic else ''})")
             return node.id
-        if self.topic and self.topic in self.m.nodes and t.person not in ("1", "2"):
+        if self.topic and self.topic in self.m.nodes:
             node = self.m.nodes[self.topic]
-            self._defaults.append(f"{role}: „{t.lemma if t.lemma != '∅' else 'nevyslovený podmět'}“ = {node.label()} (téma dokumentu)")
+            self._defaults.append(f"{role}: „{label}“ = {node.label()} (téma dokumentu)")
             return node.id
-        self._pending_open.append(("reference", t.lemma, f"Na koho odkazuje „{t.lemma if t.lemma != '∅' else 'nevyslovený podmět'}“ v roli {role}?", []))
+        self._pending_open.append(("reference", t.lemma, f"Na koho odkazuje „{label}“ v roli {role}?", []))
         return None
 
     def _resolve_possessed(self, t: TermSpec, group: Node, role: str) -> str | None:
@@ -234,12 +274,25 @@ class Grounder:
             st.roles.append(role)
         st.defaults = list(dict.fromkeys(self._defaults))
         pending = list(self._pending_open)
+        ambiguous_roles = list(self._ambiguous)
+        self._ambiguous = []
         if self.write:
             self.m.attach(st)
             self.out.statements.append(st)
             for kind, about, question, options in pending:
                 item = self.m.add_open(kind, about, question, st.id, options)
                 self.out.open.append(item)
+            # nejednoznačná koreference → alternativy jako HYPOTHESIS (I‑3, I‑8)
+            for role_name, cand_ids, label in ambiguous_roles:
+                for cid in cand_ids:
+                    alt = Statement("", st.pred, st.kind, neg=st.neg, modality=st.modality, kernel=st.kernel,
+                                    roles=[Role(r.name, list(r.terms) + ([cid] if r.name == role_name else []), r.quant, r.authority, r.surface, r.nested, dict(r.counts), r.wh, r.wh_kind) for r in st.roles],
+                                    grade=st.grade, prov=st.prov, sentence=st.sentence, tense=st.tense, mood=st.mood,
+                                    claim="HYPOTHESIS", alternatives=[st.id],
+                                    reason=f"koreference: „{label}“ = {self.m.nodes[cid].label()}? (kandidáti {', '.join(self.m.nodes[i].label() for i in cand_ids)})",
+                                    defaults=[f"{role_name}: „{label}“ = {self.m.nodes[cid].label()} (hypotéza koreference)"])
+                    self.m.attach(alt)
+                    self.out.statements.append(alt)
             if st.residue:
                 item = self.m.add_open("residue", ", ".join(f"„{f}“" for f, _ in st.residue),
                                        "Do čtení se nedostalo: " + ", ".join(f"„{f}“ ({path})" for f, path in st.residue) + " — jakou roli to hraje?", st.id)
@@ -277,7 +330,7 @@ class Grounder:
         """Zakotvi celé čtení: hlavní predikace (nebo pravidla z podmínek), vnořené
         a vedlejší predikace, podle rozhodnutí triáže."""
         if self.write:
-            sent = self.m.new_sentence(self.prov.doc, self.prov.sent_no, self.prov.text)
+            sent = self.m.new_sentence(self.prov.doc, self.prov.sent_no, self.prov.text, segment=self.segment)
             self.out.sentence = sent.id
         rules = self.triaged.rules if self.triaged is not None else []
         if rules:
@@ -299,14 +352,14 @@ class Grounder:
 
 
 def ground(reading: Reading, memory: Memory, prov: Provenance, grade: str = "read", *,
-           topic: str | None = None, write: bool = True) -> Grounded:
+           topic: str | None = None, write: bool = True, segment: str | None = None) -> Grounded:
     """Zakotvi čtení do paměti — přes triáž (`triage()`), která rozhodne statusy.
     `write=False` jen rozřeší termy (otázka bázi nemění, I‑12) — vrací hlavní
     výrok bez id."""
-    return ground_triaged(triage(reading), memory, prov, grade, topic=topic, write=write)
+    return ground_triaged(triage(reading), memory, prov, grade, topic=topic, write=write, segment=segment)
 
 
 def ground_triaged(t: Triaged, memory: Memory, prov: Provenance, grade: str = "read", *,
-                   topic: str | None = None, write: bool = True) -> Grounded:
+                   topic: str | None = None, write: bool = True, segment: str | None = None) -> Grounded:
     """Zakotvi už roztříděné čtení (`Triaged`)."""
-    return Grounder(memory, prov, grade, topic=topic, write=write, triaged=t).ground(t.reading)
+    return Grounder(memory, prov, grade, topic=topic, write=write, triaged=t, segment=segment).ground(t.reading)

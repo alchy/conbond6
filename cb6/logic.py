@@ -501,15 +501,27 @@ def rejected_notes(memory: Memory, q: Statement) -> list[str]:
     Zamítnutí a hypotéza nesmí zmizet jako prosté NEVÍM: odpověď řekne, že text
     o věci mluví, a proč to není znalost. Verdikt to nemění.
     """
-    terms = set(q.term_ids())
+    terms = list(q.term_ids())
+
+    def overlaps(st: Statement) -> bool:
+        """Sdílí výrok term s dotazem (přímo, přes `same_as*`, nebo instance ∈ group dotazu)?"""
+        for a in st.term_ids():
+            for b in terms:
+                if a == b or memory.same_as_star(a, b) is not None:
+                    return True
+                nb = memory.nodes.get(b)
+                if nb is not None and nb.kind == "group" and memory.member_star(a, b) is not None:
+                    return True
+        return False
+
     out: list[str] = []
     for st in memory.by_claim("REJECTED"):
-        if terms & set(st.term_ids()) and (st.pred == q.pred or st.kind == "nmod" or q.pred is None):
+        if overlaps(st) and (st.pred == q.pred or st.kind == "nmod" or q.pred is None):
             z = memory.nodes.get(st.sentence)
             src = f" (věta {z.lemma.rsplit('#', 1)[-1]}: „{z.text[:90]}“)" if z else ""
             out.append(f"text o tom mluví{src}, ale interpretaci neurčuje: {st.reason}")
     for st in memory.by_claim("HYPOTHESIS"):
-        if terms & set(st.term_ids()) and st.pred == q.pred:
+        if overlaps(st) and st.pred == q.pred:
             out.append(f"hypotéza, ne znalost: {memory.render_short(st)} [{st.id}] — {st.reason or 'nejistá volba'}")
     return out[:5]
 
