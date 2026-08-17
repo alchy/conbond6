@@ -1150,6 +1150,12 @@ class Reader(_Reader):
         Vrací se jen jednou na jméno (závorka má víc členů, každý ji spustí)."""
         if name_head.index in self._bio_done:
             return []
+        # jen u jmen OSOB (NameType Giv/Sur na hlavě nebo v `flat`); místa a díla
+        # („do Drážďan (1885)“, „Skaláci (1875)“) závorku s rokem mají, ale není
+        # to narození — precision audit 17. 8. 2026 (conbond6)
+        name_tokens = [name_head] + [f for f in self.p.children(name_head.index) if f.base_deprel == "flat"]
+        if not any((t.feat("NameType") or "").replace("Giv", "P").replace("Sur", "P").count("P") for t in name_tokens):
+            return []
         # tokeny mezi „(“ a „)“ hned za jménem
         idxs = [t.index for t in self.p.tokens]
         last_name = max([name_head.index] + [f.index for f in self.p.children(name_head.index) if f.base_deprel == "flat"])
@@ -1161,6 +1167,10 @@ class Reader(_Reader):
             inside.append(self.p.token(i))
             i += 1
         if not inside or i > len(idxs):
+            return []
+        # závorka musí mít tvar „A – B“ (narození – úmrtí) a nesmí obsahovat sloveso
+        # („(sepsány 1928–1935)“ není životopis)
+        if not any(t.form in ("–", "-", "—") for t in inside) or any(t.upos == "VERB" for t in inside):
             return []
         # rozděl pomlčkou
         parts: list[list[Token]] = [[]]

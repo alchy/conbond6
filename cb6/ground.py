@@ -178,9 +178,13 @@ class Grounder:
         inst.base = group.id
         self.out.nodes.append(inst)
         self._member(inst.id, group.id)
+        # Přivlastnění není tvrzení o vlastnictví: „Jiráskova ulice“ ≠ „Jirásek má
+        # ulici“, „jeho smrt“ ≠ „má smrt“. Nově odvozené `mít` je proto HYPOTHESIS
+        # (I‑3: nikdy ve verdiktu); existující vlastnictví výše se použije jako SAFE.
         st = Statement("", "mít", "verb", grade=self.grade, prov=self.prov, sentence=self.out.sentence,  # type: ignore[arg-type]
                        roles=[Role("kdo", [owner.id], "·", "structural"), Role("co", [inst.id], "·", "structural")],
-                       defaults=[f"vlastnictví z přivlastnění „{word}“"])
+                       defaults=[f"vlastnictví z přivlastnění „{word}“"], claim="HYPOTHESIS",
+                       reason="přivlastnění „" + word + "“ neurčuje vlastnictví (může jít o pojmenování, autorství, vztah)")
         self.m.attach(st)
         self.out.statements.append(st)
         return inst.id

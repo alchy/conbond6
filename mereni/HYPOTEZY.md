@@ -13,3 +13,9 @@ unsupported **76,5 %** [66,8–83,3]; hlavní predikace 76 % (n=57), vedlejší 
 Yield hl./vše 160/298 na 1 000 slov; QA 12/17 (kurátorované 3/3); graf 0 porušení; determinismus ano.
 **Nálezy:** (a) vedlejší `nmod`/fragmenty/typovací `X ∈ X` vydávané za znalost; (b) obsah vnořených predikací (xcomp/ccomp) jako fakt; (c) pro‑drop volí špatný podmět; (d) iniciály „T. G.“ → entita „G“; (e) soudce je přísný na pro‑drop z kontextu a na životopisné závorky (prompt v2).
 **Hypotéza pro Task 6 (triáž):** unsupported hlavních klesne pod 40 %, vedlejší `nmod` zmizí ze SAFE (→ REJECTED s důvodem), yield_main klesne o 20–40 %, QA hits −0 až −2 (typování zůstává pro uzávěry).
+
+## 2026-08-17 · Task 6 · triáž + soudce v2 + opravy čtení
+**Změny (tři commity):** (1) triáž — podmínka→pravidlo, vnořený obsah→reported, disjunkce/kardinalita→REJECTED, vedlejší nmod→REJECTED, fragment mimo znalost, typing zvlášť; logika čte jen `knowledge()`; (2) soudce prompt v2 (nevyslovený podmět z kontextu, závorka s roky za jménem osoby); (3) životopisná závorka jen u osob s tvarem „A – B“ bez slovesa, přivlastnění→`mít` jako HYPOTHESIS, částečná shoda jména jen s příjmením.
+**Hypotéza (před):** unsupported hlavních < 40 %, yield_main −20–40 %, QA −0…−2.
+**Výsledek (alois_jirásek + karel_čapek, strop 40, vzorek 100):** unsupported 76,5 → 63,0 (triáž) → 37,5 (soudce v2) → **29,0 %** [21,0–38,5]; hlavní 27 % (n=96); yield hl./vše 160/298 → **89/94**; SAFE 889 → 282, HYPOTHESIS 0 → 61, REJECTED 0 → 374; QA **12/17 beze změny**; graf 0 porušení; determinismus ano.
+**Zelený řádek:** ano — méně výroků, méně nepodložených, dotazovatelnost stejná. Zbývající chyby: kvantifikátor ∀ z „všechna jeho dramata“, koordinace plošně, vztažné věty (`kdo:∀sousoší`), participia jako predikáty.

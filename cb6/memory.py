@@ -276,7 +276,10 @@ class Memory:
             # tvary („Jirásek“) v seznamu jmen nesmí scelit „Josefa Jiráska“
             # s „Aloisem Jiráskem“
             canon = max(keys, key=len) if keys else ()
-            if canon and (set(q) < set(canon) or (set(canon) < set(q) and len(canon) > 1)):
+            # částečná shoda musí nést PŘÍJMENÍ (poslední slovo kanonického jména):
+            # „Jirásek“ ⊂ „Alois Jirásek“ ano; „Marie“ ⊂ „Marie Podhajská“ ne
+            # (precision audit 17. 8. 2026: scelení křestních jmen)
+            if canon and ((set(q) < set(canon) and canon[-1] in q) or (set(canon) < set(q) and len(canon) > 1)):
                 partial.append(n)
         return exact or partial
 
