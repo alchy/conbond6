@@ -17,8 +17,9 @@ Kontroly (`check_graph`, spec § 5.7):
 tvrdý krok (`member`/`subset`/`within`/`same_as`/`time`/`disjoint`/`lex`) je cesta
 po hranách daného typu (BFS), obsažení časů z atributů `t_start`/`t_end`,
 disjunkce existence hrany `disjoint` mezi nadtřídami, `lex` cesta od predikátu
-výroku k predikátu dotazu po uzlech `vazba` (`třída`+`same` oběma směry,
-`implikace`+`implies` po směru; `related` se nepočítá — ve verdiktu být nesmí).
+výroku (nebo lemmatu skupiny) k predikátu/skupině dotazu po uzlech `vazba`
+(`třída`+`same` oběma směry, `implikace`/`podřazení`+`implies` po směru;
+`related` se nepočítá — ve verdiktu být nesmí).
 """
 
 from __future__ import annotations
@@ -124,7 +125,7 @@ def lex_path(g: nx.MultiDiGraph, fact_pred: str, query_pred: str, limit: int = 4
         return []
     adj: dict[str, list[tuple[str, str]]] = {}
     for n, d in g.nodes(data=True):
-        if d.get("kind") != "vazba" or d.get("op") not in ("třída", "implikace"):
+        if d.get("kind") != "vazba" or d.get("op") not in ("třída", "implikace", "podřazení"):
             continue
         args = list(d.get("args", []))
         if len(args) != 2:

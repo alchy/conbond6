@@ -67,6 +67,9 @@ class Session:
 
     def _restore_learned(self) -> None:
         self.memory.learned.setdefault("roles", {})
+        for n in self.memory.nodes.values():
+            if n.kind == "document" and n.base and n.lemma not in self.topics:
+                self.topics[n.lemma] = n.base
 
     def _read(self, parse: Parse, mood: str | None = None) -> Reading:
         return read(parse, mood, learned_roles=self.memory.learned.get("roles", {}))
@@ -98,6 +101,9 @@ class Session:
                 n = self.memory.nodes.get(t)
                 if n and n.kind == "entity" and n.names:
                     self.topics[doc] = t
+                    # téma dokumentu drží i graf (uzel dokumentu → `base` = entita), aby
+                    # přežilo uložení paměti a aby ho logika viděla (výpis podle tématu)
+                    self.memory.ensure_document(doc).base = t
                     return
 
     # ---- vkládání textu ----------------------------------------------------------
@@ -374,7 +380,7 @@ class Session:
             # `=>` implikace/implies (fakt vlevo odpovídá na otázku vpravo), `~` jen nápověda
             parsed = parse_teach(arg)
             if parsed is None:
-                return "užití: !uč kázat = hlásat · !uč bydlet => žít · !uč vydat ~ napsat"
+                return "užití: !uč kázat = hlásat · !uč bydlet => žít · !uč vydat ~ napsat · !uč drama < dílo"
             op, args, strength = parsed
             link = m.add_link(op, args, strength, "said", f"dialog tah {self.turn_no}")
             return f"naučeno {link.id}: {link.label()} ({op}, {strength})"
@@ -483,7 +489,7 @@ class Session:
     @staticmethod
     def _help() -> str:
         return (
-            "příkazy: !zapomeň s0001 · !role v+Loc = kde · !uč kázat = hlásat | bydlet => žít | vydat ~ napsat · "
+            "příkazy: !zapomeň s0001 · !role v+Loc = kde · !uč kázat = hlásat | bydlet => žít | vydat ~ napsat | drama < dílo · "
             "!pravidlo jet(kam:X) => být(kde:X) · !výjimka létat pták tučňák · !otevřené · "
             "!odpověz o0001 kde · !program · !popiš Jirásek · !ukaž s0042 · !hypotéza s0042 potvrď · !statusy · "
             "!ulož p.json · !načti p.json · !graf g.json"

@@ -160,3 +160,19 @@ def test_derive_pres_lexikon_nese_uses_rule_na_vazbu() -> None:
     assert (d[0].id, "lex:syn:0031") in {(u, v) for u, v, x in g.edges(data=True) if x["type"] == "uses_rule"}
     assert check_graph(g) == []
     assert s.say("Platí Petr daně?").verdict.value == "ANO"
+
+
+def test_podrazeni_je_orientovane_a_tranzitivni() -> None:
+    """`podřazení`: drama ⊆ dílo — fakt „x ∈ drama“ sedí na dotaz „dílo“, ne naopak; řetězí se."""
+    lx = Lexicon([
+        Link("lex:p:1", "podřazení", ("drama", "dílo"), "implies", "seed", "t#1"),
+        Link("lex:p:2", "podřazení", ("komedie", "drama"), "implies", "seed", "t#2"),
+    ])
+    m = lx.match("dílo", "komedie")
+    assert m is not None and [l.id for l in m.links] == ["lex:p:2", "lex:p:1"] and m.derived and "⊆" in m.step
+    assert lx.match("komedie", "dílo") is None
+    assert parse_teach("drama < dílo") == ("podřazení", ("drama", "dílo"), "implies")
+    with pytest.raises(ValueError):
+        Lexicon([Link("x", "podřazení", ("a", "b"), "same", "seed", "z")])
+    seed = Lexicon(load_seed())
+    assert seed.match("dílo", "román") is not None and seed.match("dílo", "drama") is not None

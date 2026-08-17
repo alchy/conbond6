@@ -431,6 +431,10 @@
 "tvrdí",
 "Věta uvádí, že místní vzpomínají na velký požár města."
 ],
+"0f35436225f9c7f2|ollama:gemma4:latest|v2": [
+"částečně",
+"Věta uvádí, že se pokusil vysvětlit své aktivity v roce 1938, ale výrok specifikuje předmět jako [s0179], což není ve větě zmíněno."
+],
 "0f36f14cb05cc7dd|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí Josef Jiráska s ročníky (1822 – 1901), což potvrzuje datum narození."
@@ -1022,6 +1026,10 @@
 "26e4410a34114b00|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Podmět Petr Bezruč je z kontextu a výrok správně zachycuje děj 'propadat' s okolností 'melancholii'."
+],
+"26e70ae092ef2950|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Věta tvrdí, že se snažil zabránit rozdělení národa a usiloval o jeho jednotu, nikoli, že se snažil něco konkrétního s kódem [s0150]."
 ],
 "2735c9886bf664de|ollama:gemma4:latest|v2": [
 "tvrdí",
@@ -1971,6 +1979,10 @@
 "tvrdí",
 "Věta uvádí 'fáborky- stuhami', což implikuje, že fáborky jsou stuhami."
 ],
+"4b3f508d0552020f|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta tvrdí, že jeho vstup byl logický a uvádí důvod."
+],
 "4b59f15ef85a6850|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta uvádí seznam konkrétních osob (T. G. Masarykem, S. K. Neumannem, A. Rašínem, L. Heyrovským a dalšími), ale výrok tvrdí obecný kvantifikátor o skupině 'G', která není v textu definována ani zmíněna jako taková."
@@ -2494,6 +2506,10 @@
 "6105e8f7b67a6a20|ollama:gemma4:latest|v2": [
 "částečně",
 "Výrok správně identifikuje předměty (balady, idyly a romance), ale chybně určuje role 'co' jako konkrétní baladu '[rozsáhlý]' namísto množného pojmu. Navíc zjednodušuje okolnosti, které jsou spojené s vyhledáváním."
+],
+"613dc29eaa0735cb|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí konkrétní rok (1989), a film je popsán jako 'životopisný film Člověk proti zkáze', což odpovídá předmětu výroku."
 ],
 "614d918bcf9ea6af|ollama:gemma4:latest|v2": [
 "tvrdí",
@@ -4511,6 +4527,10 @@
 "tvrdí",
 "Věta uvádí, že setkání se stalo impulsem k urovnání vztahů."
 ],
+"b33d6694a3cc4f4f|ollama:gemma4:latest|v2": [
+"částečně",
+"Věta uvádí, že katolická církev zakázala zvonit zvony pražských kostelů k uctění jeho památky, ale výrok neuvádí konkrétní předmět zákazu (zvonění zvonů) a používá generický placeholder [s0259] místo něj."
+],
 "b3b65751c32076b6|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že druhou polovinu domu obýval bratr Josef Čapek se svou rodinou; výrok to správně shrnuje."
@@ -5279,6 +5299,10 @@
 "netvrdí",
 "Výrok uvádí konkrétního hráče (Gukeš Dommaradžu), který není v textu zmíněn. Věta mluví obecně o pěšci."
 ],
+"ccef703c9af1a2b8|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Výrok je příliš abstraktní a neúplný; věta uvádí konkrétní role (kterou postavu ztvárnil který herec), nikoli obecné tvrzení o tvůrci postav."
+],
 "cd30251651e869bf|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že třetí místo bylo roku 1931."
@@ -5799,6 +5823,10 @@
 "tvrdí",
 "Věta tvrdí, že dnešní šachovnice vznikla jako zvyk zabarvovat pole střídavě barvou."
 ],
+"e260012077b57961|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že Poklad byla jeho prvotinou."
+],
 "e2affb8b01efa011|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že autor se zamýšlí nad nepoznatelností smyslu života."
@@ -5810,6 +5838,10 @@
 "e2c0080f9d9a7d71|ollama:gemma4:latest|v2": [
 "částečně",
 "Jádro (propuštění v roce 1916) sedí, ale výrok zjednodušuje okolnost „následkem toho“ na pouhý kvantifikátor „∃ten“, který není dostatečný pro přesné odvození."
+],
+"e2e577a5effebf98|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Věta tvrdí, že bylo rozhodnuto konat pohřební obřady bez účasti kněze, ale výrok pouze uvádí 'rozhodnutý' s neznámým předmětem."
 ],
 "e2e6196dc563c1ad|ollama:gemma4:latest|v2": [
 "tvrdí",
@@ -6202,6 +6234,10 @@
 "f20b4608b940ffbf|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí, že FIDE schvaluje oficiální pravidla šachu, což odpovídá tvrzení o existenci takových pravidel."
+],
+"f2675e19fc4a2cab|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí konkrétní roli (domácí učitel Prokopa Lažanského) a čas/místo, což odpovídá tvrzení o členství v dané skupině s uvedenými okolnostmi."
 ],
 "f28df3dee8a3d4c5|ollama:gemma4:latest|v2": [
 "netvrdí",

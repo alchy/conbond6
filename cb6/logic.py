@@ -382,11 +382,106 @@ class Evaluator:
 
     # ---- wh --------------------------------------------------------------------
 
+    # ---- omezení výplně skupinou („která díla“) a výpis („vyjmenuj díla X“) ---------
+
+    def _classes_of(self, t: str) -> list[tuple[str, list[str], str]]:
+        """Přímé třídy termu: skupiny `h`, do nichž `t` vede hranou `member` (entita)
+        nebo `subset` (skupina) — s id výroků cesty a druhem kroku.
+        Vstup: id uzlu. Výstup: `[(h, [výroky], "member"|"subset")]`."""
+        m = self.m
+        out: list[tuple[str, list[str], str]] = []
+        kind = "member" if self._kind(t) in ("entity", "place") else "subset"
+        edges = m._kernel_edges(kind)  # pylint: disable=protected-access
+        for x in m._class(t):  # pylint: disable=protected-access
+            for h, sid in edges.get(x, []):
+                if not any(h == y for y, _, _ in out):
+                    out.append((h, (m.same_as_star(t, x) or []) + [sid], kind))
+        return out
+
+    def fits_class(self, t: str, g: str) -> Proof | None:
+        """Je výplň `t` v třídě `g` („která díla“ → výplň ∈ dílo)?
+
+        Nejdřív tvrdé hrany grafu (`member*`/`subset*`), pak lexikon: některá
+        přímá třída `h` výplně je `podřazení`‑řetězem pod lemma `g` (drama ⊆ dílo)
+        — krok `lex` s materializací řádku, aby byl z exportu doložitelný.
+        Vstup: id výplně, id skupiny omezení. Výstup: důkaz kroků, nebo `None`."""
+        m = self.m
+        if t == g:
+            return Proof()
+        tk = self._kind(t)
+        if tk in ("entity", "place"):
+            mem = m.member_star(t, g)
+            if mem is not None:
+                return Proof(mem, [f"{m.node(t).label()} ∈ {m.node(g).label()}"], grade="derived", hard=[("member", t, g)])
+        elif tk == "group":
+            sub = m.subset_star(t, g)
+            if sub is not None:
+                return Proof(sub, [f"{m.node(t).label()} ⊆ {m.node(g).label()}"], grade="derived", hard=[("subset", t, g)])
+        else:
+            return None
+        g_lemma = m.node(g).lemma
+        for h, path, kind in self._classes_of(t):
+            hn = m.node(h)
+            lm = self.lex.match(g_lemma, hn.lemma)
+            if lm is None or not lm.links:
+                continue
+            sym = "∈" if kind == "member" else "⊆"
+            proof = Proof(path, [f"{m.node(t).label()} {sym} {hn.label()}"], grade="derived", hard=[(kind, t, h)])
+            return self.lex_proof(g_lemma, hn.lemma, lm, proof)
+        return None
+
+    def list_verdict(self, q: Statement) -> Verdict:
+        """Otázka druhu `list` („Vyjmenuj všechna díla Karla Čapka.“): členové skupiny
+        omezení (přes `member*`/`subset*` a `podřazení` v lexikonu), a je‑li
+        přivlastnění (`čí`), jen ti, kdo s vlastníkem sdílejí SAFE výrok — nebo,
+        přiznaně jako výchozí volba, jsou z dokumentu, jehož je vlastník tématem
+        (text často díla jen vyjmenovává, autorství neříká větou).
+        Vstup: dotaz. Výstup: verdikt s výplněmi a důkazy."""
+        m = self.m
+        hole = next((r for r in q.roles if r.wh), None)
+        if hole is None or not hole.terms:
+            return Verdict("NEVÍM", missing=["výpis bez skupiny"])
+        g = hole.terms[0]
+        owner_role = q.role("čí")
+        owner = owner_role.terms[0] if owner_role and owner_role.terms else None
+        owner_docs = {n.lemma for n in m.nodes.values() if n.kind == "document" and n.base == owner} if owner else set()
+        fillers: list[tuple[str, Proof]] = []
+        seen: set[str] = set()
+        # kandidáti: každý uzel, který má přímou třídu; ověření přes fits_class (tvrdé hrany + lexikon)
+        for n in m.nodes.values():
+            if n.kind not in ("entity", "group") or n.id == g or n.id in seen:
+                continue
+            fit = self.fits_class(n.id, g)
+            if fit is None:
+                continue
+            if owner is not None:
+                # vztah k vlastníkovi: výrok, kde vlastník je konatel (kdo) a kandidát předmět (co)
+                # — „napsal / vydal / přeložil X“; sdílení libovolného výroku by bylo příliš volné
+                shared = [f for f in m.knowledge() if f.kind != "typing" and f.role("kdo") and owner in f.role("kdo").terms  # type: ignore[union-attr]
+                          and f.role("co") and n.id in f.role("co").terms]  # type: ignore[union-attr]
+                if shared:
+                    f = shared[0]
+                    fit = fit.merged(Proof([f.id], [f"{f.pred}(kdo: {m.node(owner).label()}, co: {n.label()})"], list(f.defaults), f.grade))
+                elif n.kind == "entity" and n.names and n.doc and n.doc in owner_docs:
+                    # pojmenovaná věc z článku, jehož je vlastník tématem (díla jsou v článcích jen vyjmenovaná)
+                    fit.defaults.append(f"výpis podle tématu dokumentu „{n.doc}“ ({m.node(owner).label()}) — o vztahu text neříká větu")
+                    fit.grade = "derived"
+                else:
+                    continue
+            seen.add(n.id)
+            fillers.append((n.id, fit))
+        if not fillers:
+            return Verdict("NEVÍM", missing=[f"neznám nic, co by bylo {m.node(g).label()}" + (f" a týkalo se {m.node(owner).label()}" if owner else "")])
+        return Verdict("ANO", [p for _, p in fillers], fillers=fillers)
+
     def enumerate(self, q: Statement) -> Verdict:
         m = self.m
+        if q.kind == "list":
+            return self.list_verdict(q)
         hole = next((r for r in q.roles if r.wh), None)
         if hole is None:
             return self.evaluate(q)
+        restrict = hole.terms[0] if hole.terms and hole.wh_kind != "count" else None
         # definice: „Kdo/co je X?“
         if q.pred == "být" and hole.name in ("co", "jaký") and q.role("kdo") and q.role("kdo").terms:  # type: ignore[union-attr]
             v = self.describe_verdict(q.role("kdo").terms[0], hole)  # type: ignore[union-attr]
@@ -429,9 +524,14 @@ class Evaluator:
                 continue
             for t in fr.terms:
                 if t not in seen:
+                    if restrict is not None:
+                        fit = self.fits_class(t, restrict)
+                        if fit is None:
+                            continue  # výplň není v žádané třídě („která díla“ → jen díla)
+                        p = p.merged(fit)
                     seen.add(t)
                     fillers.append((t, p))
-            if fr.nested and fr.nested not in seen:
+            if fr.nested and fr.nested not in seen and restrict is None:
                 seen.add(fr.nested)
                 fillers.append((fr.nested, p))
         # pravidla

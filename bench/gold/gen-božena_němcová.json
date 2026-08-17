@@ -1,0 +1,15 @@
+[
+ {
+  "q": "Vyjmenuj povídky Boženy Němcové.",
+  "expect": [
+   "Pohorská vesnice"
+  ],
+  "dok": "božena_němcová",
+  "veta": 216,
+  "source_sentence": "Pohorská vesnice (1855) – povídka ze života lidu venkovského",
+  "model": "claude (ručně z textu)",
+  "typ": "vypis",
+  "curated": false,
+  "pozn": "psal Claude z textu článku (17. 8. 2026), výpisové otázky — k ověření J. (`bench gold-gen --overit --dok …`)"
+ }
+]

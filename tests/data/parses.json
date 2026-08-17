@@ -4725,6 +4725,141 @@
 }
 ]
 },
+"Co napsal Karel Čapek?": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Co napsal Karel Čapek?",
+"tokens": [
+{
+"deprel": "obj",
+"feats": [
+[
+"Animacy",
+"Inan"
+],
+[
+"Case",
+"Acc"
+],
+[
+"PronType",
+"Int,Rel"
+]
+],
+"form": "Co",
+"head": 2,
+"id": 1,
+"lemma": "co",
+"upos": "PRON"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Past"
+],
+[
+"VerbForm",
+"Part"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "napsal",
+"head": 0,
+"id": 2,
+"lemma": "napsat",
+"upos": "VERB"
+},
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karel",
+"head": 2,
+"id": 3,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapek",
+"head": 3,
+"id": 4,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": "?",
+"head": 2,
+"id": 5,
+"lemma": "?",
+"upos": "PUNCT"
+}
+]
+},
 "Co obsahuje ovoce?": {
 "provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
 "text": "Co obsahuje ovoce?",
@@ -7478,6 +7613,167 @@
 "head": 5,
 "id": 9,
 "lemma": ".",
+"upos": "PUNCT"
+}
+]
+},
+"Jaké drama napsal Karel Čapek?": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Jaké drama napsal Karel Čapek?",
+"tokens": [
+{
+"deprel": "det",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Sing"
+],
+[
+"PronType",
+"Int,Rel"
+]
+],
+"form": "Jaké",
+"head": 2,
+"id": 1,
+"lemma": "jaký",
+"upos": "DET"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "drama",
+"head": 3,
+"id": 2,
+"lemma": "drama",
+"upos": "NOUN"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Past"
+],
+[
+"VerbForm",
+"Part"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "napsal",
+"head": 0,
+"id": 3,
+"lemma": "napsat",
+"upos": "VERB"
+},
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karel",
+"head": 3,
+"id": 4,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapek",
+"head": 4,
+"id": 5,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": "?",
+"head": 3,
+"id": 6,
+"lemma": "?",
 "upos": "PUNCT"
 }
 ]
@@ -10286,6 +10582,540 @@
 "form": ".",
 "head": 17,
 "id": 22,
+"lemma": ".",
+"upos": "PUNCT"
+}
+]
+},
+"Karel Čapek napsal drama R.U.R.": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Karel Čapek napsal drama R.U.R.",
+"tokens": [
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karel",
+"head": 3,
+"id": 1,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapek",
+"head": 1,
+"id": 2,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Past"
+],
+[
+"VerbForm",
+"Part"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "napsal",
+"head": 0,
+"id": 3,
+"lemma": "napsat",
+"upos": "VERB"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "drama",
+"head": 3,
+"id": 4,
+"lemma": "drama",
+"upos": "NOUN"
+},
+{
+"deprel": "nmod",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "R.U.R.",
+"head": 4,
+"id": 5,
+"lemma": "R.U.r.",
+"upos": "PROPN"
+}
+]
+},
+"Karel Čapek napsal román Krakatit.": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Karel Čapek napsal román Krakatit.",
+"tokens": [
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karel",
+"head": 3,
+"id": 1,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapek",
+"head": 1,
+"id": 2,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Past"
+],
+[
+"VerbForm",
+"Part"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "napsal",
+"head": 0,
+"id": 3,
+"lemma": "napsat",
+"upos": "VERB"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Animacy",
+"Inan"
+],
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "román",
+"head": 3,
+"id": 4,
+"lemma": "román",
+"upos": "NOUN"
+},
+{
+"deprel": "nmod",
+"feats": [
+[
+"Animacy",
+"Inan"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Krakatit",
+"head": 4,
+"id": 5,
+"lemma": "krakatit",
+"upos": "NOUN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": ".",
+"head": 3,
+"id": 6,
+"lemma": ".",
+"upos": "PUNCT"
+}
+]
+},
+"Karel Čapek se narodil v Malých Svatoňovicích.": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Karel Čapek se narodil v Malých Svatoňovicích.",
+"tokens": [
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karel",
+"head": 4,
+"id": 1,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapek",
+"head": 1,
+"id": 2,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "expl:pv",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"PronType",
+"Prs"
+],
+[
+"Reflex",
+"Yes"
+],
+[
+"Variant",
+"Short"
+]
+],
+"form": "se",
+"head": 4,
+"id": 3,
+"lemma": "se",
+"upos": "PRON"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Past"
+],
+[
+"VerbForm",
+"Part"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "narodil",
+"head": 0,
+"id": 4,
+"lemma": "narodit",
+"upos": "VERB"
+},
+{
+"deprel": "case",
+"feats": [
+[
+"AdpType",
+"Prep"
+],
+[
+"Case",
+"Loc"
+]
+],
+"form": "v",
+"head": 7,
+"id": 5,
+"lemma": "v",
+"upos": "ADP"
+},
+{
+"deprel": "amod",
+"feats": [
+[
+"Case",
+"Loc"
+],
+[
+"Degree",
+"Pos"
+],
+[
+"Gender",
+"Fem"
+],
+[
+"Number",
+"Plur"
+],
+[
+"Polarity",
+"Pos"
+]
+],
+"form": "Malých",
+"head": 7,
+"id": 6,
+"lemma": "malý",
+"upos": "ADJ"
+},
+{
+"deprel": "obl",
+"feats": [
+[
+"Case",
+"Loc"
+],
+[
+"Gender",
+"Fem"
+],
+[
+"NameType",
+"Geo"
+],
+[
+"Number",
+"Plur"
+]
+],
+"form": "Svatoňovicích",
+"head": 4,
+"id": 7,
+"lemma": "Svatoňovice",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": ".",
+"head": 4,
+"id": 8,
 "lemma": ".",
 "upos": "PUNCT"
 }
@@ -13780,6 +14610,733 @@
 "id": 5,
 "lemma": "pes",
 "upos": "NOUN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": "?",
+"head": 3,
+"id": 6,
+"lemma": "?",
+"upos": "PUNCT"
+}
+]
+},
+"Krakatit je román.": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Krakatit je román.",
+"tokens": [
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Inan"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Krakatit",
+"head": 3,
+"id": 1,
+"lemma": "krakatit",
+"upos": "NOUN"
+},
+{
+"deprel": "cop",
+"feats": [
+[
+"Aspect",
+"Imp"
+],
+[
+"Mood",
+"Ind"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Person",
+"3"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Pres"
+],
+[
+"VerbForm",
+"Fin"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "je",
+"head": 3,
+"id": 2,
+"lemma": "být",
+"upos": "AUX"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Animacy",
+"Inan"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "román",
+"head": 0,
+"id": 3,
+"lemma": "román",
+"upos": "NOUN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": ".",
+"head": 3,
+"id": 4,
+"lemma": ".",
+"upos": "PUNCT"
+}
+]
+},
+"Kterou knihu napsal Karel Čapek?": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Kterou knihu napsal Karel Čapek?",
+"tokens": [
+{
+"deprel": "det",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Fem"
+],
+[
+"Number",
+"Sing"
+],
+[
+"PronType",
+"Int,Rel"
+]
+],
+"form": "Kterou",
+"head": 2,
+"id": 1,
+"lemma": "který",
+"upos": "DET"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Fem"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "knihu",
+"head": 3,
+"id": 2,
+"lemma": "kniha",
+"upos": "NOUN"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Past"
+],
+[
+"VerbForm",
+"Part"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "napsal",
+"head": 0,
+"id": 3,
+"lemma": "napsat",
+"upos": "VERB"
+},
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karel",
+"head": 3,
+"id": 4,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapek",
+"head": 4,
+"id": 5,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": "?",
+"head": 3,
+"id": 6,
+"lemma": "?",
+"upos": "PUNCT"
+}
+]
+},
+"Která díla napsal Karel Čapek?": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Která díla napsal Karel Čapek?",
+"tokens": [
+{
+"deprel": "det",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Plur"
+],
+[
+"PronType",
+"Int,Rel"
+]
+],
+"form": "Která",
+"head": 2,
+"id": 1,
+"lemma": "který",
+"upos": "DET"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Plur"
+]
+],
+"form": "díla",
+"head": 3,
+"id": 2,
+"lemma": "dílo",
+"upos": "NOUN"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Past"
+],
+[
+"VerbForm",
+"Part"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "napsal",
+"head": 0,
+"id": 3,
+"lemma": "napsat",
+"upos": "VERB"
+},
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karel",
+"head": 3,
+"id": 4,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapek",
+"head": 4,
+"id": 5,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": "?",
+"head": 3,
+"id": 6,
+"lemma": "?",
+"upos": "PUNCT"
+}
+]
+},
+"Která díla napsal Petr?": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Která díla napsal Petr?",
+"tokens": [
+{
+"deprel": "det",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Plur"
+],
+[
+"PronType",
+"Int,Rel"
+]
+],
+"form": "Která",
+"head": 2,
+"id": 1,
+"lemma": "který",
+"upos": "DET"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Plur"
+]
+],
+"form": "díla",
+"head": 3,
+"id": 2,
+"lemma": "dílo",
+"upos": "NOUN"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Past"
+],
+[
+"VerbForm",
+"Part"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "napsal",
+"head": 0,
+"id": 3,
+"lemma": "napsat",
+"upos": "VERB"
+},
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Petr",
+"head": 3,
+"id": 4,
+"lemma": "Petr",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": "?",
+"head": 3,
+"id": 5,
+"lemma": "?",
+"upos": "PUNCT"
+}
+]
+},
+"Které romány napsal Karel Čapek?": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Které romány napsal Karel Čapek?",
+"tokens": [
+{
+"deprel": "det",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Plur"
+],
+[
+"PronType",
+"Int,Rel"
+]
+],
+"form": "Které",
+"head": 2,
+"id": 1,
+"lemma": "který",
+"upos": "DET"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Animacy",
+"Inan"
+],
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Plur"
+]
+],
+"form": "romány",
+"head": 3,
+"id": 2,
+"lemma": "román",
+"upos": "NOUN"
+},
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"Tense",
+"Past"
+],
+[
+"VerbForm",
+"Part"
+],
+[
+"Voice",
+"Act"
+]
+],
+"form": "napsal",
+"head": 0,
+"id": 3,
+"lemma": "napsat",
+"upos": "VERB"
+},
+{
+"deprel": "nsubj",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karel",
+"head": 3,
+"id": 4,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Nom"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapek",
+"head": 4,
+"id": 5,
+"lemma": "Čapek",
+"upos": "PROPN"
 },
 {
 "deprel": "punct",
@@ -22116,6 +23673,526 @@
 "form": ".",
 "head": 3,
 "id": 4,
+"lemma": ".",
+"upos": "PUNCT"
+}
+]
+},
+"Vyjmenuj všechna dramata.": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Vyjmenuj všechna dramata.",
+"tokens": [
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Mood",
+"Imp"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Person",
+"2"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"VerbForm",
+"Fin"
+]
+],
+"form": "Vyjmenuj",
+"head": 0,
+"id": 1,
+"lemma": "vyjmenovat",
+"upos": "VERB"
+},
+{
+"deprel": "det",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Plur"
+],
+[
+"PronType",
+"Tot"
+]
+],
+"form": "všechna",
+"head": 3,
+"id": 2,
+"lemma": "všechen",
+"upos": "DET"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Plur"
+]
+],
+"form": "dramata",
+"head": 1,
+"id": 3,
+"lemma": "drama",
+"upos": "NOUN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": ".",
+"head": 1,
+"id": 4,
+"lemma": ".",
+"upos": "PUNCT"
+}
+]
+},
+"Vyjmenuj všechna díla Karla Čapka.": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Vyjmenuj všechna díla Karla Čapka.",
+"tokens": [
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Mood",
+"Imp"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Person",
+"2"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"VerbForm",
+"Fin"
+]
+],
+"form": "Vyjmenuj",
+"head": 0,
+"id": 1,
+"lemma": "vyjmenovat",
+"upos": "VERB"
+},
+{
+"deprel": "det",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Plur"
+],
+[
+"PronType",
+"Tot"
+]
+],
+"form": "všechna",
+"head": 3,
+"id": 2,
+"lemma": "všechen",
+"upos": "DET"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Neut"
+],
+[
+"Number",
+"Plur"
+]
+],
+"form": "díla",
+"head": 1,
+"id": 3,
+"lemma": "dílo",
+"upos": "NOUN"
+},
+{
+"deprel": "nmod",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Gen"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karla",
+"head": 3,
+"id": 4,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Gen"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapka",
+"head": 4,
+"id": 5,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": ".",
+"head": 1,
+"id": 6,
+"lemma": ".",
+"upos": "PUNCT"
+}
+]
+},
+"Vypiš prózy Karla Čapka.": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Vypiš prózy Karla Čapka.",
+"tokens": [
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Mood",
+"Imp"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Person",
+"2"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"VerbForm",
+"Fin"
+]
+],
+"form": "Vypiš",
+"head": 0,
+"id": 1,
+"lemma": "vypsat",
+"upos": "VERB"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Fem"
+],
+[
+"Number",
+"Plur"
+]
+],
+"form": "prózy",
+"head": 1,
+"id": 2,
+"lemma": "próza",
+"upos": "NOUN"
+},
+{
+"deprel": "nmod",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Gen"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karla",
+"head": 2,
+"id": 3,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Gen"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapka",
+"head": 3,
+"id": 4,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": ".",
+"head": 1,
+"id": 5,
+"lemma": ".",
+"upos": "PUNCT"
+}
+]
+},
+"Vypiš romány Karla Čapka.": {
+"provenance": "udpipe2 model?=cs_all-ud-2.17-251125 tokenizer=6247b8b7a5c8",
+"text": "Vypiš romány Karla Čapka.",
+"tokens": [
+{
+"deprel": "root",
+"feats": [
+[
+"Aspect",
+"Perf"
+],
+[
+"Mood",
+"Imp"
+],
+[
+"Number",
+"Sing"
+],
+[
+"Person",
+"2"
+],
+[
+"Polarity",
+"Pos"
+],
+[
+"VerbForm",
+"Fin"
+]
+],
+"form": "Vypiš",
+"head": 0,
+"id": 1,
+"lemma": "vypsat",
+"upos": "VERB"
+},
+{
+"deprel": "obj",
+"feats": [
+[
+"Animacy",
+"Inan"
+],
+[
+"Case",
+"Acc"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"Number",
+"Plur"
+]
+],
+"form": "romány",
+"head": 1,
+"id": 2,
+"lemma": "román",
+"upos": "NOUN"
+},
+{
+"deprel": "nmod",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Gen"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Karla",
+"head": 2,
+"id": 3,
+"lemma": "Karel",
+"upos": "PROPN"
+},
+{
+"deprel": "flat",
+"feats": [
+[
+"Animacy",
+"Anim"
+],
+[
+"Case",
+"Gen"
+],
+[
+"Gender",
+"Masc"
+],
+[
+"NameType",
+"Giv"
+],
+[
+"Number",
+"Sing"
+]
+],
+"form": "Čapka",
+"head": 3,
+"id": 4,
+"lemma": "Čapek",
+"upos": "PROPN"
+},
+{
+"deprel": "punct",
+"feats": [],
+"form": ".",
+"head": 1,
+"id": 5,
 "lemma": ".",
 "upos": "PUNCT"
 }

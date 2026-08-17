@@ -172,3 +172,19 @@ Obsahuje jablko vitamíny?
 Pokud Petr žije v Praze, platí Petr daně v Praze.
 Petr bydlí v Praze.
 Platí Petr daně?
+
+# výpis: která/jaká N, imperativ, podřazení
+Která díla napsal Karel Čapek?
+Které romány napsal Karel Čapek?
+Jaké drama napsal Karel Čapek?
+Vyjmenuj všechna díla Karla Čapka.
+Vypiš romány Karla Čapka.
+Karel Čapek napsal drama R.U.R.
+Karel Čapek napsal román Krakatit.
+Krakatit je román.
+Vyjmenuj všechna dramata.
+Kterou knihu napsal Karel Čapek?
+Co napsal Karel Čapek?
+Která díla napsal Petr?
+Karel Čapek se narodil v Malých Svatoňovicích.
+Vypiš prózy Karla Čapka.

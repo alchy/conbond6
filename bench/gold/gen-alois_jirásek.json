@@ -1,0 +1,71 @@
+[
+ {
+  "q": "Vyjmenuj romány Aloise Jiráska.",
+  "expect": [
+   "Psohlavci",
+   "Slavný den",
+   "Konec a počátek",
+   "V cizích službách",
+   "Na dvoře vévodském",
+   "Ráj světa",
+   "Husitský král"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 79,
+  "source_sentence": "Psohlavci (1884) – román ze 17. století; …",
+  "model": "claude (ručně z textu)",
+  "typ": "vypis",
+  "curated": false,
+  "pozn": "psal Claude z textu článku (17. 8. 2026), výpisové otázky — k ověření J. (`bench gold-gen --overit --dok …`)"
+ },
+ {
+  "q": "Vyjmenuj dramata Aloise Jiráska.",
+  "expect": [
+   "Vojnarka",
+   "Emigrant",
+   "Gero",
+   "Otec",
+   "Kolébka",
+   "M. D. Rettigová",
+   "Samota"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 104,
+  "source_sentence": "Emigrant (1898) – drama se odehrává o Vánocích v roce 1741 …",
+  "model": "claude (ručně z textu)",
+  "typ": "vypis",
+  "curated": false,
+  "pozn": "psal Claude z textu článku (17. 8. 2026), výpisové otázky — k ověření J. (`bench gold-gen --overit --dok …`)"
+ },
+ {
+  "q": "Které povídky napsal Alois Jirásek?",
+  "expect": [
+   "Maryla"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 74,
+  "source_sentence": "Maryla (1885) – povídka, milostný příběh z doby poděbradské.",
+  "model": "claude (ručně z textu)",
+  "typ": "vypis",
+  "curated": false,
+  "pozn": "psal Claude z textu článku (17. 8. 2026), výpisové otázky — k ověření J. (`bench gold-gen --overit --dok …`)"
+ },
+ {
+  "q": "Vyjmenuj všechna díla Aloise Jiráska.",
+  "expect": [
+   "Psohlavci",
+   "Vojnarka",
+   "Maryla",
+   "Gero",
+   "Emigrant",
+   "Slavný den"
+  ],
+  "dok": "alois_jirásek",
+  "veta": 79,
+  "source_sentence": "Psohlavci (1884) – román …",
+  "model": "claude (ručně z textu)",
+  "typ": "vypis",
+  "curated": false,
+  "pozn": "psal Claude z textu článku (17. 8. 2026), výpisové otázky — k ověření J. (`bench gold-gen --overit --dok …`)"
+ }
+]

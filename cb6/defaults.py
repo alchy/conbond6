@@ -114,6 +114,10 @@ WH: dict[str, tuple[str, str]] = {
     "jak_dlouho": ("jak_dlouho", "filler"),
 }
 
+#: Slovesa výpisu v rozkazu („Vyjmenuj všechna díla Karla Čapka.“): věta je otázka
+#: druhu `list` (díra omezená skupinou předmětu, volitelně přivlastnění), ne tvrzení.
+LIST_VERBS = frozenset({"vyjmenovat", "vypsat", "uvést", "jmenovat", "vypisovat", "vyjmenovávat"})
+
 #: Obecná jména míst — výplň v `v+Loc` apod. je pak MÍSTO i bez NameType=Geo.
 PLACE_NOUNS = frozenset(
     {"město", "vesnice", "ves", "obec", "země", "stát", "říše", "království", "kraj",

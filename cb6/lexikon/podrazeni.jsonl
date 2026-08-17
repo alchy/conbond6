@@ -1,0 +1,21 @@
+# Podřazení skupin (x ⊆ y) — malý seed pro výpisy („Která díla…“). Kdo je drama, je dílo.
+# op podřazení, síla implies (orientované, tranzitivní); zdroj = soubor#řádek; autorita seed.
+# Dál se učí z konzole: `!uč komedie < drama`.
+{"id": "lex:pod:0001", "op": "podřazení", "args": ["román", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0002", "op": "podřazení", "args": ["drama", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0003", "op": "podřazení", "args": ["povídka", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0004", "op": "podřazení", "args": ["novela", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0005", "op": "podřazení", "args": ["báseň", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0006", "op": "podřazení", "args": ["sbírka", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0007", "op": "podřazení", "args": ["hra", "dílo"], "síla": "implies", "pozn": "divadelní hra; „hra“ jako zábava je jiný význam — hlídá rámec (co: hra ∈ …)"}
+{"id": "lex:pod:0008", "op": "podřazení", "args": ["esej", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0009", "op": "podřazení", "args": ["fejeton", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0010", "op": "podřazení", "args": ["pohádka", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0011", "op": "podřazení", "args": ["cestopis", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0012", "op": "podřazení", "args": ["trilogie", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0013", "op": "podřazení", "args": ["komedie", "drama"], "síla": "implies"}
+{"id": "lex:pod:0014", "op": "podřazení", "args": ["tragédie", "drama"], "síla": "implies"}
+{"id": "lex:pod:0015", "op": "podřazení", "args": ["kniha", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0016", "op": "podřazení", "args": ["próza", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0017", "op": "podřazení", "args": ["poezie", "dílo"], "síla": "implies"}
+{"id": "lex:pod:0018", "op": "podřazení", "args": ["libreto", "dílo"], "síla": "implies"}

@@ -84,6 +84,16 @@ class Grounder:
                 self.out.notes.append(f"{' '.join(t.forms)} → {node.id} ({node.label()}; týž uzel)")
                 if " ".join(t.name_lemmas) != node.lemma:
                     self._defaults.append(f"identita: „{' '.join(t.name_lemmas)}“ = {node.label()} (částečné jméno)")
+            if t.cls is not None and self.write:
+                # nominativ jmenovací „drama R.U.R.“: název je entita, hlava její třída → R.U.R. ∈ drama;
+                # popisek = povrchový tvar (název je v 1. pádě), identita zůstává lemmatická
+                surface = " ".join(t.forms)
+                if new and surface and surface in node.names and node.names[0] != surface:
+                    node.names.remove(surface)
+                    node.names.insert(0, surface)
+                group = self.m.ensure_group(t.cls[0], t.cls[1])
+                if self.m.member_star(node.id, group.id) is None:
+                    self._member(node.id, group.id, note=f"třída z nominativu jmenovacího: {node.label()} ∈ {group.label()}")
             return node.id
         if t.kind == "place":
             node = self.m.ensure_place(t.name_lemmas or (t.lemma,), t.forms)
@@ -121,13 +131,14 @@ class Grounder:
             return inst.id
         return group.id
 
-    def _member(self, elem: str, group: str) -> None:
+    def _member(self, elem: str, group: str, note: str = "instance: členství z neurčité zmínky") -> None:
         """Typovací výrok „instance ∈ skupina“ z neurčité zmínky („Filip má auto“ →
-        a1 ∈ auto). Je `SAFE` (slouží uzávěrům), ale `kind="typing"` — není to
+        a1 ∈ auto) nebo z nominativu jmenovacího („drama R.U.R.“ → R.U.R. ∈ drama).
+        Je `SAFE` (slouží uzávěrům), ale `kind="typing"` — není to
         znalost získaná z textu, bench ho nepočítá do yieldu ani do auditu."""
         st = Statement("", "být", "typing", kernel="member", grade=self.grade, prov=self.prov, sentence=self.out.sentence,  # type: ignore[arg-type]
                        roles=[Role("kdo", [elem], "·", "structural"), Role("co", [group], "∃", "structural")],
-                       defaults=["instance: členství z neurčité zmínky"])
+                       defaults=[note])
         self.m.attach(st)
         self.out.statements.append(st)
 

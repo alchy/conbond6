@@ -11,3 +11,11 @@ Automatická sada obsahovala paskvily („Kdy vytvořil Josef Čapek?“, „Kdy
 Josef Čapek?“ — bez předmětu, který věta má); filtr je odstraňuje deterministicky
 a auditovatelně (důvody v logu). Další krok (plán, Task 5b): kurátorovaná sada
 generovaná LM s ukotvením na větu a ověřená člověkem.
+
+## `gen-*.json` (17. 8. 2026, večer)
+
+`gen-alois_jirásek.json` (4), `gen-karel_čapek.json` (4), `gen-božena_němcová.json` (1) — **výpisové otázky**
+(„Vyjmenuj romány Aloise Jiráska.“, „Která díla napsal Karel Čapek?“) psané Claudem ručně z textu článků
+(řádky „Krakatit (1924) – román.“), `curated: False` do lidského ověření (`python -m bench gold-gen --overit --dok …`);
+sada `gen`, vykazují se zvlášť. Očekávané odpovědi jsou seznam (zásah = aspoň jedna správná výplň); tah „výpis“
+v `mereni/HYPOTEZY.md`.

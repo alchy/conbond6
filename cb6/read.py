@@ -70,6 +70,9 @@ class TermSpec:
     possessor: tuple[str, str] | None = None
     #: Zúžení group vztažnou / participiální větou apod. jen jako poznámka pro render.
     note: str = ""
+    #: Nominativ jmenovací („drama R.U.R.“, „román Krakatit“, „město Praha“): term je
+    #: ENTITA s názvem a zároveň člen skupiny hlavy — `(lemma skupiny, přívlastky)`.
+    cls: tuple[str, tuple[str, ...]] | None = None
 
     def label(self) -> str:
         if self.kind in ("entity", "place") and self.name_lemmas:
@@ -116,7 +119,7 @@ class Predication:
     věta, přívlastek jako vztah, souřadný přísudek, životopisná závorka)."""
 
     pred: str | None
-    kind: Literal["verb", "copula", "fragment", "nmod", "appos"]
+    kind: Literal["verb", "copula", "fragment", "nmod", "appos", "list"]
     neg: bool = False
     modality: str | None = None
     kernel: str | None = None
@@ -189,9 +192,17 @@ class _Reader:
         self.learned_roles: Mapping[str, str] = learned_roles or {}
         self.place: dict[int, str] = {}
         self.residue: list[tuple[str, str]] = []
-        self.mood: str = mood or ("question" if parse.text.rstrip().endswith("?") or self._has_wh() else "assert")
+        self.mood: str = mood or ("question" if parse.text.rstrip().endswith("?") or self._has_wh() or self._list_imperative() is not None else "assert")
 
     # ---- pomocníci -------------------------------------------------------
+
+    def _list_imperative(self) -> Token | None:
+        """Je věta rozkaz výpisu („Vyjmenuj všechna díla…“)? Vrací kořen, nebo `None`.
+        Proč: rozkaz není tvrzení o světě — nesmí se zapsat; je to otázka druhu `list`."""
+        root = self.p.root()
+        if root.upos == "VERB" and root.feat("Mood") == "Imp" and root.lemma in D.LIST_VERBS and self.kids(root.index, "obj"):
+            return root
+        return None
 
     def _has_wh(self) -> bool:
         first = next((t for t in self.p.tokens if t.upos != "PUNCT"), None)
@@ -439,6 +450,16 @@ class _Reader:
                 # „kolik zubů“: díra je počet, term zůstává
                 role.terms = [self._term(t)]
                 role.name = name
+            elif t.upos == "NOUN" and not ("Int" in (t.feat("PronType") or "") and t.lemma in D.WH) \
+                    and role.name not in ("kde", "kam", "odkud", "kudy", "kdy", "od_kdy", "do_kdy", "jak_dlouho"):
+                # „která díla“, „jaké drama“, „kterou knihu“: díra přišla z determinátoru na
+                # podstatném jménu — je to výplň role (co:?), podstatné jméno ji OMEZUJE
+                # (výplň musí být členem skupiny; místa/časy nechávají rodinu rolí, jak je)
+                if role.name in D.WH or role.name in ("který", "jaký"):
+                    role.name = name
+                role.wh_kind = "filler"
+                role.terms = [self._term(t)]
+                p.defaults.append(f"omezení výplně: {name} ∈ {t.lemma}")
             p.roles.append(role)
             return
         role.terms = self._term_group(t)
@@ -687,6 +708,41 @@ class _Reader:
             terms.extend(self._term_group(c))
         return terms
 
+    def _title_of(self, t: Token) -> list[Token] | None:
+        """Nominativ jmenovací: obecné jméno + název v 1. pádě bez předložky
+        („drama R.U.R.“, „román Krakatit“, „hra Bílá nemoc“, „město Praha“).
+        Název je `nmod` v Nom, vlastní jméno nebo velké písmeno, ne zkratka
+        (ta je součást jména: „vitamín C“). Vrací tokeny názvu (hlava + flat +
+        amod, v pořadí věty), nebo `None`."""
+        if t.upos != "NOUN" or "Int" in (t.feat("PronType") or ""):
+            return None
+        for f in self.p.children(t.index):
+            if f.base_deprel != "nmod" or f.feat("Case") != "Nom" or self.case_of(f.index):
+                continue
+            if f.feat("Abbr") == "Yes" or len(f.form) <= 2:
+                continue
+            if not (f.upos == "PROPN" or f.form[:1].isupper()):
+                continue
+            if f.feat("NameType") == "Geo" and t.lemma not in D.PLACE_NOUNS:
+                continue
+            # název = celý podstrom názvu („Továrna na absolutno“, „Osudy dobrého vojáka Švejka“)
+            # kromě větných a závorkových větví (acl, appos, parataxis, conj, punct)
+            toks = [f]
+            for x in self.p.subtree(f.index):
+                if x.index == f.index or x.upos == "PUNCT":
+                    continue
+                anc = x
+                bad = False
+                while anc.index != f.index:
+                    if anc.base_deprel in ("acl", "appos", "parataxis", "conj", "cc", "advcl", "punct"):
+                        bad = True
+                        break
+                    anc = self.p.tokens[anc.head - 1]
+                if not bad:
+                    toks.append(x)
+            return sorted(toks, key=lambda x: x.index)
+        return None
+
     def _term(self, t: Token) -> TermSpec:
         where = "term"
         consumed: list[int] = [t.index]
@@ -701,8 +757,20 @@ class _Reader:
         quant: Quant | None = None
         qauth = ""
         kind: Kind
+        title = self._title_of(t)
+        if title is not None:
+            # nominativ jmenovací: „drama R.U.R.“ → entita R.U.R. ∈ drama (hlava je třída, ne jméno)
+            forms, name_tokens, name_lemmas = [], [], []
+            for x in title:
+                forms.append(x.form)
+                name_tokens.append(x.index)
+                name_lemmas.append(x.lemma)
+                consumed.append(x.index)
+                self.mark(x.index, where)
         # víceslovné jméno
         for f in self.p.children(t.index):
+            if title is not None and f.index in consumed:
+                continue
             if f.base_deprel == "flat" or f.deprel == "compound" or (
                 f.base_deprel == "nmod" and t.upos == "NOUN" and not self.case_of(f.index)
                 and not self.p.children(f.index) and f.feat("NameType") != "Geo"
@@ -767,8 +835,14 @@ class _Reader:
                 self.mark(c.index, "particle")
         # druh
         time = None
+        cls: tuple[str, tuple[str, ...]] | None = None
         if "Int" in (t.feat("PronType") or ""):
             kind = "wh"
+        elif title is not None:
+            kind = "entity"
+            cls = (t.lemma, tuple(a for a in attrs if a != "¬"))
+            attrs = []
+            quant, qauth = "·", "structural"
         elif t.upos == "PROPN":
             kind = "place" if (t.feat("NameType") == "Geo" or self._filler_kind(t) == "place?") else "entity"
             quant, qauth = quant or "·", qauth or "structural"
@@ -808,7 +882,7 @@ class _Reader:
             attrs=tuple(a for a in attrs if a != "¬"), count=count, time=time,
             gender=t.feat("Gender"), number=t.feat("Number"), person=t.feat("Person"),
             quant=quant, quant_authority=qauth, tokens=tuple(sorted(set(consumed))),
-            name_tokens=tuple(name_tokens), name_lemmas=tuple(name_lemmas), possessor=possessor,
+            name_tokens=tuple(name_tokens), name_lemmas=tuple(name_lemmas), possessor=possessor, cls=cls,
         )
         if possessor is not None and spec.quant is None:
             spec.quant, spec.quant_authority = "·", "default:přivlastnění"
@@ -1004,7 +1078,8 @@ class Reader(_Reader):
 
     def read(self) -> Reading:
         root = self.p.root()
-        main = self._clause(root)
+        imp = self._list_imperative()
+        main = self._list_question(imp) if imp is not None else self._clause(root)
         if main is None:
             # nadpis + věta („Obezita: Domácí mazlíčci jsou…“): kořen je nominál,
             # věta visí pod ním jako appos/parataxis/conj/dep — ta je hlavní
@@ -1035,6 +1110,31 @@ class Reader(_Reader):
                 main.secondary.append(sec)
         self._sweep()
         return Reading(parse=self.p, main=main, residue=self.residue, _placement=self.place)
+
+    def _list_question(self, root: Token) -> Predication:
+        """„Vyjmenuj všechna díla Karla Čapka.“ → otázka druhu `list`: díra `co:?`
+        omezená skupinou předmětu (`dílo`), volitelně přivlastnění (`čí: Karel Čapek`
+        z genitivu / přivlastňovacího přívlastku). Sloveso rozkazu je jen částice —
+        není to predikát o světě.
+        Vstup: kořen (VERB, Mood=Imp z `LIST_VERBS`). Výstup: `Predication(kind="list")`."""
+        p = Predication(pred=None, kind="list", head=root.index)
+        self.mark(root.index, "particle")
+        obj = self.kids(root.index, "obj")[0]
+        owner = next((c for c in self.p.children(obj.index) if c.base_deprel == "nmod" and c.feat("Case") == "Gen"
+                      and c.upos in ("PROPN", "NOUN") and not self.case_of(c.index)), None)
+        owner_term = self._term(owner) if owner is not None else None
+        group = self._term(obj)
+        # přivlastnění je role otázky, ne vedlejší predikace `nmod`
+        if owner is not None:
+            self._pending_secondary = [(h, d) for (h, d) in self._pending_secondary if d.index != owner.index]
+        hole = RoleFill("co", "obj", terms=[group], wh=True, wh_kind="filler")
+        p.roles.append(hole)
+        p.defaults.append(f"výpis: {obj.lemma}" + (f" — {owner_term.label()}" if owner_term is not None else ""))
+        if owner_term is not None:
+            p.roles.append(RoleFill("čí", "nmod:Gen", terms=[owner_term]))
+        elif group.possessor is not None:
+            p.defaults.append(f"přivlastnění {group.possessor[1]} → čí")
+        return p
 
     def _clause(self, root: Token) -> Predication | None:
         """Je token hlavou věty (klauze)? Vrátí predikaci, jinak `None`."""

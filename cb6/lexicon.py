@@ -8,11 +8,13 @@ Tenhle modul je *jedno* místo: každá vazba je jeden řádek
 množina funkcí v kódu; použitý řádek se **líně materializuje do grafu** jako
 uzel `kind="vazba"` (I‑11/I‑12 — odpověď je rekonstruovatelná z exportu).
 
-Krok 1 (tento modul dnes): operátory `třída` (ekvivalence — symetrická,
-tranzitivní) a `implikace` (jednosměrná: `p ⇒ q`; fakt `p` odpovídá na otázku
-`q`, ne naopak). Ostatní operátory (`protiklad`, `inverze`, `skládání`,
-`podřazení`, `překryv`, `porovnání`) jsou vyjmenované, ale zatím bez kódu —
-řádek s nimi se načte a hlídá, jen se neuplatní.
+Dnes v kódu: `třída` (ekvivalence — symetrická, tranzitivní), `implikace`
+(jednosměrná: `p ⇒ q`; fakt `p` odpovídá na otázku `q`, ne naopak) a
+`podřazení` (`x ⊆ y` nad lemmaty skupin: kdo je *drama*, je *dílo*; orientované,
+tranzitivní — technicky implikace nad třídami, zvlášť jen kvůli čitelnosti
+řádku a grafu). Ostatní operátory (`protiklad`, `inverze`, `skládání`,
+`překryv`, `porovnání`) jsou vyjmenované, ale zatím bez kódu — řádek s nimi se
+načte a hlídá, jen se neuplatní.
 
 Síla: `same` (zaměnitelné ve verdiktu), `implies` (jednosměrné, ve verdiktu
 jako odvození), `related` (jen pro recall / nápovědu — **nikdy ve verdiktu**).
@@ -34,7 +36,7 @@ from typing import TYPE_CHECKING, Any, Iterable, Sequence
 if TYPE_CHECKING:  # pragma: no cover — jen typy, žádný běhový import (memory importuje lexicon)
     from cb6.memory import Memory
 
-#: Osm operátorů návrhu (§ 1.1). Kód dnes umí první dva; ostatní jsou rezervované.
+#: Osm operátorů návrhu (§ 1.1). Kód dnes umí `třída`, `implikace`, `podřazení`; ostatní jsou rezervované.
 OPS = ("třída", "implikace", "protiklad", "inverze", "skládání", "podřazení", "překryv", "porovnání")
 STRENGTHS = ("same", "implies", "related")
 AUTHORITIES = ("seed", "said", "read", "derived")
@@ -94,6 +96,8 @@ class Link:
     def label(self) -> str:
         """Čitelný popisek pro graf a důkaz: `a ~ b` (same), `a ⇒ b` (implies), `a ≈ b` (related)."""
         sym = {"same": "~", "implies": "⇒", "related": "≈"}.get(self.strength, "?")
+        if self.op == "podřazení" and self.strength == "implies":
+            sym = "⊆"
         return f" {sym} ".join(self.args)
 
     def validate(self) -> None:
@@ -109,12 +113,12 @@ class Link:
             raise ValueError(f"{self.id}: neznámá autorita {self.authority!r}")
         if not self.source:
             raise ValueError(f"{self.id}: řádek bez zdroje")
-        if self.op in ("třída", "implikace") and len(self.args) != 2:
+        if self.op in ("třída", "implikace", "podřazení") and len(self.args) != 2:
             raise ValueError(f"{self.id}: {self.op} chce dva argumenty, má {len(self.args)}")
         if self.op == "třída" and self.strength == "implies":
             raise ValueError(f"{self.id}: třída nemůže mít sílu implies (použij implikace)")
-        if self.op == "implikace" and self.strength == "same":
-            raise ValueError(f"{self.id}: implikace nemůže mít sílu same (použij třída)")
+        if self.op in ("implikace", "podřazení") and self.strength == "same":
+            raise ValueError(f"{self.id}: {self.op} nemůže mít sílu same (použij třída)")
 
 
 @dataclass(frozen=True)
@@ -175,7 +179,7 @@ class Lexicon:
             if link.id in self.rows:
                 raise ValueError(f"duplicitní id {link.id}")
             self.rows[link.id] = link
-            if link.op not in ("třída", "implikace"):
+            if link.op not in ("třída", "implikace", "podřazení"):
                 continue  # rezervované operátory: řádek držíme, kód zatím nemá
             a, b = link.args
             self._loose.setdefault(a, set()).add(b)
@@ -254,8 +258,11 @@ class Lexicon:
                 chain.reverse()
                 derived = any(l.strength == "implies" for l in chain)
                 ids = ", ".join(l.id for l in chain)
-                head = "implikace" if derived else "synonymum"
-                sym = "⇒" if derived else "~"
+                if all(l.op == "podřazení" for l in chain):
+                    head, sym = "podřazení", "⊆"
+                else:
+                    head = "implikace" if derived else "synonymum"
+                    sym = "⇒" if derived else "~"
                 result = LexMatch(tuple(chain), f"{head}: {fact} {sym} {pattern} [{ids}]", derived)
                 break
             if depth >= MAX_CHAIN:
@@ -292,18 +299,21 @@ class Lexicon:
         return False
 
 
-_TEACH = re.compile(r"^(\S+)\s*(=>|=|~)\s*(\S+)$")
+_TEACH = re.compile(r"^(\S+)\s*(=>|=|~|<)\s*(\S+)$")
 
 
 def parse_teach(arg: str) -> tuple[str, tuple[str, str], str] | None:
-    """Zápis dialogu `!uč a = b` (třída/same), `!uč a => b` (implikace/implies),
-    `!uč a ~ b` (třída/related). Vstup: text za příkazem. Výstup: `(op, args, síla)` nebo `None`."""
+    """Zápis dialogu: `!uč a = b` (třída/same), `!uč a => b` (implikace/implies),
+    `!uč a ~ b` (třída/related), `!uč a < b` (podřazení: a ⊆ b, implies).
+    Vstup: text za příkazem. Výstup: `(op, args, síla)` nebo `None`."""
     mt = _TEACH.match(arg.strip())
     if not mt:
         return None
     a, sym, b = mt.groups()
     if sym == "=>":
         return "implikace", (a, b), "implies"
+    if sym == "<":
+        return "podřazení", (a, b), "implies"
     if sym == "=":
         return "třída", (a, b), "same"
     return "třída", (a, b), "related"
