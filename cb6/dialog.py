@@ -408,7 +408,7 @@ class Session:
         if cmd in ("statusy", "statuses"):
             counts = {c: len(m.by_claim(c)) for c in ("SAFE", "HYPOTHESIS", "REJECTED")}  # type: ignore[arg-type]
             know = sum(1 for _ in m.knowledge())
-            moods = {}
+            moods: dict[str, int] = {}
             for st in m.active():
                 moods[st.mood] = moods.get(st.mood, 0) + 1
             return (f"SAFE {counts['SAFE']} (z toho znalost {know}) · HYPOTHESIS {counts['HYPOTHESIS']} · REJECTED {counts['REJECTED']}"
@@ -418,9 +418,10 @@ class Session:
             if not mt:
                 return "užití: !hypotéza s0042 potvrď | zamítni"
             sid, what = mt.group(1), mt.group(2)
-            st = m.statements.get(sid)
-            if st is None or st.claim != "HYPOTHESIS" or st.status != "active":
+            hyp = m.statements.get(sid)
+            if hyp is None or hyp.claim != "HYPOTHESIS" or hyp.status != "active":
                 return f"{sid} není aktivní hypotéza"
+            st = hyp
             if what.startswith("potvr"):
                 m.set_claim(sid, "SAFE", f"potvrzeno dialogem (tah {self.turn_no})")
                 closed = []
