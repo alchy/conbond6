@@ -198,7 +198,7 @@ def write_filtered(kept: list[dict[str, Any]], reasons: Counter[str], total: int
 
 def main(argv: list[str]) -> int:  # pylint: disable=unused-argument
     """`python -m bench gold-filter` — přegeneruje vyfiltrovanou sadu."""
-    from bench.run import make_oracle  # pylint: disable=import-outside-toplevel  (cyklus)
+    from bench.run import make_oracle  # pylint: disable=import-outside-toplevel
     cfg = load_config()
     oracle = make_oracle(cfg)
     kept, reasons = filter_auto(oracle, cfg)

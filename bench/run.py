@@ -101,7 +101,8 @@ def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = Fal
         row["reach"] = reach(m, ans_no, anchor_words(q.q, doc.topic), sentences) if ans_no is not None else None
         try:
             a = session.say(q.q)
-        except Exception as exc:  # noqa: BLE001  pylint: disable=broad-exception-caught  — bench nesmí spadnout na jedné otázce
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            # bench nesmí spadnout na jedné otázce
             row.update({"ok": False, "text_ok": False, "why": f"pád: {type(exc).__name__}: {exc}"})
             results.append(row)
             continue
@@ -126,8 +127,8 @@ def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = Fal
             row["graph_violations"] = len(vs)
             violations.extend({**v.__dict__, "q": row["q"]} for v in vs)
     by_check: dict[str, int] = {}
-    for v in violations:
-        by_check[v["check"]] = by_check.get(v["check"], 0) + 1
+    for viol in violations:
+        by_check[str(viol["check"])] = by_check.get(str(viol["check"]), 0) + 1
     determinism: bool | None = None
     if twice:
         s2, _, _, _ = ingest_doc(doc, oracle, strop)
