@@ -8,6 +8,7 @@
 |---|---|
 | repo | `~/Projects/conbond6` · https://github.com/alchy/conbond6 (větve `main` = `v1`) |
 | zadání, invarianty I‑1…I‑12 | `docs/superpowers/specs/2026-08-17-conbond6-design.md` |
+| znalostní vazby jako data (návrh) | `docs/superpowers/specs/2026-08-17-znalostni-vazby-design.md` |
 | koncept (proč takhle) | `docs/KONCEPT.md` |
 | plán v1 + stav provedení | `docs/superpowers/plans/2026-08-17-conbond6-v1.md` |
 | hypotézy a výsledky tahů | `mereni/HYPOTEZY.md` |
@@ -72,7 +73,8 @@ Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná z
 5. Prostor modelů pro disjunkci/ekvivalenci/kardinalitu (přenos `conBond3/cb_logic/models.py`) — dnes REJECTED s důvodem.
 6. Adaptéry conbond1/conbond4 pro zpětný běh QA (Task 12 — neproveden).
 7. Valence jako data (`valence.json` conbond1 / VALLEX), relativní čas (conbond1 chronos), nominalizace, rekurze v dotazu (jellyAI3 SubQuery) — každý jako měřený tah, až bench ukáže potřebu.
-8. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
+8. **Znalostní vazby jako data** (návrh `2026-08-17-znalostni-vazby-design.md`): operátory v kódu (8), vazby jako řádky se sílou/autoritou/zdrojem, líná materializace do grafu s `uses_rule`; pořadí: synonyma se sílou (migrace `SYNONYMS`, `learned`) → překryv/porovnání + veličiny ("mohli se potkat", "vejde se", "Jaká je délka") → příbuzenství (inverze/skládání, G‑3) → antonyma až na otázku. Nahrazuje čtyři dnešní místa (`defaults.SYNONYMS`, `Memory.learned`, `Memory.rules`, `kind=rule`) jedním.
+9. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
 
 ## 7. Deník rozhodnutí
 
@@ -85,6 +87,7 @@ Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná z
 - 17. 8. — viewBase → viewBase2 (github.com/alchy/viewBase2), oblasti podle dokumentu (`skupina`).
 - 17. 8. — Vzorek auditu se vybírá po větách se seedem = dokument (dřív seed = commit → každý commit jiných 400 výroků, ±5 b. šum). Čísla před 234ca26 nejsou navzájem srovnatelná; od 234ca26 ano.
 - 17. 8. — ∀ z generického prézentu jen v jednoduché obecné větě (kořen, nekoordinovaný podmět, bez PROPN); hlavní predikace 35 → 31–32 % nepodložených.
+- 17. 8. — Návrh conbond5 „Q(A,B) ⇐ TEST(…)“ přijat jako operátory `překryv`/`porovnání` v lexikonu vazeb; pravidlo je řádek dat s modalitou a proveniencí, materializovaný do grafu při použití; ne pátý slovník. Síla vazby `same/implies/related` (dnešní `SYNONYMS` je únik precision).
 - 17. 8. — conbond5 (paralelně) jde cestou šíře konstrukcí (ruční otázky 59/70); conbond6 cestou věrnosti; další tah conbond6 = přebírat konstrukce z conbond5 po jedné přes bránu benche.
 
 ## 8. Jak předat dál (checklist pro nové sezení)
