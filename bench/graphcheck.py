@@ -160,8 +160,10 @@ def lex_path(g: nx.MultiDiGraph, fact_pred: str, query_pred: str, limit: int = 4
 def hard_path(g: nx.MultiDiGraph, kernel: str, a: str, b: str) -> list[str] | None:
     """Cesta po tvrdých hranách daného jádra z `a` do `b` (BFS), nebo `None`.
 
-    `member`: první hrana `member`, dál `subset`/`restricts`; `subset`:
-    `subset`/`restricts`; `within`: `within` (+ `same_as` obousměrně);
+    `member`: nejdřív libovolně `same_as` (obousměrně — třída jmen prvku, jako
+    `Memory.member_star`), pak jedna hrana `member`, dál `subset`/`restricts`
+    (a `same_as` mezi skupinami, jako `subset_star`); `subset`: `subset`/`restricts`
+    + `same_as` obousměrně; `within`: `within` (+ `same_as` obousměrně);
     `same_as`: obousměrně. Triviální `a == b` je prázdná cesta.
     """
     if a == b:
@@ -169,40 +171,47 @@ def hard_path(g: nx.MultiDiGraph, kernel: str, a: str, b: str) -> list[str] | No
     if a not in g or b not in g:
         return None
 
-    def nexts(n: str, first: bool) -> Iterable[str]:
+    def nexts(n: str, first: bool) -> Iterable[tuple[str, bool]]:
+        """Sousedé po povolených hranách; `first` = ještě nepadla hrana `member`."""
         for _, v, d in g.out_edges(n, data=True):
             t = d.get("type")
             if kernel == "member":
-                if (first and t == "member") or (not first and t in ("subset", "restricts")):
-                    yield v
+                if first and t == "member":
+                    yield v, False
+                elif first and t == "same_as":
+                    yield v, True
+                elif not first and t in ("subset", "restricts", "same_as"):
+                    yield v, False
             elif kernel == "subset":
-                if t in ("subset", "restricts"):
-                    yield v
+                if t in ("subset", "restricts", "same_as"):
+                    yield v, first
             elif kernel == "within":
                 if t in ("within", "same_as"):
-                    yield v
+                    yield v, first
             elif kernel == "same_as":
                 if t == "same_as":
-                    yield v
-        if kernel in ("same_as", "within"):
-            for u, _, d in g.in_edges(n, data=True):
-                if d.get("type") == "same_as":
-                    yield u
+                    yield v, first
+        # `same_as` je symetrické — i proti směru hrany
+        for u, _, d in g.in_edges(n, data=True):
+            if d.get("type") == "same_as":
+                yield u, first
 
-    prev: dict[str, str | None] = {a: None}
+    prev: dict[tuple[str, bool], tuple[str, bool] | None] = {(a, True): None}
     q: deque[tuple[str, bool]] = deque([(a, True)])
     while q:
         n, first = q.popleft()
-        for v in nexts(n, first):
-            if v in prev:
+        for v, nf in nexts(n, first):
+            if (v, nf) in prev:
                 continue
-            prev[v] = n
-            if v == b:
-                path = [b]
-                while prev[path[-1]] is not None:
-                    path.append(prev[path[-1]])  # type: ignore[arg-type]
+            prev[(v, nf)] = (n, first)
+            if v == b and not (kernel == "member" and nf):  # member: aspoň jedna hrana member
+                path: list[str] = []
+                cur: tuple[str, bool] | None = (v, nf)
+                while cur is not None:
+                    path.append(cur[0])
+                    cur = prev[cur]
                 return list(reversed(path))
-            q.append((v, False))
+            q.append((v, nf))
     return None
 
 

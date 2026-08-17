@@ -287,14 +287,19 @@ class Grounder:
         # totožnost (same_as by spojila všechny navzájem — otrava identity); převeď na member
         kdo_r, co_r = st.role("kdo"), st.role("co")
         if st.kernel == "same_as" and kdo_r and co_r and len(kdo_r.terms) == 1 and len(co_r.terms) > 1 \
-                and self.m.nodes.get(kdo_r.terms[0], Node("", "")).kind == "group" \
-                and all(self.m.nodes.get(t, Node("", "")).kind in ("entity", "place") for t in co_r.terms):
-            group_id = kdo_r.terms[0]
-            members = list(co_r.terms)
-            kdo_r.terms, co_r.terms = members, [group_id]
-            kdo_r.quant, co_r.quant = "·", "∃"
-            st.kernel = "member"
-            self._defaults.append(f"výčet: {self.m.nodes[group_id].label()}: {', '.join(self.m.nodes[t].label() for t in members)} → každý ∈ {self.m.nodes[group_id].label()} [výchozí]")
+                and self.m.nodes.get(kdo_r.terms[0], Node("", "")).kind == "group":
+            # letopočty/hodnoty ve výčtu („Jan Žižka 1903, Jan Roháč 1914“) nejsou členové — přeskočí se
+            members = [t for t in co_r.terms if self.m.nodes.get(t, Node("", "")).kind in ("entity", "place")]
+            others = [t for t in co_r.terms if t not in members]
+            def _etc(t: str) -> bool:  # „a další“, „a jiní“ — výčet pokračuje, člen to není
+                n = self.m.nodes.get(t, Node("", ""))
+                return n.kind in ("time", "value") or (n.kind == "group" and n.lemma in ("další", "jiný", "ostatní", "podobný", "mnohý"))
+            if members and all(_etc(t) for t in others):
+                group_id = kdo_r.terms[0]
+                kdo_r.terms, co_r.terms = members, [group_id]
+                kdo_r.quant, co_r.quant = "·", "∃"
+                st.kernel = "member"
+                self._defaults.append(f"výčet: {self.m.nodes[group_id].label()}: {', '.join(self.m.nodes[t].label() for t in members)} → každý ∈ {self.m.nodes[group_id].label()} [výchozí]")
         st.defaults = list(dict.fromkeys(self._defaults))
         pending = list(self._pending_open)
         ambiguous_roles = list(self._ambiguous)

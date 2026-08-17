@@ -46,7 +46,7 @@ to o sobě změřit.** Není to „další verze motoru“; úkol je *prokázat 
 
 ## Prostředí (ověř na začátku)
 
-- `.venv` (Python 3.11): `.venv/bin/python -m pytest -q` musí být zelené (159 + 2 xfail).
+- `.venv` (Python 3.11): `.venv/bin/python -m pytest -q` musí být zelené (167 + 2 xfail).
 - UDPipe služba z conBond3 na `127.0.0.1:42200` (bench, nové rozbory).
 - Ollama `gemma4:latest` na `127.0.0.1:11434` (soudce auditu, `gold-gen`).
 - Živý graf: `.venv/bin/python -m cb6.viewbase_app --pamet data/pamet-graf.json --port 8081`.
@@ -66,6 +66,12 @@ to o sobě změřit.** Není to „další verze motoru“; úkol je *prokázat 
   `lex` v graphchecku), `!uč a = b | a => b | a ~ b`; `defaults.SYNONYMS` a
   `Memory.learned["synonyms"]` zanikly. Přitvrzení síly dalo +3 QA (napsat ≠
   publikovat, chodit ≠ studovat), 0 ztrát, unsupported beze změny.
+- **Hotový tah „výpis“ (večer, nález J. z dema):** „Která díla napsal…?“ = díra
+  s omezením skupinou, „Vyjmenuj všechna díla Karla Čapka.“ = otázka druhu `list`
+  (nezapisuje se), operátor `podřazení` v lexikonu (`!uč drama < dílo`, seed
+  `podrazeni.jsonl`), nominativ jmenovací („drama R.U.R.“ → R.U.R. ∈ drama),
+  téma dokumentu v grafu. Nové výpisové otázky `bench/gold/gen-*.json` (9) čekají
+  na ověření J. (`bench gold-gen --overit --dok …`). Čísla: HANDOVER § 4 / HYPOTEZY.
 - **Další tah = krok 2 návrhu:** operátory `překryv` + `porovnání` a veličiny
   (hodnota, jednotka → dimenze; `!uč překryv …`, `!uč porovnání …`; otázky
   „Jaká je délka …?“, „Je A delší než B?“, „Mohli se potkat?“ s modalitou
