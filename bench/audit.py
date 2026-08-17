@@ -48,12 +48,29 @@ def render_for_audit(m: Memory, st: Statement) -> str:
 
 
 def sample(memory: Memory, n: int, seed: str) -> list[Statement]:
-    """Deterministický vzorek znalosti (`knowledge()`, jen `read`; pravidla ne)."""
-    pool = sorted((s for s in memory.knowledge() if s.grade == "read" and s.kind not in ("rule", "typing") and s.sentence), key=lambda s: s.id)
-    rnd = random.Random(int(hashlib.sha256(seed.encode()).hexdigest()[:8], 16))  # noqa
+    """Deterministický vzorek znalosti (`knowledge()`, jen `read`; pravidla a typování ne).
+
+    Vzorek se vybírá po **větách** (pořadí vět zamíchané seedem = jméno dokumentu),
+    ne po výrocích: napříč commity se tak soudí tytéž věty a čísla jsou srovnatelná
+    (změna kódu změní výroky těch vět, ne výběr). Kdyby seed byl otisk commitu,
+    každý commit by měřil jiných n výroků a rozdíl ±5 b. by byl šum (17. 8. 2026).
+    """
+    pool = [s for s in memory.knowledge() if s.grade == "read" and s.kind not in ("rule", "typing") and s.sentence]
     if len(pool) <= n:
-        return pool
-    return sorted(rnd.sample(pool, n), key=lambda s: s.id)
+        return sorted(pool, key=lambda s: s.id)
+    by_sentence: dict[str, list[Statement]] = {}
+    for st in pool:
+        by_sentence.setdefault(st.sentence, []).append(st)
+    order = sorted(by_sentence)
+    rnd = random.Random(int(hashlib.sha256(seed.encode()).hexdigest()[:8], 16))  # noqa
+    rnd.shuffle(order)
+    out: list[Statement] = []
+    for z in order:
+        for st in sorted(by_sentence[z], key=lambda s: s.id):
+            out.append(st)
+            if len(out) >= n:
+                return sorted(out, key=lambda s: s.id)
+    return sorted(out, key=lambda s: s.id)
 
 
 def _sentence_text(m: Memory, st: Statement) -> str:
