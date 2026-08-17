@@ -216,9 +216,9 @@ class Session:
         g = ground(reading, m, prov, "said", topic=self.topics.get(doc))
         self._update_topic(doc, g)
         m.tick()
-        self._last_said = [s.id for s in g.statements if s.derived_from is None]
+        self._last_said = [s.id for s in g.statements if s.derived_from is None and s.parent is None]
         for s in g.statements:
-            if s.derived_from is None:
+            if s.derived_from is None and s.parent is None:
                 lines.append(f"✓ zapsáno [{s.id}] {render_statement(m, s)}")
                 if s.defaults:
                     lines.append("   [" + "; ".join(s.defaults) + "]")

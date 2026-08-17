@@ -172,9 +172,17 @@ def test_time_containment_in_question(oracle: RecordedOracle) -> None:
 
 def test_modal_question_on_modal_fact(oracle: RecordedOracle) -> None:
     b = Box(oracle)
-    b.say("Chov domácích zvířat může mít negativní dopad na jejich zdraví, pokud nejsou splněny určité požadavky.")
+    b.say("Chov domácích zvířat může mít negativní dopad na jejich zdraví.")
     assert b.ask("Může chov mít negativní dopad?").value == "ANO"
     assert b.ask("Má chov negativní dopad?").value == "MOŽNÁ"
+
+
+def test_conditional_modal_fact_is_rule_not_fact(oracle: RecordedOracle) -> None:
+    """„…, pokud nejsou splněny požadavky.“ je podmínka → pravidlo, ne tvrzení (triáž, I‑8)."""
+    b = Box(oracle)
+    b.say("Chov domácích zvířat může mít negativní dopad na jejich zdraví, pokud nejsou splněny určité požadavky.")
+    assert b.ask("Může chov mít negativní dopad?").value == "NEVÍM"
+    assert any(s.kind == "rule" for s in b.m.knowledge())
 
 
 def test_definition_of_group_and_property(oracle: RecordedOracle) -> None:

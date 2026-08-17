@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 
 from cb6.memory import Memory, Node, OpenItem, Provenance, Role, Statement
 from cb6.read import Predication, Reading, TermSpec
+from cb6.triage import Decision, Rule, Triaged, triage
 
 
 @dataclass
@@ -34,12 +35,15 @@ class Grounded:
 class Grounder:
     """Jedno zakotvení jedné věty (drží paměť, provenienci a poznámky)."""
 
-    def __init__(self, memory: Memory, prov: Provenance, grade: str, *, topic: str | None, write: bool) -> None:
+    def __init__(self, memory: Memory, prov: Provenance, grade: str, *, topic: str | None, write: bool,
+                 triaged: Triaged | None = None) -> None:
         self.m = memory
         self.prov = prov
         self.grade = grade
         self.topic = topic
         self.write = write
+        #: rozhodnutí triáže (status/nálada predikací, pravidla); None = vše SAFE/assert
+        self.triaged = triaged
         self.out = Grounded()
         self._defaults: list[str] = []
         self._pending_open: list[tuple[str, str, str, list[str]]] = []  # (kind, about, question, options)
@@ -101,7 +105,10 @@ class Grounder:
         return group.id
 
     def _member(self, elem: str, group: str) -> None:
-        st = Statement("", "být", "copula", kernel="member", grade=self.grade, prov=self.prov, sentence=self.out.sentence,  # type: ignore[arg-type]
+        """Typovací výrok „instance ∈ skupina“ z neurčité zmínky („Filip má auto“ →
+        a1 ∈ auto). Je `SAFE` (slouží uzávěrům), ale `kind="typing"` — není to
+        znalost získaná z textu, bench ho nepočítá do yieldu ani do auditu."""
+        st = Statement("", "být", "typing", kernel="member", grade=self.grade, prov=self.prov, sentence=self.out.sentence,  # type: ignore[arg-type]
                        roles=[Role("kdo", [elem], "·", "structural"), Role("co", [group], "∃", "structural")],
                        defaults=["instance: členství z neurčité zmínky"])
         self.m.attach(st)
@@ -196,9 +203,12 @@ class Grounder:
         self._pending_open = []
         subj = p.role("kdo")
         subject_specific = bool(subj and subj.terms and subj.terms[0].kind in ("entity", "pron") and subj.terms[0].quant == "·")
+        dec = self.triaged.decision(p) if self.triaged is not None else Decision()
+        mood = p.mood if p.mood == "question" else dec.mood
         st = Statement("", p.pred, p.kind, neg=p.neg, modality=p.modality, kernel=p.kernel, grade=self.grade,  # type: ignore[arg-type]
-                       prov=self.prov, sentence=self.out.sentence, tense=p.tense, mood=p.mood, parent=parent,
-                       residue=list(residue or []))
+                       prov=self.prov, sentence=self.out.sentence, tense=p.tense, mood=mood, parent=parent,  # type: ignore[arg-type]
+                       residue=list(residue or []), claim=dec.claim, reason=dec.reason)
+        self._defaults.extend(dec.defaults)
         nested_specs: list[tuple[Role, Predication]] = []
         for rf in p.roles:
             role = Role(rf.name, [], None, rf.authority, rf.surface, wh=rf.wh, wh_kind=rf.wh_kind)
@@ -238,19 +248,61 @@ class Grounder:
                 self.out.statements.append(child)
         return st
 
+    def ground_rule(self, rule: Rule, *, residue: list[tuple[str, str]] | None = None) -> Statement:
+        """Podmínka z textu → výrok `kind="rule"` (SAFE jakožto pravidlo) s rolemi
+        `pokud` (podmínka) a `pak` (důsledek), obě jako výroky `mood="pattern"`
+        vnořené do pravidla. `only_if` prohodí strany; `iff` volající zavolá dvakrát.
+
+        Args:
+            rule: z triáže; residue: zbytek věty (nese ho pravidlo).
+        Returns:
+            Výrok pravidla (u `write=False` nezapsaný).
+        """
+        cond, cons = (rule.cond, rule.cons) if rule.kind != "only_if" else (rule.cons, rule.cond)
+        st = Statement("", None, "rule", grade=self.grade, prov=self.prov, sentence=self.out.sentence,  # type: ignore[arg-type]
+                       residue=list(residue or []), defaults=[f"pravidlo z podmínky „{rule.marker}“ ({rule.kind})"])
+        if self.write:
+            self.m.attach(st)
+            self.out.statements.append(st)
+        c1 = self.ground_predication(cond, parent=st.id or None)
+        c2 = self.ground_predication(cons, parent=st.id or None)
+        st.roles = [Role("pokud", [], None, "structural", nested=c1.id or None), Role("pak", [], None, "structural", nested=c2.id or None)]
+        return st
+
     def ground(self, reading: Reading) -> Grounded:
+        """Zakotvi celé čtení: hlavní predikace (nebo pravidla z podmínek), vnořené
+        a vedlejší predikace, podle rozhodnutí triáže."""
         if self.write:
             sent = self.m.new_sentence(self.prov.doc, self.prov.sent_no, self.prov.text)
             self.out.sentence = sent.id
-        main = self.ground_predication(reading.main, residue=reading.residue)
-        self.out.main = main
+        rules = self.triaged.rules if self.triaged is not None else []
+        if rules:
+            first: Statement | None = None
+            for rule in rules:
+                r = self.ground_rule(rule, residue=reading.residue if first is None else None)
+                first = first or r
+                if rule.kind == "iff":
+                    self.ground_rule(Rule("only_if", rule.cond, rule.cons, rule.marker))
+            self.out.main = first
+        else:
+            self.out.main = self.ground_predication(reading.main, residue=reading.residue)
         for sec in reading.main.secondary:
             self.ground_predication(sec)
+        if self.triaged is not None:
+            for n in self.triaged.notes:
+                self.out.notes.append(n)
         return self.out
 
 
 def ground(reading: Reading, memory: Memory, prov: Provenance, grade: str = "read", *,
            topic: str | None = None, write: bool = True) -> Grounded:
-    """Zakotvi čtení do paměti. `write=False` jen rozřeší termy (otázka
-    bázi nemění, I‑12) — vrací hlavní výrok bez id."""
-    return Grounder(memory, prov, grade, topic=topic, write=write).ground(reading)
+    """Zakotvi čtení do paměti — přes triáž (`triage()`), která rozhodne statusy.
+    `write=False` jen rozřeší termy (otázka bázi nemění, I‑12) — vrací hlavní
+    výrok bez id."""
+    return ground_triaged(triage(reading), memory, prov, grade, topic=topic, write=write)
+
+
+def ground_triaged(t: Triaged, memory: Memory, prov: Provenance, grade: str = "read", *,
+                   topic: str | None = None, write: bool = True) -> Grounded:
+    """Zakotvi už roztříděné čtení (`Triaged`)."""
+    return Grounder(memory, prov, grade, topic=topic, write=write, triaged=t).ground(t.reading)

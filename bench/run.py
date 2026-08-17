@@ -138,7 +138,7 @@ def run_doc(doc: Doc, oracle: CachedOracle, *, strop: int = 0, twice: bool = Fal
         by_check[str(viol["check"])] = by_check.get(str(viol["check"]), 0) + 1
     audit: dict[str, Any] | None = None
     if audit_n and audit_dir is not None:
-        audit = run_audit(m, doc.name, judge, audit_dir / f"audit-{doc.name}.json", audit_n, seed or doc.name)
+        audit = run_audit(m, doc.name, judge, audit_dir / f"audit-{doc.name}.json", audit_n, seed or doc.name, topic=doc.topic)
     determinism: bool | None = None
     if twice:
         s2, _, _, _ = ingest_doc(doc, oracle, strop)

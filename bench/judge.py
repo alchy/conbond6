@@ -28,9 +28,11 @@ from typing import Literal, Protocol
 Verdikt = Literal["tvrdí", "netvrdí", "částečně"]
 VERDIKTY: tuple[Verdikt, ...] = ("tvrdí", "netvrdí", "částečně")
 
-PROMPT_VERSION = "1"
+PROMPT_VERSION = "2"
 
 JUDGE_PROMPT_V1 = """Jsi soudce věrnosti extrakce. Dostaneš jednu českou větu a jeden výrok, který z ní systém vytěžil.
+Čeština vynechává podmět: když věta podmět nemá („Zemřel v Praze.“) a výrok ho doplňuje z kontextu (téma textu, předchozí věta), je to správně — posuzuj jen, zda ostatní role a děj sedí.
+Závorka za jménem osoby s roky „(1887–1945)“ nebo „(9. 1. 1890 Hronov – 12. 3. 1930 Praha)“ = narození a úmrtí; výrok narodit_se/zemřít z ní je „tvrdí“. Závorka s jediným rokem za místem („do Drážďan (1885)“) NENÍ narození.
 Výrok má tvar predikát(role: hodnota, …); „kdo“ = podmět/konatel, „co“ = předmět, „kde/kdy/kam/odkud/komu/čím/s_kým“ = okolnosti,
 „⟨member⟩“ = jedinec patří do skupiny, „⟨subset⟩“ = skupina je podmnožinou, „∀“ = obecné tvrzení o všech, „∃“ = o některých, „·“ = konkrétní jedinec.
 Rozhodni POUZE podle toho, co věta doslova tvrdí (žádné vlastní znalosti o světě):
@@ -43,6 +45,9 @@ Příklady:
 3) Věta: „V roce 1888 Jirásek přesídlil do Prahy.“ Výrok: přesídlit(kdo: Jirásek, kam: Praha) → částečně (chybí rok, jinak sedí)
 4) Věta: „Pes štěká.“ Výrok: štěkat(kdo: ∀pes) → tvrdí (generické tvrzení)
 5) Věta: „Petr řekl, že Marie přijde.“ Výrok: přijít(kdo: Marie) → netvrdí (věta tvrdí jen, že to Petr řekl)
+6) Věta: „Zemřel v Praze.“ Kontext: Alois Jirásek. Výrok: zemřít(kdo: Alois Jirásek, kde: Praha) → tvrdí (nevyslovený podmět z kontextu)
+7) Věta: „Byl mladším bratrem Josefa Čapka (1887–1945).“ Výrok: narodit_se(kdo: Josef Čapek, kdy: 1887) → tvrdí (závorka s roky za jménem)
+8) Věta: „Podíval se do Drážďan (1885).“ Výrok: narodit_se(kdo: Drážďany, kdy: 1885) → netvrdí
 Odpověz jen JSON: {"verdikt": "tvrdí" | "netvrdí" | "částečně", "pozn": "krátké zdůvodnění česky"}"""
 
 
@@ -89,7 +94,8 @@ def _parse_verdict(text: str) -> tuple[Verdikt, str]:
 
 
 def _user_message(render: str, sentence: str, context: str) -> str:
-    ctx = f"\nKontext (jen pro zájmena): {context}" if context else ""
+    """Zpráva soudci: věta, kontext (téma / předchozí věta — jen pro nevyslovený podmět a zájmena), výrok."""
+    ctx = f"\nKontext (jen pro nevyslovený podmět a zájmena): {context}" if context else ""
     return f"Věta: „{sentence}“{ctx}\nVýrok: {render}\nOdpověz JSON."
 
 

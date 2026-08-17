@@ -33,7 +33,8 @@ def ingest_metrics(memory: Memory, n_words: int, reports: list[dict[str, Any]]) 
         `roles_per_stmt`, `pct_with_time`, `pct_with_place`, `written_pct`,
         `sentences`, `words`, `statements_active`.
     """
-    know = [s for s in memory.knowledge() if s.grade in ("read", "said") and s.kind != "rule"]
+    know = [s for s in memory.knowledge() if s.grade in ("read", "said") and s.kind not in ("rule", "typing")]
+    typing = sum(1 for s in memory.knowledge() if s.kind == "typing")
     #: hlavní predikace (sloveso, kopula) — bez vedlejších `nmod`/`appos`/fragmentů
     know_main = [s for s in know if s.kind in ("verb", "copula")]
     rules = [s for s in memory.knowledge() if s.kind == "rule"]
@@ -58,7 +59,7 @@ def ingest_metrics(memory: Memory, n_words: int, reports: list[dict[str, Any]]) 
         "safe": len(know), "safe_main": len(know_main), "rules": len(rules), "derived": len(derived),
         "yield_main": round(1000.0 * len(know_main) / n_words, 2) if n_words else 0.0,
         "claims": {k: claims.get(k, 0) for k in ("SAFE", "HYPOTHESIS", "REJECTED")},
-        "pattern": pattern, "reported": reported,
+        "pattern": pattern, "reported": reported, "typing": typing,
         "statements_active": sum(1 for _ in memory.active()),
         "residue_pct": round(100.0 * n_residue / n_tokens, 1) if n_tokens else 0.0,
         "residue_tokens": n_residue, "tokens": n_tokens,

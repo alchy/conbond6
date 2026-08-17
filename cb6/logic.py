@@ -233,7 +233,7 @@ class Evaluator:
                         proofs.append(Proof(mem, [f"{m.node(s).label()} ∈ {m.node(o).label()}"], grade=self._grade_of(mem), hard=[("member", s, o)]))
                         continue
                     # disjunktnost: s ∈ H, H ∦ o
-                    for st in m.active():
+                    for st in m.knowledge():
                         st_kdo, st_co = st.role("kdo"), st.role("co")
                         if st.kernel == "member" and not st.neg and st_kdo and s in st_kdo.terms:
                             for h in (st_co.terms if st_co else []):
@@ -280,7 +280,7 @@ class Evaluator:
                     return kv
                 neg.extend(kv.counter)
                 pos.extend(kv.proofs)
-        candidates = [f for f in m.active() if self.same_pred(q.pred, f.pred) is not None]
+        candidates = [f for f in m.knowledge() if self.same_pred(q.pred, f.pred) is not None]
         for f in candidates:
             p = self.match(q, f, depth=depth)
             if p is None:
@@ -340,7 +340,7 @@ class Evaluator:
                 if not m.statements_about(t) and self._kind(t) in ("entity", "place"):
                     out.append(f"o {m.node(t).label()} nevím nic")
         if not near and not out and q.pred:
-            preds = {s.pred for s in m.active() if s.pred}
+            preds = {s.pred for s in m.knowledge() if s.pred}
             if not any(self.same_pred(q.pred, p) is not None for p in preds):
                 out.append(f"o „{q.pred}“ nemám žádný výrok")
         return out
@@ -367,7 +367,7 @@ class Evaluator:
         seen: set[str] = set()
         near: list[str] = []
         matched: list[tuple[Statement, Proof]] = []
-        for f in m.active():
+        for f in m.knowledge():
             if self.same_pred(q.pred, f.pred) is None or f.neg:
                 continue
             p = self.match(q, f)

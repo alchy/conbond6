@@ -443,7 +443,7 @@ class Memory:
             Iterátor výroků, o něž se smí opřít verdikt ANO/NE a výplň díry.
         """
         for st in self.statements.values():
-            if st.status == "active" and st.claim == "SAFE" and st.mood == "assert":
+            if st.status == "active" and st.claim == "SAFE" and st.mood == "assert" and st.kind != "fragment":
                 yield st
 
     def by_claim(self, claim: Claim) -> list[Statement]:

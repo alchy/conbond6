@@ -49,7 +49,7 @@ def render_for_audit(m: Memory, st: Statement) -> str:
 
 def sample(memory: Memory, n: int, seed: str) -> list[Statement]:
     """Deterministický vzorek znalosti (`knowledge()`, jen `read`; pravidla ne)."""
-    pool = sorted((s for s in memory.knowledge() if s.grade == "read" and s.kind != "rule" and s.sentence), key=lambda s: s.id)
+    pool = sorted((s for s in memory.knowledge() if s.grade == "read" and s.kind not in ("rule", "typing") and s.sentence), key=lambda s: s.id)
     rnd = random.Random(int(hashlib.sha256(seed.encode()).hexdigest()[:8], 16))  # noqa
     if len(pool) <= n:
         return pool
@@ -62,19 +62,20 @@ def _sentence_text(m: Memory, st: Statement) -> str:
     return z.text if z else st.prov.text
 
 
-def _context(m: Memory, st: Statement) -> str:
-    """Předchozí věta téhož dokumentu (pro zájmena)."""
+def _context(m: Memory, st: Statement, topic: str = "") -> str:
+    """Téma dokumentu + předchozí věta (pro nevyslovený podmět a zájmena)."""
     z = m.nodes.get(st.sentence)
-    if not z:
-        return ""
-    try:
-        no = int(z.lemma.rsplit("#", 1)[-1])
-    except ValueError:
-        return ""
-    for n in m.nodes.values():
-        if n.kind == "sentence" and n.doc == z.doc and n.lemma.endswith(f"#{no - 1}"):
-            return n.text
-    return ""
+    parts = [f"téma textu: {topic}"] if topic else []
+    if z:
+        try:
+            no = int(z.lemma.rsplit("#", 1)[-1])
+        except ValueError:
+            no = -1
+        for n in m.nodes.values():
+            if n.kind == "sentence" and n.doc == z.doc and n.lemma.endswith(f"#{no - 1}"):
+                parts.append(f"předchozí věta: {n.text}")
+                break
+    return "; ".join(parts)
 
 
 def load_human(path: Path) -> dict[str, list[str]]:
@@ -90,7 +91,7 @@ def save_human(path: Path, data: dict[str, list[str]]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=0, sort_keys=True), encoding="utf-8")
 
 
-def run_audit(memory: Memory, doc: str, judge: Judge | None, human_path: Path, n: int, seed: str) -> dict[str, Any]:
+def run_audit(memory: Memory, doc: str, judge: Judge | None, human_path: Path, n: int, seed: str, *, topic: str = "") -> dict[str, Any]:
     """Audit jednoho dokumentu.
 
     Args:
@@ -119,7 +120,7 @@ def run_audit(memory: Memory, doc: str, judge: Judge | None, human_path: Path, n
                                "kind": st.kind, "main": st.kind in ("verb", "copula")}
         if judge is not None:
             try:
-                v, note = judge.judge(render, sentence, _context(memory, st))
+                v, note = judge.judge(render, sentence, _context(memory, st, topic))
                 row["judge"] = [v, note]
                 counts[v] += 1
                 judged += 1

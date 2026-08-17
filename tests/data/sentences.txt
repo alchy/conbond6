@@ -1,114 +1,160 @@
-# Věty pro nahrané rozbory testů (jedna na řádek). Doplňuj na konec.
 # --- Task 3: predikace
-Petr bydlí v Praze.
-Alois Jirásek se narodil ve východočeském Hronově u Náchoda.
-Tučňák nelétá.
-Chov domácích zvířat může mít negativní dopad na jejich zdraví, pokud nejsou splněny určité požadavky.
-Petr jel v pondělí do Prahy.
-Dospělý pes má 42 zubů.
-Celý život pracoval jako učitel dějepisu na gymnáziu, nejprve v Litomyšli a poté v Praze.
-Kde se narodil Alois Jirásek?
-Kolik zubů má dospělý pes?
-Kdy se narodil Isaac Newton?
-Domácí mazlíčci vyžadují pravidelnou péči majitele.
-Pes štěká.
-Štěká jezevčík?
-Bydlí Petr v Praze?
-Bydlí Petr v Brně?
-Kde bydlí Petr?
 # --- Task 4: kopula, fragment, závorka
-Jezevčík je pes.
-Je jezevčík pes?
-Každý spisovatel je člověk.
-Žádný stroj není člověk.
-Praha je v Česku.
-Je Praha v Česku?
-Hrabal je spisovatel.
-Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.
-Kdo je Isaac Newton?
-Úrazy způsobené pády.
-Petr přišel a sedl si.
-Isaac Newton (4. ledna 1643 – 31. března 1727) byl anglický fyzik, matematik, astronom, alchymista a teolog.
-Kdo je Alois Jirásek?
 # --- Task 6: zakotvení
-Jirásek zemřel v Praze.
-Oženil se v roce 1879.
-On se oženil.
-Přešel přes most.
-# --- Task 8/9: dialogy
-Ne, Petr bydlí v Brně.
-Auto je dopravní prostředek.
-Dopravní prostředek jezdí po dálnici.
-Jezdí auto po dálnici?
-Citron je ovoce.
-Ovoce obsahuje vitamíny.
-Vitamín C je vitamín.
-Obsahuje citron vitamín C?
-Obsahuje citron nějaký vitamín?
-Hrabal napsal Postřižiny.
-Je Hrabal stroj?
-Je Hrabal člověk?
-Napsal Postřižiny spisovatel?
-V úterý jel Petr do Brna.
-Byl Petr v pondělí v Česku?
-Kam jel Petr v pondělí?
-Ptáci létají.
-Tučňák je pták.
-Létá tučňák?
-Vrabec je pták.
-Létá vrabec?
-Filip má auto.
-Filipovo auto je modré.
-Co má Filip?
-Vesmír se rozšířil do dnešní podoby.
-Paralelní vesmír je vesmír.
-Rozšířil se paralelní vesmír?
-Kdy zemřel Alois Jirásek?
-Kde zemřel Alois Jirásek?
-Kdo napsal Postřižiny?
-Co obsahuje ovoce?
-Kdy se narodil Alois Jirásek?
-Kde pracoval Alois Jirásek?
-Má dospělý pes 42 zubů?
-Ne každý pták.
-To není pravda.
 # --- Task 7: logika
-Má chov negativní dopad?
-Kde žije Petr?
-Ovoce obsahuje vitamín C?
-Napsal Hrabal román?
-Co napsal Hrabal?
-Hrabal napsal román.
-Bydlel Petr v Praze v roce 1990?
-Narodil se Jirásek v roce 1851?
-Kdo je Hrabal?
-Co je jezevčík?
-Je citron ovoce?
-Kolik je druhů ovoce?
-Nelétá tučňák?
-Může chov mít negativní dopad?
-Jaké je Filipovo auto?
 # --- Task 8/9: dialog
-Štěká pes?
-Jak rychle může jezdit auto po dálnici?
-Slouží auto k přesunu osob?
-Dopravní prostředek slouží k přesunu nákladů nebo osob.
-Dálnice má omezenou rychlost na 130 km/h.
-Napsal Postřižiny i nějaký stroj?
-Kam jel Petr dřív?
-Byl Petr ve středu v Česku?
-Co je Ford?
-Filip má Ford.
-Je to to auto.
-Létají ptáci?
-Kdo je Hrabal?
-Ovoce obsahuje každý vitamín.
-Citron obsahuje vitamín C.
-Nevím.
-Rozšířil se vesmír?
+# --- Task 8/9: dialogy
+# Věty pro nahrané rozbory testů (jedna na řádek). Doplňuj na konec.
+Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.
+Alois Jirásek se narodil v Hronově.
+Alois Jirásek se narodil ve východočeském Hronově u Náchoda.
+Auto je dopravní prostředek.
+Božena Němcová napsala Babičku.
+Bydlel Petr v Praze v roce 1990?
+Bydlí Petr v Brně?
 Bydlí Petr v Praze v roce 2020?
-Kdy jel Petr do Prahy?
+Bydlí Petr v Praze?
+Byl Čapek členem nějaké strany?
+Byl Čapek člověk?
+Byl Čapek malíř?
+Byl Petr v pondělí v Česku?
+Byl Petr ve středu v Česku?
+Bylo rozhodnuto konat pohřební obřady bez účasti kněze.
+Čapek pracoval v Lidových novinách.
+Čapek se narodil v Praze.
+Celý život pracoval jako učitel dějepisu na gymnáziu, nejprve v Litomyšli a poté v Praze.
+Chov domácích zvířat může mít negativní dopad na jejich zdraví, pokud nejsou splněny určité požadavky.
+Citron je ovoce.
+Citron obsahuje vitamín C.
 Co dělal Petr v pondělí?
-Kolik druhů ovoce znáš?
+Co je Ford?
+Co je jezevčík?
+Co má Filip?
+Co napsal Hrabal?
+Co obsahuje ovoce?
+Dálnice má omezenou rychlost na 130 km/h.
+Dílo
+Domácí mazlíčci vyžadují pravidelnou péči majitele.
+Dopravní prostředek jezdí po dálnici.
+Dopravní prostředek slouží k přesunu nákladů nebo osob.
+Dospělý pes má 42 zubů.
+Filip má auto.
+Filip má Ford.
+Filipovo auto je modré.
+Hrabal je spisovatel.
+Hrabal napsal Postřižiny.
+Hrabal napsal román.
+Isaac Newton (4. ledna 1643 – 31. března 1727) byl anglický fyzik, matematik, astronom, alchymista a teolog.
+Jak rychle může jezdit auto po dálnici?
+Jaké je Filipovo auto?
 Jaké znáš spisovatele?
+Jako jeden z prvních podepsal Manifest českých spisovatelů.
+Jana přijde, pokud přijde Petr.
+Je citron ovoce?
+Je Hrabal člověk?
+Je Hrabal stroj?
+Je jezevčík pes?
+Je Praha v Česku?
+Je to to auto.
+Jeho bratr Josef Čapek byl malíř.
+Jezdí auto po dálnici?
+Jezevčík je pes.
+Jirásek zemřel v Praze.
+Kam jel Petr dřív?
+Kam jel Petr v pondělí?
+Karel a Josef Čapkovi byli bratři.
+Karel Čapek (9. ledna 1890 Malé Svatoňovice – 25. prosince 1938 Praha) byl český spisovatel, novinář a dramatik.
+Karel přijde na oslavu, pokud přijde Jana.
+Každý spisovatel je člověk.
+Kde bydlí Petr?
+Kde pracoval Alois Jirásek?
+Kde pracoval Čapek?
+Kde se narodil Alois Jirásek?
+Kde se narodil Karel Čapek?
+Kde studoval?
+Kde zemřel Alois Jirásek?
+Kde žije Petr?
+Kdo byl Karel Čapek?
+Kdo je Alois Jirásek?
+Kdo je Hrabal?
+Kdo je Isaac Newton?
+Kdo namaloval obraz?
+Kdo napsal Postřižiny?
+Kdo přijde na oslavu?
+Kdo přijde?
 Kdo stvořil Postřižiny?
+Kdy jel Petr do Prahy?
+Kdy napsal R.U.R.?
+Kdy se narodil Alois Jirásek?
+Kdy se narodil Isaac Newton?
+Kdy zemřel Alois Jirásek?
+Když pršelo, zůstal doma.
+Kolik druhů ovoce znáš?
+Kolik je druhů ovoce?
+Kolik zubů má dospělý pes?
+Létá tučňák?
+Létá vrabec?
+Létají ptáci?
+Má chov negativní dopad?
+Má dospělý pes 42 zubů?
+Manifest českých spisovatelů a vyhlášení samostatnosti
+Marie nepřijde.
+Může chov mít negativní dopad?
+Namaloval Josef Čapek obraz?
+Napsal Hrabal román?
+Napsal Postřižiny i nějaký stroj?
+Napsal Postřižiny spisovatel?
+Narodil se Jirásek v roce 1851?
+Narodil se v rodině lékaře.
+Ne každý pták.
+Ne, Petr bydlí v Brně.
+Nebyl nikdy členem žádné politické strany.
+Nelétá tučňák?
+Nemoc mu znemožnila psát.
+Nevím.
+Obsahuje citron nějaký vitamín?
+Obsahuje citron vitamín C?
+On namaloval obraz.
+On se oženil.
+Ona zemřela v Praze.
+Ovoce obsahuje každý vitamín.
+Ovoce obsahuje vitamín C?
+Ovoce obsahuje vitamíny.
+Oženil se v roce 1879.
+Paralelní vesmír je vesmír.
+Pes štěká.
+Petr a Karel přijdou, když nepřijde Marie.
+Petr bydlí v Praze.
+Petr jel v pondělí do Prahy.
+Petr nebo Jana přijde.
+Petr přijde jen pokud přijde Karel.
+Petr přijde.
+Petr přišel a sedl si.
+Petr řekl, že Marie přijde.
+Praha je v Česku.
+Přešel přes most.
+Přijde aspoň jeden z nich.
+Přijde Karel?
+Přijde Petr?
+Ptáci létají.
+Rozšířil se paralelní vesmír?
+Rozšířil se vesmír?
+Slouží auto k přesunu osob?
+Spisovatel je člověk.
+Štěká jezevčík?
+Štěká pes?
+Studoval filozofii v Praze, Berlíně a Paříži.
+To není pravda.
+Tučňák je pták.
+Tučňák nelétá.
+Úrazy způsobené pády.
+V roce 1920 napsal drama R.U.R.
+V úterý jel Petr do Brna.
+Vesmír se rozšířil do dnešní podoby.
+Vitamín C je vitamín.
+Vrabec je pták.
+Začal psát romány.
+Žádný stroj není člověk.
+Zemřel v Praze.
+Život
+Chov domácích zvířat může mít negativní dopad na jejich zdraví.

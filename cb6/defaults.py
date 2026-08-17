@@ -189,3 +189,32 @@ def synonym_class(pred: str, learned: dict[str, str] | None = None) -> str:
         if ra != rb:
             parent[max(ra, rb)] = min(ra, rb)
     return find(rep)
+
+
+# ---- triáž (spec conbond6 § 3.3) — tabulky jako data ---------------------------
+
+#: Podmínkové spojky (`advcl` s `mark`) → hlavní klauze není tvrzení, vzniká pravidlo.
+#: Hodnota říká, jak spojku číst: `if` = A ⇒ B vždy; `if_or_when` = podmínka jen
+#: v prézentu/futuru (v minulém čase je to čas: „Když pršelo, zůstal doma.“).
+CONDITIONAL_MARKERS: dict[str, str] = {
+    "pokud": "if", "jestliže": "if", "li": "if", "-li": "if", "kdyby": "if", "pakliže": "if", "když": "if_or_when",
+}
+#: „jen pokud / pouze když“ → obrácený směr (only if): B ⇒ A.
+ONLY_IF_ADVERBS = frozenset({"jen", "pouze", "jenom"})
+#: „právě když / tehdy a jen tehdy, když“ → ekvivalence (oba směry).
+IFF_ADVERBS = frozenset({"právě"})
+#: Spojky vedlejších vět, jejichž obsah text NEtvrdí (účel, přání): jde o obsah, ne o svět.
+PURPOSE_MARKS = frozenset({"aby", "ať", "kéž"})
+#: Slovesa postoje / mluvení: vnořený obsah („že …“) je obsah promluvy, ne fakt o světě.
+ATTITUDE_VERBS = frozenset({
+    "říci", "říkat", "tvrdit", "prohlásit", "prohlašovat", "myslet", "myslit", "věřit", "doufat", "domnívat_se",
+    "předpokládat", "slíbit", "slibovat", "napsat", "psát", "uvést", "uvádět", "oznámit", "oznamovat", "sdělit",
+    "vysvětlit", "vysvětlovat", "dodat", "odpovědět", "zeptat_se", "ptát_se", "tvrdívat", "soudit", "cítit",
+    "chtít", "přát_si", "obávat_se", "bát_se", "očekávat", "navrhnout", "navrhovat", "žádat", "požadovat",
+    "rozhodnout", "rozhodnout_se", "znemožnit", "umožnit", "dovolit", "zakázat", "nařídit", "doporučit",
+    "plánovat", "hodlat", "snažit_se", "pokusit_se", "zdát_se", "vypadat", "považovat", "pokládat",
+})
+#: Souřadné spojky vylučovací → disjunkce (v1 bez prostoru modelů → REJECTED).
+DISJUNCTION_CC = frozenset({"nebo", "anebo", "či", "buď"})
+#: Kardinalita („aspoň jeden“, „nejvýše dva“, „právě jeden“) → REJECTED (v1).
+CARDINALITY_ADVERBS = frozenset({"aspoň", "alespoň", "nejvýše", "nanejvýš", "nejméně", "minimálně", "maximálně", "přinejmenším"})
