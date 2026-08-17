@@ -390,12 +390,15 @@ class Evaluator:
         Vstup: id uzlu. Výstup: `[(h, [výroky], "member"|"subset")]`."""
         m = self.m
         out: list[tuple[str, list[str], str]] = []
-        kind = "member" if self._kind(t) in ("entity", "place") else "subset"
-        edges = m._kernel_edges(kind)  # pylint: disable=protected-access
-        for x in m._class(t):  # pylint: disable=protected-access
-            for h, sid in edges.get(x, []):
-                if not any(h == y for y, _, _ in out):
-                    out.append((h, (m.same_as_star(t, x) or []) + [sid], kind))
+        # skupina může být i jedinec (parser dal NOUN: „Krakatit (1924) – román“ → krakatit ∈ román),
+        # proto se u skupin berou hrany `member` i `subset`
+        kinds = ("member",) if self._kind(t) in ("entity", "place") else ("member", "subset")
+        for kind in kinds:
+            edges = m._kernel_edges(kind)  # pylint: disable=protected-access
+            for x in m._class(t):  # pylint: disable=protected-access
+                for h, sid in edges.get(x, []):
+                    if not any(h == y for y, _, _ in out):
+                        out.append((h, (m.same_as_star(t, x) or []) + [sid], kind))
         return out
 
     def fits_class(self, t: str, g: str) -> Proof | None:
@@ -409,16 +412,15 @@ class Evaluator:
         if t == g:
             return Proof()
         tk = self._kind(t)
-        if tk in ("entity", "place"):
-            mem = m.member_star(t, g)
-            if mem is not None:
-                return Proof(mem, [f"{m.node(t).label()} ∈ {m.node(g).label()}"], grade="derived", hard=[("member", t, g)])
-        elif tk == "group":
+        if tk not in ("entity", "place", "group"):
+            return None
+        mem = m.member_star(t, g)
+        if mem is not None:
+            return Proof(mem, [f"{m.node(t).label()} ∈ {m.node(g).label()}"], grade="derived", hard=[("member", t, g)])
+        if tk == "group":
             sub = m.subset_star(t, g)
             if sub is not None:
                 return Proof(sub, [f"{m.node(t).label()} ⊆ {m.node(g).label()}"], grade="derived", hard=[("subset", t, g)])
-        else:
-            return None
         g_lemma = m.node(g).lemma
         for h, path, kind in self._classes_of(t):
             hn = m.node(h)
@@ -462,12 +464,17 @@ class Evaluator:
                 if shared:
                     f = shared[0]
                     fit = fit.merged(Proof([f.id], [f"{f.pred}(kdo: {m.node(owner).label()}, co: {n.label()})"], list(f.defaults), f.grade))
-                elif n.kind == "entity" and n.names and n.doc and n.doc in owner_docs:
-                    # pojmenovaná věc z článku, jehož je vlastník tématem (díla jsou v článcích jen vyjmenovaná)
-                    fit.defaults.append(f"výpis podle tématu dokumentu „{n.doc}“ ({m.node(owner).label()}) — o vztahu text neříká větu")
-                    fit.grade = "derived"
                 else:
-                    continue
+                    # jedinec (hrana `member`, ne podmnožina) typovaný výrokem z článku, jehož je vlastník
+                    # tématem (díla jsou v článcích jen vyjmenovaná: „Krakatit (1924) – román.“)
+                    is_individual = any(k == "member" for k, _, _ in fit.hard) and (n.kind != "entity" or n.names)
+                    typing_docs = {m.statements[sid].prov.doc for sid in fit.statements if sid in m.statements}
+                    doc_hit = typing_docs & owner_docs
+                    if is_individual and doc_hit:
+                        fit.defaults.append(f"výpis podle tématu dokumentu „{sorted(doc_hit)[0]}“ ({m.node(owner).label()}) — o vztahu text neříká větu")
+                        fit.grade = "derived"
+                    else:
+                        continue
             seen.add(n.id)
             fillers.append((n.id, fit))
         if not fillers:
