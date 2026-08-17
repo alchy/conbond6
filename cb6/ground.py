@@ -300,6 +300,12 @@ class Grounder:
                 kdo_r.quant, co_r.quant = "·", "∃"
                 st.kernel = "member"
                 self._defaults.append(f"výčet: {self.m.nodes[group_id].label()}: {', '.join(self.m.nodes[t].label() for t in members)} → každý ∈ {self.m.nodes[group_id].label()} [výchozí]")
+                years = [t for t in others if self.m.nodes[t].kind == "time"]
+                if years:
+                    # letopočty u členů („Jan Žižka 1903, Jan Roháč 1914“) zůstávají u výroku jako `kdy`
+                    # (které patří ke kterému členu, text neurčuje — přiznáno), ne jako osiřelé uzly
+                    st.roles.append(Role("kdy", years, "·", "default", "výčet"))
+                    self._defaults.append("letopočty z výčtu → kdy (přiřazení k členům neurčeno)")
         st.defaults = list(dict.fromkeys(self._defaults))
         pending = list(self._pending_open)
         ambiguous_roles = list(self._ambiguous)
