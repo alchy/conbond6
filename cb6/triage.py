@@ -182,6 +182,12 @@ def triage(reading: Reading) -> Triaged:
     for p in _walk(main):
         for s in p.secondary:
             if s.kind == "nmod":
+                # výjimka: místo uvnitř fráze („gymnázium v Broumově“ → gymnázium je v Broumově)
+                # je čitelné tvrzení s výchozí volbou; ostatní nmod jsou fráze bez sémantiky
+                co = s.role("co")
+                if s.pred in ("nmod:v+Loc", "nmod:na+Loc", "nmod:u+Gen", "nmod:ve+Loc") and co and co.terms and all(x.kind == "place" for x in co.terms):
+                    t.decisions[id(s)] = Decision("SAFE", "assert", "", ["místo uvnitř fráze [výchozí]: X v místě → X je v místě"])
+                    continue
                 t.decisions[id(s)] = Decision("REJECTED", "assert", f"vedlejší vztah bez sémantiky ({s.pred or 'nmod'})")
             elif s.kind == "appos" and s.kernel not in ("member", "same_as", "name"):
                 t.decisions[id(s)] = Decision("REJECTED", "assert", "přístavek bez jádra")

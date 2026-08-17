@@ -381,6 +381,55 @@ class Memory:
     def node(self, node_id: str) -> Node:
         return self.nodes[node_id]
 
+    def snapshot(self) -> dict[str, int]:
+        """Stav čítačů id — pro `prune_orphans` po dotazu."""
+        return dict(self.counters)
+
+    def prune_orphans(self, since: dict[str, int]) -> list[str]:
+        """Smaž uzly termů (group/time/place/entity/value) založené po `since`, na
+        které nevede žádný výrok ani zmínka. Proč: otázka bázi nemění (I‑12), ale
+        rozřešení jejích termů uzly zakládá (`ensure_group` …); bez úklidu by
+        v grafu zůstaly osiřelé uzly z dotazů (audit grafu, 17. 8. 2026).
+        Čítače se nevracejí — id zůstávají deterministická a jednoznačná.
+
+        Args:
+            since: `snapshot()` před dotazem.
+        Returns:
+            id smazaných uzlů.
+        """
+        removed: list[str] = []
+        while True:  # do pevného bodu: smazání zúžené group osiří její základní group
+            referenced: set[str] = set()
+            for st in self.statements.values():
+                referenced.update(st.term_ids())
+            referenced.update(node for _, node, _, _, _ in self.mentions)
+            for n in self.nodes.values():
+                if n.base:
+                    referenced.add(n.base)
+            batch: list[str] = []
+            for nid, n in list(self.nodes.items()):
+                if n.kind not in ("group", "time", "place", "entity", "value"):
+                    continue
+                prefix = self.PREFIX.get(n.kind, "n")
+                try:
+                    num = int(nid[len(prefix):])
+                except ValueError:
+                    continue
+                if num <= since.get(prefix, 0) or nid in referenced:
+                    continue
+                del self.nodes[nid]
+                batch.append(nid)
+            if not batch:
+                break
+            removed.extend(batch)
+        if removed:
+            self._groups = {k: v for k, v in self._groups.items() if v not in removed}
+            self._times = {k: v for k, v in self._times.items() if v not in removed}
+            self.activation_ = defaultdict(float, {k: v for k, v in self.activation_.items() if k not in removed})
+            self.soft = defaultdict(float, {k: v for k, v in self.soft.items() if k[0] not in removed and k[1] not in removed})
+            self.version += 1
+        return removed
+
     # ---- výroky ---------------------------------------------------------------
 
     def attach(self, stmt: Statement) -> Statement:

@@ -184,6 +184,14 @@ def check_answer(g: nx.MultiDiGraph, proof_statement_ids: list[str], hard_steps:
     """
     out: list[Violation] = []
     for sid in proof_statement_ids:
+        if sid.startswith("restricts:"):
+            # krok uzávěru přes zúženou group („mazlíček[domácí] ⊆ mazlíček“) — strukturní hrana, ne výrok
+            node = sid.split(":", 1)[1]
+            has = node in g and (any(d.get("type") == "restricts" for _, _, d in g.out_edges(node, data=True))
+                                 or any(d.get("type") == "restricts" for _, _, d in g.in_edges(node, data=True)))
+            if not has:
+                out.append(Violation("rekonstrukce", sid, "hrana restricts není v grafu"))
+            continue
         d: dict[str, Any] = g.nodes.get(sid, {})
         if d.get("kind") != "statement":
             out.append(Violation("rekonstrukce", sid, "výrok důkazu není v grafu"))

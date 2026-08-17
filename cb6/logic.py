@@ -439,7 +439,7 @@ class Evaluator:
                 for r in f.roles:
                     for t in r.terms:
                         for st in m.statements_about(t):
-                            if st.kind != "nmod" or st.status != "active":
+                            if st.kind != "nmod" or st.status != "active" or st.claim != "SAFE":
                                 continue
                             kdo, co = st.role("kdo"), st.role("co")
                             if not (kdo and t in kdo.terms and co):
@@ -457,7 +457,7 @@ class Evaluator:
     def describe(self, node_id: str) -> list[Statement]:
         """Okolí uzlu: členství/podmnožiny, `být`, výroky s uzlem v podmětu, ostatní."""
         m = self.m
-        about = m.statements_about(node_id)
+        about = [s for s in m.statements_about(node_id) if s.claim == "SAFE" and s.mood == "assert" and s.kind != "fragment"]
         def rank(s: Statement) -> tuple[int, int]:
             kdo = s.role("kdo")
             is_subj = bool(kdo and node_id in kdo.terms)

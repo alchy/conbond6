@@ -197,6 +197,7 @@ class Session:
     def _answer(self, reading: Reading, doc: str) -> Answer:
         m = self.memory
         prov = Provenance(doc, 0, reading.parse.text, self.turn_no, getattr(self.oracle, "provenance", ""))
+        before = m.snapshot()
         g = ground(reading, m, prov, "said", topic=self.topics.get(doc), write=False)
         q = g.main
         assert q is not None
@@ -212,6 +213,7 @@ class Session:
         m.activate(q.term_ids(), 0.5)
         m.tick()
         text = f"čtu: {reading.main}\n" + render_answer(m, verdict, wh=wh, recalled=recalled)
+        m.prune_orphans(before)  # uzly založené jen dotazem (I‑12: otázka bázi nemění)
         return Answer(text, verdict, reading=str(reading.main))
 
     def _assert(self, reading: Reading, doc: str) -> Answer:
