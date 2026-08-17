@@ -128,6 +128,8 @@ def main(argv: list[str]) -> int:
     d.add_argument("prev")
     d.add_argument("cur")
     sub.add_parser("gold-filter", help="přegenerovat bench/gold/otazky-filtr.json")
+    gg = sub.add_parser("gold-gen", help="LM‑generované ukotvené otázky (+ --overit lidské ověření)")
+    gg.add_argument("rest", nargs=argparse.REMAINDER)
     argv = list(argv)
     if not argv or argv[0].startswith("-"):
         argv = ["run"] + argv
@@ -140,6 +142,9 @@ def main(argv: list[str]) -> int:
         return _cmd_gold_filter(args)
     if args.cmd == "audit":
         return _cmd_audit(args)
+    if args.cmd == "gold-gen":
+        from bench.gold_gen import main as gg_main  # pylint: disable=import-outside-toplevel
+        return gg_main(args.rest)
     ap.print_help()
     return 2
 

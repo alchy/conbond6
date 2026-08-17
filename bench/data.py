@@ -112,6 +112,12 @@ def load_wiki(cfg: dict[str, Any], *, only: list[str] | None = None, with_auto: 
     if with_auto:
         for item in _gold_json("otazky-filtr.json"):
             by_doc.setdefault(str(item["dok"]), []).append(Question(item["q"], list(item["expect"]), "otazky", sent_no=item.get("veta"), kind=str(item.get("typ", "")), curated=False))
+    # LM‑generované ukotvené otázky (`bench gold-gen`): kurátorované jen po lidském ověření
+    for gp in sorted((HERE / "gold").glob("gen-*.json")):
+        for item in json.loads(gp.read_text(encoding="utf-8")):
+            if item.get("rejected"):
+                continue
+            by_doc.setdefault(str(item["dok"]), []).append(Question(item["q"], list(item["expect"]), "gen", sent_no=item.get("veta"), curated=bool(item.get("curated"))))
     names = sorted(by_doc) if not only else list(only)
     docs: list[Doc] = []
     for name in names:
