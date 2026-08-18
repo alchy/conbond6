@@ -7,6 +7,8 @@
 | co | kde |
 |---|---|
 | repo | `~/Projects/conbond6` · https://github.com/alchy/conbond6 (větve `main` = `v1`) |
+| **úvod a orientace v kódu** (pojmy, cesta věty grafem, příkazy) | `docs/UVOD.md` |
+| **ukázky ze živého běhu** (12 scén; přegenerovat `python -m bench ukazky` po tahu, který mění odpovědi) | `docs/UKAZKY.md` (generátor `bench/ukazky.py`) |
 | zadání, invarianty I‑1…I‑12 | `docs/superpowers/specs/2026-08-17-conbond6-design.md` |
 | znalostní vazby jako data (návrh) | `docs/superpowers/specs/2026-08-17-znalostni-vazby-design.md` |
 | lexikon vazeb (krok 1 + `podřazení`) | `cb6/lexicon.py` (operátory `třída`, `implikace`, `podřazení`; loader, shoda, materializace) · seed `cb6/lexikon/synonyma.jsonl` (88 ř.) + `podrazeni.jsonl` (18 ř., žánry ⊆ dílo) · dialog `!uč a = b | a => b | a ~ b | a < b` |
@@ -40,6 +42,7 @@
 4. **Plný běh před sloučením:** `python -m bench run --vse --dvakrat --soudce --audit-doky 8` (~30 min napoprvé, pak méně) → `mereni/`.
 5. Zpráva: yield, unsupported (+ shoda soudce/člověk), statusy, QA (kurátorované zvlášť, dosah), audit grafu (musí být 0), determinismus (ano), diff.
 6. Commit s číslem v předmětu; `git push` (main = v1).
+7. Když tah mění odpovědi: `python -m bench ukazky` (docs/UKAZKY.md jsou živé), a doplnit scénu, je‑li nová schopnost.
 
 Zelený řádek: víc pravdivé (unsupported neroste), doložitelné (každý zásah má důkaz), dotazovatelné (QA hits/coverage rostou nebo yield roste při stejné precision). Recall ↑ + precision ↓ = regrese, dokud není v commitu přijatý trade‑off.
 

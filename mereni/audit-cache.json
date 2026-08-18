@@ -639,6 +639,10 @@
 "netvrdí",
 "Věta neuvádí žádné informace o národití Eduard Bassa."
 ],
+"169c54fb4208b4d6|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Výrok správně zachycuje, že herec Jan Budař ztvárnil postavu Karla Čapka ve filmu Hovory s TGM."
+],
 "16a788b365bfb9d8|ollama:gemma4:latest|v2": [
 "tvrdí",
 "Věta uvádí Ludvíčka Adlera a Markétku Fischerovou v Terezínu jako předmět románu."
@@ -2391,6 +2395,14 @@
 "netvrdí",
 "Věta neuvádí obecný zákaz přesouvání kamenů na pole s jiným kusem stejné barvy, ale spíše o omezení takového tahu."
 ],
+"5648737dcf774e8d|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí konkrétní rok a název filmu, který byl uveden do kin."
+],
+"56a2af96bc155f35|ollama:gemma4:latest|v2": [
+"netvrdí",
+"Výrok je chybně sestavený a neodpovídá struktuře věty. Věta uvádí, že byly úspěšné hry (historické), a poté výčítá konkrétní příklady s různými roky. Výrok však předpokládá, že Jan Žižka, Jan Roháč a Jan Hus jsou členové nějaké skupiny hry v roce 1903."
+],
 "56bdfc003151e5bb|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta zmiňuje „období po bitvě na Bílé hoře“, ale výrok tvrdí, že se jedná o nějakou „bitvu“ jako podmiot."
@@ -3210,6 +3222,10 @@
 "765e38f5f4e549cf|ollama:gemma4:latest|v1": [
 "netvrdí",
 "Věta neuvádí žádné informace o tom, že by rybník byl podmnožinou Strže."
+],
+"766b66ba46a3a326|ollama:gemma4:latest|v2": [
+"tvrdí",
+"Věta uvádí, že Poklad byla jeho prvotinou."
 ],
 "7678a93ca64b0004|ollama:gemma4:latest|v1": [
 "netvrdí",

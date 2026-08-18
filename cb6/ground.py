@@ -88,7 +88,7 @@ class Grounder:
                 # nominativ jmenovací „drama R.U.R.“: název je entita, hlava její třída → R.U.R. ∈ drama;
                 # popisek = povrchový tvar (název je v 1. pádě), identita zůstává lemmatická
                 surface = " ".join(t.forms)
-                if new and surface and surface in node.names and node.names[0] != surface:
+                if surface and surface in node.names and node.names[0] != surface:
                     node.names.remove(surface)
                     node.names.insert(0, surface)
                 group = self.m.ensure_group(t.cls[0], t.cls[1])
@@ -108,7 +108,13 @@ class Grounder:
             return self._resolve_pron(t, role)
         if t.kind == "value":
             return self.m.ensure_group(t.lemma).id
-        # group
+        # group — ale holé obecné jméno může být NÁZEV, který už paměť zná jako entitu
+        # („Kdo napsal Krakatit?“ — parser dal NOUN; entita Krakatit vznikla z „román Krakatit“)
+        if not t.attrs and t.count is None and t.possessor is None and t.quant in (None, "·", "∃"):
+            named = [n for n in self.m.find_entity((t.lemma,)) if t.lemma in n.names or " ".join(t.forms) in n.names]
+            if len(named) == 1:
+                self._defaults.append(f"{role}: „{' '.join(t.forms)}“ = {named[0].label()} (jméno známé entity)")
+                return named[0].id
         group = self.m.ensure_group(t.lemma, t.attrs)
         if t.possessor is not None:
             owned = self._resolve_possessed(t, group, role)

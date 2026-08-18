@@ -112,6 +112,8 @@ def main(argv: list[str]) -> int:
     """Rozparsuj argumenty a spusť podpříkaz (`run` je výchozí)."""
     ap = argparse.ArgumentParser(prog="bench", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd")
+    u = sub.add_parser("ukazky", help="přegeneruj docs/UKAZKY.md z živého běhu")
+    u.add_argument("cesta", nargs="?", help="jiný cílový soubor")
     r = sub.add_parser("run", help="běh nad sadami")
     r.add_argument("--sada", nargs="*", help="wiki | korpus")
     r.add_argument("--vse", action="store_true", help="všechny sady")
@@ -141,6 +143,9 @@ def main(argv: list[str]) -> int:
     if not argv or argv[0].startswith("-"):
         argv = ["run"] + argv
     args = ap.parse_args(argv)
+    if args.cmd == "ukazky":
+        from bench.ukazky import main as ukazky_main  # pylint: disable=import-outside-toplevel
+        return ukazky_main([args.cesta] if args.cesta else [])
     if args.cmd == "run":
         return _cmd_run(args)
     if args.cmd == "diff":

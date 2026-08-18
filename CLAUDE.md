@@ -36,7 +36,9 @@ to o sobě změřit.** Není to „další verze motoru“; úkol je *prokázat 
 ## Kde co je (čti v tomto pořadí)
 
 1. `docs/HANDOVER.md` — stav, čísla, otevřené tahy, deník rozhodnutí, checklist.
-2. `docs/KONCEPT.md` — proč je to postavené takhle (5 zásad, kde je stavovost).
+2. `docs/KONCEPT.md` — proč je to postavené takhle (5 zásad, kde je stavovost);
+   `docs/UVOD.md` — orientace v kódu (pojmy, cesta věty grafem, příkazy);
+   `docs/UKAZKY.md` — ukázky ze živého běhu (`python -m bench ukazky` po tahu, který mění odpovědi).
 3. `docs/superpowers/specs/2026-08-17-znalostni-vazby-design.md` — návrh
    znalostních vazeb jako data (krok 1 hotový, kroky 2–5 čekají).
 4. Poslední záznam v `mereni/HYPOTEZY.md` a poslední zpráva `mereni/<datum>-<commit>.md`.
