@@ -1,6 +1,6 @@
 # conbond6 — handover (živý)
 
-*Aktualizuje se po každém významnějším tahu. Poslední aktualizace: 17. 8. 2026.*
+*Aktualizuje se po každém významnějším tahu. Poslední aktualizace: 18. 8. 2026 (ráno).*
 
 ## 1. Kde co je
 
@@ -16,7 +16,7 @@
 | koncept (proč takhle) | `docs/KONCEPT.md` |
 | plán v1 + stav provedení | `docs/superpowers/plans/2026-08-17-conbond6-v1.md` |
 | hypotézy a výsledky tahů | `mereni/HYPOTEZY.md` |
-| zprávy benche | `mereni/<datum>-<commit>.md/.json` (poslední plný, **stabilní vzorek**: `2026-08-17-b75d8d5`; předchozí `ad5d41b`, `234ca26`) |
+| zprávy benche | `mereni/<datum>-<commit>.md/.json` (poslední plný, **stabilní vzorek**: `2026-08-18-3cd63e4`; předchozí `b75d8d5`, `ad5d41b`, `234ca26`) |
 | lidské odpovědi auditu | `mereni/audit-<dokument>.json` (otisk → [verdikt, pozn, chápu‑z‑grafu a/n]) |
 | keš verdiktů soudce | `mereni/audit-cache.json` (klíč = otisk · soudce · verze promptu) |
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
@@ -51,12 +51,12 @@ Zelený řádek: víc pravdivé (unsupported neroste), doložitelné (každý z�
 | měřítko | conbond5 (výchozí) | conbond6 v1 |
 |---|---|---|
 | unsupported, 2 dok. / vzorek 100 (soudce gemma4) | **76,5 %** | **23,0 %** [15,8–32,1] |
-| unsupported, plný běh 8 dok. / 400 (**stabilní vzorek po větách od 234ca26**) | — | **30,5 %** [26,2–35,2] (b75d8d5; hlavní 31 %, appos 35 %, nmod‑místo 13 %; bylo 31,4 %) |
+| unsupported, plný běh 8 dok. / 400 (**stabilní vzorek po větách od 234ca26**) | — | **30,1 %** [25,7–34,7] (3cd63e4; hlavní 30 %, appos 35 %, nmod‑místo 13 %; b75d8d5 30,5 %, ad5d41b 31,4 %) |
 | yield hl./vše (2 dok.) | 160 / 298 | 89 / 94 |
 | yield hl./vše (plný běh, 182 853 slov) | — | 76,8 / 89,7 |
 | statusy (plný běh) | — | SAFE 27 771 · HYPOTHESIS 3 271 · REJECTED 19 747; pravidel 59, odvozeno 4 |
 | QA stejné 2 dok. | 12/17 | 12/17 |
-| QA plný běh | 60,9 % na staré sadě (682 auto) | **184/343** (b75d8d5): stará sada 179/334 (ad5d41b 178, 234ca26 175), **gen výpis 5/9** (neověřené); **kurátorované 29/130** (etalon 14/32, conbond 8/8, korpus 7/90); otazky‑filtr 150/204 (74 %) |
+| QA plný běh | 60,9 % na staré sadě (682 auto) | **184/343** (3cd63e4 = b75d8d5): stará sada 179/334 (ad5d41b 178, 234ca26 175), **gen výpis 5/9** (neověřené); **kurátorované 29/130** (etalon 14/32, conbond 8/8, korpus 7/90); otazky‑filtr 150/204 (74 %) |
 | audit grafu | — | 0 porušení (bylo 33, opraveno; krok `lex` se rekonstruuje z uzlů `vazba`) |
 | lexikon v odpovědích (plný běh) | — | krok `lex` u 11/334 otázek (9 správně); ablace `--bez-lexikonu`: 177/334 → seed vrstva nese 1 zásah (obsahovat ⇒ mít) |
 | determinismus | — | ano |

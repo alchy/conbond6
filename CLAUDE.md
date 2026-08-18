@@ -58,8 +58,8 @@ to o sobě změřit.** Není to „další verze motoru“; úkol je *prokázat 
 
 ## Kde to stojí (17. 8. 2026, večer) a co je další tah
 
-- Stabilní baseline `b75d8d5` (zpráva `mereni/2026-08-17-b75d8d5.md`): unsupported
-  **30,5 %** [26,2–35,2] na 400 výrocích (8 dok.), yield 77/90, QA **184/343**
+- Stabilní baseline `3cd63e4` (zpráva `mereni/2026-08-18-3cd63e4.md`): unsupported
+  **30,1 %** [25,7–34,7] na 400 výrocích (8 dok.), yield 77/90, QA **184/343**
   (stará sada 179/334, gen výpis 5/9 neověřené; kurátorované 29/130, etalon 14/32),
   audit grafu 0, determinismus ano. Podrobně HANDOVER § 4.
 - **Hotový krok 1 znalostních vazeb:** `cb6/lexicon.py` (operátory `třída`,
