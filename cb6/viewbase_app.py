@@ -1,7 +1,7 @@
 """Konverzace nad živým grafem ve viewBase2 (volitelný adaptér).
 
     pip install -e /Users/j/Projects/viewBase2/python     # viewbase (github.com/alchy/viewBase2)
-    python -m cb6.viewbase_app [--pamet p.json] [--port 8080]
+    python -m cb6.viewbase_app [--pamet p.json] [--port 8080] [--user workbench]
 
 Model viewBase2: `Project` (služba, port) → `Screen` (plocha) → okna:
 `GraphWindow` (živý 3D graf, fyzika v prohlížeči, oblasti podle metadata
@@ -34,6 +34,12 @@ from cb6.render import describe_node, render_statement
 HERE = Path(__file__).resolve().parent.parent
 CACHE = HERE / "data" / "cache" / "parses.json"
 
+#: Uživatel viewBase2 pro tenhle projekt. Je součástí konfigurace (v gitu),
+#: tajemství NE: TOTP tajemství a QR pro něj vzniknou při první instanciaci
+#: v `~/.viewbase/user-<jméno>/` (0600) — právě proto, aby se nedostaly do
+#: repozitáře. Odemyká zabezpečená okna (`secured=True`), viz README viewBase2.
+VIEWBASE_USER = "workbench"
+
 TYPES = {
     "entity": dict(shape="sphere", color="#28d7fe", size=1.4),
     "group": dict(shape="box", color="#7bd389", size=1.2),
@@ -54,18 +60,21 @@ TYPES = {
 HIDDEN_KINDS = ("sentence", "document", "segment", "open")
 
 
-def build(session: Session, *, title: str = "conbond6", port: int = 8080) -> tuple[Any, Any]:
+def build(session: Session, *, title: str = "conbond6", port: int = 8080,
+          user: str = VIEWBASE_USER) -> tuple[Any, Any]:
     """Postav projekt viewBase2: screen s grafovým oknem, konzolí (dialog) a log oknem.
 
     Args:
         session: sezení nad pamětí (graf se z ní promítá po každém tahu).
         title: titulek; port: port služby (Project ho potřebuje před vším).
+        user: uživatel viewBase2 (odemyká zabezpečená okna; tajemství a QR
+            vzniknou při prvním startu v ~/.viewbase/, do gitu nejdou).
     Returns:
         (project, screen) — volající zavolá `project.serve(screen, …)`.
     """
     import viewbase as vb  # type: ignore[import-not-found]
 
-    project = vb.Project(port=port)
+    project = vb.Project(port=port, user=user)
     screen = vb.Screen(title=title, theme="cyber")
     graph = vb.GraphWindow(screen=screen, title=f"{title} — graf paměti", dimensions=3, theme="cyber", highlight_neighbors=1)
     vb.LogWindow(screen=screen)
@@ -168,15 +177,19 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--pamet", help="JSON paměti (načte se, na konci uloží)")
     ap.add_argument("--port", type=int, default=8080)
+    ap.add_argument("--user", default=VIEWBASE_USER,
+                    help="uživatel viewBase2 (odemyká zabezpečená okna); "
+                         "tajemství a QR vzniknou při prvním startu v ~/.viewbase/")
     args = ap.parse_args(argv)
     try:
         import viewbase as vb  # type: ignore[import-not-found]
     except ImportError:
-        print("viewbase není nainstalované: pip install -e /Users/j/Projects/viewBase/python", file=sys.stderr)
+        print("viewbase není nainstalované: pip install -e /Users/j/Projects/viewBase2/python",
+              file=sys.stderr)
         return 2
     memory = Memory.load(Path(args.pamet)) if args.pamet and Path(args.pamet).exists() else Memory()
     session = Session(memory, live_or_recorded(CACHE))
-    project, screen = build(session, port=args.port)
+    project, screen = build(session, port=args.port, user=args.user)
     try:
         project.serve(screen, open_browser=True)
     finally:

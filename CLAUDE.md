@@ -52,7 +52,8 @@ to o sobě změřit.** Není to „další verze motoru“; úkol je *prokázat 
 - UDPipe služba z conBond3 na `127.0.0.1:42200` (bench, nové rozbory).
 - Ollama `gemma4:latest` na `127.0.0.1:11434` (soudce auditu, `gold-gen`).
 - Živý graf: `.venv/bin/python -m cb6.viewbase_app --pamet data/pamet-graf.json --port 8081`
-  (viewBase2 HEAD dnes vyžaduje Python ≥ 3.12 → použij `.venv314/bin/python`, viz HANDOVER § 2; ukončit `kill -INT`).
+  (viewBase2 je zase 3.11‑kompatibilní, `.venv314` netřeba; uživatel `workbench`
+  z `VIEWBASE_USER`, tajemství jen v `~/.viewbase/`; ukončit `kill -INT`).
 - Rychlá smyčka: `python -m bench run --sada wiki --strop 40 --dok alois_jirásek karel_čapek --soudce`;
   plný běh: `python -m bench run --vse --dvakrat --soudce --audit-doky 8`.
 

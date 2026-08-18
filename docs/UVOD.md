@@ -138,7 +138,7 @@ Zpráva: **yield** (SAFE výroků / 1 000 slov, hlavní/vše), **statusy**, **QA
 .venv/bin/python -m cb6 chat --pamet moje.json      # REPL: věty, otázky, !příkazy (UDPipe musí běžet)
 .venv/bin/python -m cb6 ingest text.txt --dok jmeno --pamet moje.json
 .venv/bin/python -m cb6 ask "Kde se narodil Alois Jirásek?" --pamet moje.json
-.venv314/bin/python -m cb6.viewbase_app --pamet data/pamet-graf.json --port 8081   # živý graf (viz HANDOVER § 2)
+.venv/bin/python -m cb6.viewbase_app --pamet data/pamet-graf.json --port 8081      # živý graf (viz HANDOVER § 2)
 .venv/bin/python -m bench ukazky                    # přegeneruj docs/UKAZKY.md
 .venv/bin/python -m cb6.record tests/data/sentences.txt tests/data/parses.json  # nové věty do nahrávky pro testy
 ```

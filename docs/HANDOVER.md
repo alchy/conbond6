@@ -32,7 +32,9 @@
 - Python 3.11, `.venv` (`pip install -e '.[dev]'`), závislost jen `networkx` (+ dev pytest/mypy/pylint; viewbase editable z `~/Projects/viewBase2/python`).
 - **UDPipe** služba z conBond3 na `127.0.0.1:42200` (model `cs_all-ud-2.17-251125`) — jen pro nové rozbory a bench; testy jedou z keše.
 - **Ollama** `gemma4:latest` na `127.0.0.1:11434` — soudce auditu a `gold-gen` (27B qwen se do 24 GiB nevejde vedle UDPipe).
-- **Živý graf:** `.venv/bin/python -m cb6.viewbase_app --pamet data/pamet-graf.json --port 8081` → http://127.0.0.1:8081/ (viewBase2; dnes paměť se třemi články: Jirásek, Karel Čapek, Josef Čapek). **Pozor (17. 8. večer):** viewBase2 HEAD (3c22e4c) má f‑string se zpětným lomítkem → na Pythonu 3.11 `SyntaxError`; demo proto běží z `.venv314` (Python 3.14: `python3.14 -m venv .venv314 && .venv314/bin/pip install -e . -e ~/Projects/viewBase2/python`), dokud viewBase2 nebude 3.11‑kompatibilní. Ukončovat `kill -INT <pid>` (uloží paměť); démon nesmí být zabit bez INT.
+- **Živý graf:** `.venv/bin/python -m cb6.viewbase_app --pamet data/pamet-graf.json --port 8081 [--user workbench]` → http://127.0.0.1:8081/ (viewBase2; dnes paměť se třemi články: Jirásek, Karel Čapek, Josef Čapek). Ukončovat `kill -INT <pid>` (uloží paměť); démon nesmí být zabit bez INT.
+  - **18. 8.:** viewBase2 je zase 3.11‑kompatibilní (f‑string se zpětným lomítkem opraven a hlídá ho tam test), takže stačí `.venv`; `.venv314` už není potřeba. Instalace: `.venv/bin/pip install -e ~/Projects/viewBase2/python` — TOTP (`pyotp`, `qrcode`) se dotáhne samo, je to standardní závislost viewBase2.
+  - **Uživatel:** `VIEWBASE_USER = "workbench"` v `cb6/viewbase_app.py` (přebije `--user`). Do gitu jde jméno, ne tajemství: TOTP secret a QR vzniknou při první instanciaci v `~/.viewbase/user-<jméno>/` (0600). Naskenovat lze rovnou z konzole: `cat ~/.viewbase/user-workbench/totp-workbench.txt`. Slouží k odemykání zabezpečených oken (`secured=True`), která adaptér zatím nepoužívá.
 
 ## 3. Jak se pracuje (smyčka jednoho tahu)
 
