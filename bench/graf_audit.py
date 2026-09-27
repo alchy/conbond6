@@ -25,7 +25,7 @@ from typing import Any
 
 from bench.data import Doc, load_config, load_wiki
 from bench.run import make_oracle
-from cb6.dialog import Session
+from cb6.dialog import Session, graf_suggestions_enabled, set_graf_suggestions_enabled
 from cb6.memory import Memory
 
 
@@ -67,7 +67,22 @@ def _example_sentences(session: Session, pred_a: str, pred_b: str, *, limit: int
 def scan(docs: list[Doc], oracle: Any, *, strop: int = 0) -> list[GrafLink]:
     """Projeď dokumenty, po ingestu sesbírej řádky mechanismu `graf`
     (autorita `read`, zdroj začíná „graf (tah“ — odlišeno od `korekce`
-    a `věta učí lexikon`, což jsou jiné mechanismy stejné autority)."""
+    a `věta učí lexikon`, což jsou jiné mechanismy stejné autority).
+
+    Mechanismus je od 27. 9. 2026 VYPNUTÝ ve výchozím stavu (`cb6/dialog.py`)
+    — tenhle nástroj ho pro dobu skenu natvrdo zapne (a stav obnoví), jinak
+    by vždycky vrátil 0 bez ohledu na to, co se opravilo/nezměřilo."""
+    out: list[GrafLink] = []
+    prev = graf_suggestions_enabled()
+    set_graf_suggestions_enabled(True)
+    try:
+        out = _scan(docs, oracle, strop=strop)
+    finally:
+        set_graf_suggestions_enabled(prev)
+    return out
+
+
+def _scan(docs: list[Doc], oracle: Any, *, strop: int) -> list[GrafLink]:
     out: list[GrafLink] = []
     for doc in docs:
         lines = doc.text.splitlines()

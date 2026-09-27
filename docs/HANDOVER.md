@@ -23,7 +23,7 @@
 | jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` + `lang/` (jazyková pravidla jako data, `cb6/lang/cs.json`) |
 | bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff vazby __main__` |
 | **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes **7/7** (všechny čtyři mechanismy hotové; `graf` validováno na reálném korpusu 27. 9. 2026 — 80/80 návrhů byl šum, proto VYPNUT ve výchozím stavu, `bench run --se-grafem` ho zapne, viz § 6 „‑1“) |
-| testy | `tests/` (223 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
+| testy | `tests/` (224 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
 | paralelní větev | conbond5 (`~/Projects/conbond5`, jiné sezení, HEAD c503b68) — do něj nesahat |
 | související | inventura conbond0–4: artefakt „Inventura conBond 0–5“ (Claude artifacts, 17. 8.) |
@@ -273,6 +273,39 @@ záměrně beze změny — bezpečnější krok, ne vyčerpání tématu. `docs/
 UKAZKY.md` čeká na regeneraci (`bench ukazky` potřebuje UDPipe/keš na
 přesné věty scén, chybí tuhle relaci — stejná mez jako zbytek dneška).
 Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
+
+**Krok 7 hotový — neosobní `_se` v přítomném čase nedostane `kdo`** (27. 9.
+2026, nález z validace mechanismu `graf` výše): `_prodrop` (`cb6/read.py`)
+chtěl nedosazovat `kdo` u neosobních vět s `expl:pv` (`_lemma_with_refl`
+dá `pred` s příponou `_se`/`_si` — jednat_se, odehrávat_se, vyskytovat_se,
+nacházet_se…), ale podmínka žádala `Gender == "Neut"`, a čeština u
+PŘÍTOMNÉHO času rod vůbec neznačí (`Gender` je `None` — jen l‑příčestí
+minulého času ho nese). V praxi to znamenalo, že skoro KAŽDÁ neosobní věta
+v encyklopedickém textu (převážně přítomný čas: „Jedná se o…“, „Vyskytuje
+se…“, „Nachází se…“) dostala `kdo` doplněný na TÉMA DOKUMENTU
+(`ground.py._resolve_pron`, poslední záchrana bez kandidáta) — přesně
+mechanismus, který dělal z mechanismu `graf` (validace výše) skoro čistý
+šum: dvě neosobní věty o různých faktech téhož dokumentu sdílely `kdo`
+=téma, a `graf` to bralo jako parafrázi. Oprava: podmínka teď přijímá
+`gender in (None, "Neut")` (bezpečné — `_se`/`_si` z `expl:pv` je podle UD
+definice vždy neosobní/mediopasivní značka, ne skutečný zvratný předmět;
+skutečné zvratné sloveso typu „myje se“ by mělo `se` v roli `obj`, ne
+`expl:pv`, takže by `_se` příponu vůbec nedostalo — ověřeno v `_lemma_with_
+refl`). Nový hermetický test `tests/test_read.py::test_neosobni_se_v_
+pritomnem_case_nedostane_kdo` (ruční UD, ověřeno křížově proti `SpacyOracle`).
+Reprodukce i oprava ověřeny přímo na `Session.ingest` („Jedná se o pomalý
+pohyb…“ dřív dostalo `kdo=Karel Čapek“ z tématu dokumentu, teď `kdo=None`).
+Pytest 223+2xfail → **224+2xfail**, mypy/pylint beze regrese. **Přeměřeno
+na celém korpusu** (`bench/graf_audit.py`, mechanismus dočasně zapnutý jen
+pro dobu skenu — jinak by díky vypnutí ve výchozím stavu vždy vrátil 0):
+**80 → 71 návrhů** (`sopka` 16→10, `egon_hostovský` 4→2, `pes_domácí`
+5→4). Pokles, ne vymizení — většina 80 (`božena_němcová` 21, beze změny)
+byla biografická náhoda se SKUTEČNÝM podmětem, na tu tahle oprava nemíří.
+**Nezkoumáno dál:** neosobní slovesa BEZ `se` (`docházet k`, `nastávat`)
+stejný problém mít můžou, ale nemají spolehlivý morfologický/UD signál
+jako `expl:pv` — potřebovaly by lexikon neosobních sloves (jako `is_time_
+noun`/`PLACE_NOUNS`), ne dohad; ponecháno jako další tah. Podrobně
+`mereni/HYPOTEZY.md` 27. 9. 2026 (pokračování).
 9. **Výpis — zbytky z reálného textu:** typing z nadpisů/seznamů („Wikilivres: Josef Čapek: díla“ → Josef Čapek ∈ dílo — paskvil z appos), „Krakatit je román.“ čtené jako obecná věta (⊆ místo ∈; velké písmeno na začátku věty není důkaz jména), „R.U.R. (… 1920) –“ → `zemřít(R.U.R., 1920)` (životopisná závorka u díla); imperativ s vedlejší větou („Vyjmenuj, co napsal…“); ověření 9 gen otázek J.
 10. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
 11. **(housekeeping, čeká na službu) `docs/UKAZKY.md` regenerovat** (`python -m bench ukazky`) — spadne na `segmentace … není v data/cache/parses.json` (scény potřebují přesné věty z živého UDPipe/keše, které tahle relace nemá). Až bude UDPipe po ruce: přegenerovat, ověřit, že „krok 6“ (§ 5) je v ukázkách vidět (kratší NEVÍM sekce, bez zdroje u „vím:“).
@@ -313,6 +346,13 @@ Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
   korpusu (cloud) → hotov jen krok 1 (`cb6/lang/`), beze změny chování,
   měřeno pytestem/mypy/pylint, ne bench číslem (viz HYPOTEZY 2026‑09‑27).
 - 17. 8. — Lexikon krok 1: síla vazby se rozhoduje podle významu páru, ne podle počtu zásahů (např. `pracovat ~ působit` same — životopisné „působil v/jako“; jiné významy chrání rámec rolí; `absolvovat`, `vyhrát`, `uvést`, `dostat`… zváženy jednotlivě, viz `pozn` v seedu). Shoda přes `implies` snižuje stupeň důkazu na `derived` (je to odvození, ne záměna). Otázka je vždy první argument shody (`same_pred(dotaz, výrok)`); u můstkových pravidel se pořadí opravilo (`dst_pred` je výrok). Použitý řádek se materializuje i při dotazu (uzel `vazba` v exportu) — jinak by krok `lex` nebyl z grafu doložitelný; nepoužité seed řádky graf nezatěžují.
+- 27. 9. 2026 (pokračování) — Vedlejší nález z validace `graf`: `_prodrop`
+  (`cb6/read.py`) nechytil neosobní `_se` konstrukce v přítomném čase
+  (čeština v přítomném čase neznačí rod, podmínka žádala `Gender=="Neut"`)
+  — `kdo` se tak defaultoval na téma dokumentu i tam, kde věta (\"jedná
+  se o…\", \"vyskytuje se…\") nemá logický podmět vůbec. Oprava:
+  `gender in (None, "Neut")`, bezpečné díky UD `expl:pv` (vždy neosobní
+  značka, ne skutečný zvratný předmět). Viz § 5 „Krok 7“, HYPOTEZY.
 - 27. 9. 2026 (pokračování) — Mechanismus `graf` (§ 6 „‑1“) změřen na celém
   reálném korpusu wiki (16 dok., ~180 000 slov, `bench/graf_audit.py`): 80
   návrhů, ruční čtení vzorku ukázalo 0 skutečných parafrází — opatrnostní

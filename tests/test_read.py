@@ -107,6 +107,29 @@ def test_prodrop_and_coordinated_places(oracle: RecordedOracle) -> None:
     assert r.residue == []
 
 
+def test_neosobni_se_v_pritomnem_case_nedostane_kdo() -> None:
+    """„Jedná se o pomalý pohyb.“ (`bench/graf_audit.py`, 27. 9. 2026, nález
+    z reálného korpusu wiki „sopka“): sloveso s `expl:pv` (`_lemma_with_refl`
+    dá `pred=jednat_se`) je neosobní — žádný `kdo` nemá existovat, natož se
+    doplňovat na téma dokumentu (`ground.py._resolve_pron`). Rod v přítomném
+    čase čeština neznačí vůbec (`Gender` je `None`, ne `Neut`) — `_prodrop`
+    dřív tenhle případ (na rozdíl od minulého času, „stalo se“) nechytil a
+    `kdo` doplnil. Ruční UD (ověřeno křížově proti `SpacyOracle` — základní
+    morfologie, ne sémantický odhad), ne živý UDPipe."""
+    from cb6.oracle import Parse, Token
+    p = Parse("Jedná se o pomalý pohyb.", (
+        Token(1, "Jedná", "jednat", "VERB", 0, "root", (("Aspect", "Imp"), ("Mood", "Ind"), ("Number", "Sing"), ("Person", "3"), ("Polarity", "Pos"), ("Tense", "Pres"), ("VerbForm", "Fin"), ("Voice", "Act"))),
+        Token(2, "se", "se", "PRON", 1, "expl:pv", (("Case", "Acc"), ("PronType", "Prs"), ("Reflex", "Yes"), ("Variant", "Short"))),
+        Token(3, "o", "o", "ADP", 5, "case", (("AdpType", "Prep"), ("Case", "Acc"))),
+        Token(4, "pomalý", "pomalý", "ADJ", 5, "amod", (("Animacy", "Inan"), ("Case", "Acc"), ("Degree", "Pos"), ("Gender", "Masc"), ("Number", "Sing"), ("Polarity", "Pos"))),
+        Token(5, "pohyb", "pohyb", "NOUN", 1, "obl:arg", (("Animacy", "Inan"), ("Case", "Acc"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(6, ".", ".", "PUNCT", 1, "punct", ()),
+    ), "ruční UD (ověřeno křížově proti SpacyOracle) — test, ne živý UDPipe")
+    m = read(p).main
+    assert m.pred == "jednat_se"
+    assert m.role("kdo") is None
+
+
 def test_questions_have_holes(oracle: RecordedOracle) -> None:
     m = R(oracle, "Kde se narodil Alois Jirásek?").main
     assert m.mood == "question"

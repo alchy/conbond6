@@ -657,8 +657,15 @@ class _Reader:
         person = h.feat("Person") or next((a.feat("Person") for a in self.kids(h.index, "aux") if a.feat("Person")), None)
         gender = h.feat("Gender")
         number = h.feat("Number") or next((a.feat("Number") for a in self.kids(h.index, "aux") if a.feat("Number")), None)
-        # neosobní: 3. os. sg. neutrum bez podmětu („prší“, „jedná se“) → nedosazovat
-        if person == "3" and gender == "Neut" and number == "Sing" and p.pred and p.pred.endswith("_se"):
+        # neosobní: 3. os. sg. bez podmětu, sloveso s `_se`/`_si` z `expl:pv`/`expl`
+        # (`_lemma_with_refl`, ne obyčejný zvratný predikát typu "myje_se" — ten
+        # by `se`/`si` měl v UD roli `obj`, ne `expl:pv`, takže by `_se` vůbec
+        # nedostal) → nedosazovat NIC, ani `téma dokumentu` (ground.py by ho
+        # jinak neprávem přiřadilo — nález 27. 9. 2026, `bench/graf_audit.py`).
+        # Rod v přítomném čase Čeština NEZNAČÍ vůbec (jen l-příčestí minulého
+        # času ho nese) — `gender is None` u „jedná se“/„vyskytuje se“ je tedy
+        # STEJNĚ neosobní jako `gender == "Neut"` u „stalo se“/„pršelo“.
+        if person == "3" and gender in (None, "Neut") and number == "Sing" and p.pred and p.pred.endswith("_se"):
             return
         term = TermSpec(0, "∅", (), "PRON", "pron", gender=gender, number=number, person=person, quant="·", quant_authority="prodrop")
         p.roles.insert(0, RoleFill("kdo", "prodrop", [term], "prodrop"))

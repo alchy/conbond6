@@ -1209,3 +1209,86 @@ je na reálném vstupu dost ostrá. Bench, co mate tyhle dvě věci, by
 takovouhle regresi (ticho šumu do lexikonu) nezachytil vůbec — proto
 `graf_audit.py` zůstává jako samostatný, opakovatelný nástroj, ne
 jednorázový skript.
+
+## 2026-09-27 · pokračování · `_prodrop` — neosobní `_se` v přítomném čase dostávalo `kdo` z tématu dokumentu
+
+**Podnět:** vedlejší nález z čtení zdrojových vět při validaci mechanismu
+`graf` (výše) — u `sopka` (článek beze jmenované osoby, čistě přítomný
+čas) se opakovaly páry typu `jednat_se ~ odehrávat_se`, `docházet ~
+nastávat`, přestože žádná z těch vět nemá logický podmět. Otázka: proč má
+vůbec `kdo` roli statement z věty „Jedná se o velmi pomalý pohyb…“, když
+`cb6/read.py._prodrop` má výslovný komentář „neosobní: … → nedosazovat“?
+
+**Rozbor:** `_prodrop` (řádek u komentáře „prší“/„jedná se“) žádal
+`person=="3" and gender=="Neut" and number=="Sing" and pred.endswith("_se")`.
+Ověřeno přímo (`SpacyOracle` na „Jedná se o pomalý pohyb.“): sloveso
+„Jedná“ nese `Aspect/Mood/Number/Person/Polarity/Tense/VerbForm/Voice`,
+ale **žádný `Gender`** — přítomný čas v češtině rod vůbec neznačí (jen
+l‑příčestí minulého času, „stalo se“, ho nese). Podmínka `gender=="Neut"`
+proto u KAŽDÉ neosobní věty v přítomném čase selhala a `_prodrop` dosadil
+anonymní `∅` pron term do role `kdo` — ten pak `ground.py._resolve_pron`
+(řádek „bez kandidáta → téma dokumentu“, poslední záchrana) doplnil na
+téma dokumentu BEZE stopy, že šlo o odhad nad neosobní větou, ne o
+skutečnou koreferenci. Reprodukce (`Session.ingest`, `SpacyOracle`):
+„Karel Čapek se narodil v Praze…“ + „Jedná se o pomalý pohyb…“ →
+`jednat_se(kdo=Karel Čapek)` — přesně ten typ falešné vazby, co dělal z
+mechanismu `graf` šum.
+
+**Bezpečnost opravy:** rozšířit podmínku na `gender in (None, "Neut")` by
+mohlo být nebezpečné, kdyby postihlo i SKUTEČNÁ zvratná slovesa se
+skutečným podmětem (např. „Myje se.“ = umývá sám sebe) — ale ta mají
+zvratné „se“ v UD roli `obj` (skutečný předmět), ne `expl:pv`
+(gramatikalizovaná neosobní/mediopasivní značka), takže `_lemma_with_refl`
+(řádek, který `_se` příponu vůbec připojuje) by jim `_se` nepřipojil —
+`pred.endswith("_se")` je tedy už sám o sobě filtr na `expl:pv` věty,
+podmínka na `gender` byla jen zbytečně úzká zrovna pro přítomný čas.
+
+**Hypotéza:** oprava (`gender in (None, "Neut")`) sníží `kdo` u neosobních
+`_se` vět v přítomném čase (a tím i počet návrhů `graf` na reálném
+korpusu — `bench/graf_audit.py` teď musí mechanismus pro dobu skenu
+natvrdo zapnout, jinak by kvůli výchozímu vypnutí vždycky vrátil 0 bez
+ohledu na opravu), beze změny u skutečných zvratných sloves (jiný UD
+deprel na „se“) a beze změny u minulého času (`gender=="Neut"` tam
+funguje už dnes). Pytest beze regrese (+1 nový test), mypy/pylint beze
+nového nálezu. Očekávání na `graf_audit.py` bylo OTEVŘENÉ — tahle
+konkrétní chyba je jen JEDNA z příčin šumu (vedle prosté biografické
+náhody, co je většina), takže pokles, ne vymizení.
+
+**Výsledek:** přesně tak, včetně velikosti. Reprodukce potvrzena PŘED
+opravou (`kdo`=Karel Čapek), PO opravě `kdo=None` na téže větě. Nový
+hermetický test `tests/test_read.py::test_neosobni_se_v_pritomnem_case_
+nedostane_kdo` (ruční UD, ověřeno křížově proti `SpacyOracle` — základní
+morfologie tady není sporná, na rozdíl od sémantických konstrukcí typu
+vztahových substantiv, kde fragmentový test dřív stačil, ale živý text
+je potřeba na potvrzení frekvence). Pytest **224 passed** (+1) **+
+2 xfailed**, mypy čisté (jediná nahlášená chyba v `tests/test_read.py:232`
+je prokazatelně předexistující — `git stash` diff ukázal STEJNOU chybu
+na řádku 209 před mou změnou, jen posunutou), pylint diff (`git stash`)
+jen posun řádků. **Přeměřeno na celém reálném korpusu** (`bench/graf_
+audit.py`, mechanismus natvrdo zapnutý pro dobu skenu — jinak by kvůli
+výchozímu vypnutí vždycky vrátil 0): **80 → 71 návrhů** (`sopka`
+16 → 10, `egon_hostovský` 4 → 2, `pes_domácí` 5 → 4, zbytek beze změny).
+Pokles, ne vymizení — potvrzuje, že tahle chyba byla JEDNA z příčin
+šumu (encyklopedické věty beze jmenované osoby, čistě přítomný čas),
+ne ta hlavní: většina 80 návrhů (`božena_němcová` 21, žádná změna) byla
+prostá biografická náhoda mezi dvěma větami se SKUTEČNÝM podmětem
+(stejná osoba, jiná životní událost, náhodná shoda druhé role) — na tu
+tahle oprava nemíří a mířit nemá (`kdo` tam byl a je správně vyplněný,
+jen sdílení role samo o sobě parafrázi nedokazuje). Mechanismus `graf`
+zůstává vypnutý ve výchozím stavu i po týhle opravě — rozhodnutí z
+předchozí sekce platí beze změny, jen `bench/graf_audit.py::scan` teď
+mechanismus pro dobu měření sám dočasně zapíná (`graf_suggestions_
+enabled()`/`set_graf_suggestions_enabled()`, stejný vzor jako `bench/
+vazby.py`), aby šlo měřit i po vypnutí výchozího stavu.
+
+**Poučení:** morfologický signál (osoba/rod/číslo) sám o sobě nestačí na
+rozlišení „neosobní věta“ od „věta s elidovaným, ale dohledatelným
+podmětem“ — čeština v přítomném čase prostě rod neznačí, takže `None`
+a skutečné neosobní `Neut` vypadají morfologicky stejně. Bezpečný
+rozlišovač byl UD DEPREL (`expl:pv` vs. `obj` na zvratném „se“), ne
+morfologická kategorie — týž princip jako `RELATIONAL_NOUNS`/`is_time_
+noun“: kde morfologie nestačí, potřeba je (malá, otestovaná) STRUKTURNÍ
+značka z rozboru, ne dohad podle povrchového tvaru. **Nezkoumáno dál:**
+neosobní slovesa BEZ zvratného „se“ (`docházet k`, `nastávat`) stejnou
+UD značku nemají — potřebovaly by vlastní (malý, ověřený) seznam sloves,
+ne domněnku; ponecháno jako otevřený tah (HANDOVER § 5 „Krok 7“).
