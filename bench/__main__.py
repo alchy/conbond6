@@ -9,6 +9,7 @@
     python -m bench vazby                    # pokročilost chápání vazeb podle mechanismu
     python -m bench distill --strop 40       # destilační dataset (read.py jako učitel) + pokrytí
     python -m bench probe --dok X Y          # lineární sonda: role z read.py ← embedding NN parseru
+    python -m bench graf-audit --strop 60    # mechanismus `graf` na reálném korpusu, k ručnímu posouzení
 """
 
 from __future__ import annotations
@@ -35,19 +36,20 @@ def _cmd_run(args: argparse.Namespace) -> int:
         # ablace seed vrstvy lexikonu (návrh vazeb § 3): řádky `said` zůstávají, seed ne
         from cb6.lexicon import set_seed_enabled  # pylint: disable=import-outside-toplevel
         set_seed_enabled(False)
-    if args.bez_graf:
-        # ablace mechanismu `graf` (bench/vazby.py, 27. 9. 2026): neměřeno na reálném
-        # korpusu, kolik falešných párů by to navrhlo — vypnutelné pro srovnání
+    if args.se_grafem:
+        # mechanismus `graf` (bench/vazby.py) je od 27. 9. 2026 VYPNUTÝ ve výchozím
+        # stavu (real-corpus měření: 80/80 návrhů byl šum, mereni/HYPOTEZY.md) —
+        # zapínatelné jen pro přeměření po zpřesnění kritéria
         from cb6.dialog import set_graf_suggestions_enabled  # pylint: disable=import-outside-toplevel
-        set_graf_suggestions_enabled(False)
+        set_graf_suggestions_enabled(True)
     report = run(sady, strop=args.strop, docs=args.dok, twice=args.dvakrat, with_auto=not args.bez_auto, cfg=cfg, verbose=args.vypis,
                  judge=judge, audit_n=audit_n, audit_docs=args.audit_doky, parser=args.parser)
     if args.label:
         report["label"] = args.label
     if args.bez_lexikonu:
         report["label"] = (report.get("label", "") + "-bez-lexikonu").lstrip("-")
-    if args.bez_graf:
-        report["label"] = (report.get("label", "") + "-bez-graf").lstrip("-")
+    if args.se_grafem:
+        report["label"] = (report.get("label", "") + "-se-grafem").lstrip("-")
     if args.parser != "udpipe":
         report["label"] = (report.get("label", "") + f"-{args.parser}").lstrip("-")
     mereni = ROOT / cfg["mereni"]
@@ -136,7 +138,8 @@ def main(argv: list[str]) -> int:
     r.add_argument("--dvakrat", action="store_true", help="determinismus: dokument dvakrát")
     r.add_argument("--bez-auto", action="store_true", help="bez automatické (filtrované) sady otázek")
     r.add_argument("--bez-lexikonu", action="store_true", help="ablace: bez seed vrstvy lexikonu (cb6/lexikon/*.jsonl)")
-    r.add_argument("--bez-graf", action="store_true", help="ablace: bez mechanismu `graf` (Session._suggest_link_from_graph)")
+    r.add_argument("--se-grafem", action="store_true", help="zapni mechanismus `graf` (Session._suggest_link_from_graph) — "
+                    "VYPNUT ve výchozím stavu od 27. 9. 2026, real-corpus měření: 80/80 návrhů byl šum")
     r.add_argument("--parser", choices=["udpipe", "spacy"], default="udpipe",
                     help="`spacy` = náhradní NN cesta bez UDPipe/LINDAT (27. 9. 2026) — NENÍ srovnatelné s UDPipe2 čísly")
     r.add_argument("--vypis", action="store_true", help="vypsat každou otázku")
@@ -159,16 +162,21 @@ def main(argv: list[str]) -> int:
     sub.add_parser("vazby", help="pokročilost chápání vazeb podle mechanismu (příkaz/věta/korekce/graf)")
     sub.add_parser("distill", help="destilační dataset (parse→Predication) z read.py jako učitele + pokrytí")
     sub.add_parser("probe", help="lineární sonda: role z read.py ← embedding NN parseru")
+    sub.add_parser("graf-audit", help="mechanismus `graf` na reálném korpusu, k ručnímu posouzení")
     argv = list(argv)
     if not argv or argv[0].startswith("-"):
         argv = ["run"] + argv
-    # `distill`/`probe` mají vlastní argparse (bench/distill.py, bench/probe.py) —
-    # `nargs=REMAINDER` na podparseru je s `add_subparsers` nespolehlivé (stejný
-    # nález platí i pro `gold-gen`), takže zbytek argv jde rovnou beze sdíleného `ap`.
-    if argv and argv[0] in ("distill", "probe"):
+    # `distill`/`probe`/`graf-audit` mají vlastní argparse (bench/distill.py,
+    # bench/probe.py, bench/graf_audit.py) — `nargs=REMAINDER` na podparseru je
+    # s `add_subparsers` nespolehlivé (stejný nález platí i pro `gold-gen`),
+    # takže zbytek argv jde rovnou beze sdíleného `ap`.
+    if argv and argv[0] in ("distill", "probe", "graf-audit"):
         if argv[0] == "distill":
             from bench.distill import main as distill_main  # pylint: disable=import-outside-toplevel
             return distill_main(argv[1:])
+        if argv[0] == "graf-audit":
+            from bench.graf_audit import main as graf_audit_main  # pylint: disable=import-outside-toplevel
+            return graf_audit_main(argv[1:])
         from bench.probe import main as probe_main  # pylint: disable=import-outside-toplevel
         return probe_main(argv[1:])
     args = ap.parse_args(argv)

@@ -34,8 +34,11 @@ def test_ingest_then_ask_with_source(s: Session) -> None:
 def test_graf_uci_vazbu_z_parafraze_bez_opravy(s: Session) -> None:
     """Dvě věty, stejné role `kdo`+`co`, jiný predikát, ŽÁDNÁ oprava v
     dialogu — jen tak vedle sebe v textu — je kontextový důkaz vztahu mezi
-    predikáty (J. 27. 9. 2026; `bench/vazby.py` mechanismus `graf`)."""
-    s.ingest("Karel Čapek napsal román Krakatit.", "d")
+    predikáty (J. 27. 9. 2026; `bench/vazby.py` mechanismus `graf`).
+    Mechanismus je od téhož dne VYPNUTÝ ve výchozím stavu (real-corpus
+    měření: 80/80 návrhů byl šum, `mereni/HYPOTEZY.md`) — test dočasně
+    zapíná, aby dál dokazoval, že KÓD tuhle schopnost má."""
+    from cb6.dialog import graf_suggestions_enabled, set_graf_suggestions_enabled
     from cb6.oracle import Parse, Token
     vytvoril = Parse("Karel Čapek vytvořil román Krakatit.", (
         Token(1, "Karel", "Karel", "PROPN", 3, "nsubj", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
@@ -50,36 +53,41 @@ def test_graf_uci_vazbu_z_parafraze_bez_opravy(s: Session) -> None:
         def parse(self, text: str) -> Parse:
             assert text == vytvoril.text
             return vytvoril
-    s.oracle = _Then()  # type: ignore[assignment]
-    s.ingest("Karel Čapek vytvořil román Krakatit.", "d")
-    said = [l for l in s.memory.links.values() if l.authority == "read"]
-    assert len(said) == 1 and said[0].args == ("napsat", "vytvořit") and said[0].strength == "related"
-
-
-def test_graf_ablace(s: Session) -> None:
-    """`bench run --bez-graf` (dosud neměřeno na reálném korpusu, HANDOVER § 6 „‑1“)."""
-    from cb6.dialog import set_graf_suggestions_enabled
-    from cb6.oracle import Parse, Token
-    vytvoril = Parse("Karel Čapek vytvořil román Krakatit.", (
-        Token(1, "Karel", "Karel", "PROPN", 3, "nsubj", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
-        Token(2, "Čapek", "Čapek", "PROPN", 1, "flat", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
-        Token(3, "vytvořil", "vytvořit", "VERB", 0, "root", (("Aspect", "Perf"), ("Gender", "Masc"), ("Number", "Sing"), ("Polarity", "Pos"), ("Tense", "Past"), ("VerbForm", "Part"), ("Voice", "Act"))),
-        Token(4, "román", "román", "NOUN", 3, "obj", (("Animacy", "Inan"), ("Case", "Acc"), ("Gender", "Masc"), ("Number", "Sing"))),
-        Token(5, "Krakatit", "krakatit", "NOUN", 4, "nmod", (("Animacy", "Inan"), ("Case", "Nom"), ("Gender", "Masc"), ("Number", "Sing"))),
-        Token(6, ".", ".", "PUNCT", 3, "punct", ()),
-    ), "ruční UD (ověřeno) — test, ne UDPipe")
-
-    class _Then:
-        def parse(self, text: str) -> Parse:
-            assert text == vytvoril.text
-            return vytvoril
-    set_graf_suggestions_enabled(False)
+    prev = graf_suggestions_enabled()
+    set_graf_suggestions_enabled(True)
     try:
         s.ingest("Karel Čapek napsal román Krakatit.", "d")
         s.oracle = _Then()  # type: ignore[assignment]
         s.ingest("Karel Čapek vytvořil román Krakatit.", "d")
     finally:
-        set_graf_suggestions_enabled(True)
+        set_graf_suggestions_enabled(prev)
+    said = [l for l in s.memory.links.values() if l.authority == "read"]
+    assert len(said) == 1 and said[0].args == ("napsat", "vytvořit") and said[0].strength == "related"
+
+
+def test_graf_vypnuty_ve_vychozim_stavu(s: Session) -> None:
+    """`bench run` (bez `--se-grafem`) — výchozí stav od 27. 9. 2026 je
+    VYPNUTO (real-corpus měření: 80/80 návrhů byl šum, `mereni/HYPOTEZY.md`);
+    stejný scénář jako parafráze výše, ale bez explicitního zapnutí."""
+    from cb6.dialog import graf_suggestions_enabled
+    from cb6.oracle import Parse, Token
+    assert graf_suggestions_enabled() is False
+    vytvoril = Parse("Karel Čapek vytvořil román Krakatit.", (
+        Token(1, "Karel", "Karel", "PROPN", 3, "nsubj", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(2, "Čapek", "Čapek", "PROPN", 1, "flat", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(3, "vytvořil", "vytvořit", "VERB", 0, "root", (("Aspect", "Perf"), ("Gender", "Masc"), ("Number", "Sing"), ("Polarity", "Pos"), ("Tense", "Past"), ("VerbForm", "Part"), ("Voice", "Act"))),
+        Token(4, "román", "román", "NOUN", 3, "obj", (("Animacy", "Inan"), ("Case", "Acc"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(5, "Krakatit", "krakatit", "NOUN", 4, "nmod", (("Animacy", "Inan"), ("Case", "Nom"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(6, ".", ".", "PUNCT", 3, "punct", ()),
+    ), "ruční UD (ověřeno) — test, ne UDPipe")
+
+    class _Then:
+        def parse(self, text: str) -> Parse:
+            assert text == vytvoril.text
+            return vytvoril
+    s.ingest("Karel Čapek napsal román Krakatit.", "d")
+    s.oracle = _Then()  # type: ignore[assignment]
+    s.ingest("Karel Čapek vytvořil román Krakatit.", "d")
     assert not [l for l in s.memory.links.values() if l.authority == "read"]
 
 

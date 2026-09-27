@@ -30,11 +30,19 @@ from cb6.read import Reading, read
 from cb6.recall import recall
 from cb6.render import render_show, describe_node, render_answer, render_statement
 
-#: Ablace `bench run --bez-graf` (mechanismus `graf`, spec HANDOVER § 6 „‑1“
-#: 27. 9. 2026): dosud neměřeno na reálném korpusu, kolik falešných párů by
-#: to na velkém textu navrhlo — vypínatelné globálně, stejně jako
-#: `cb6.lexicon.set_seed_enabled`.
-_GRAF_SUGGESTIONS_ENABLED = True
+#: Mechanismus `graf` (spec HANDOVER § 6 „‑1“, 27. 9. 2026): VYPNUTO ve
+#: výchozím stavu. Změřeno na reálném korpusu (`bench/graf_audit.py`,
+#: 16 dokumentů wiki, ~180 000 slov): 80 návrhů, ruční čtení zdrojových vět
+#: u ~35 z nich neukázalo ANI JEDNU skutečnou parafrázi — dvojice sdílející
+#: `kdo`+další roli jsou skoro vždy dvě různé věty o téže osobě/tématu
+#: (jiná životní událost, jiný dílčí fakt), ne totéž řečeno jinak. Síla
+#: `related` chrání verdikt (I‑3), ale šum kazí čitelnost lexikonu zbytečně
+#: — recall bez odpovídající pravdivosti (pravidlo 2). Kód zůstává (`bench
+#: vazby` ho zapíná pro zlatou úlohu na fragmentu, `bench run --se-grafem`
+#: pro budoucí přeměření), ale produkční ingest ho nepoužívá, dokud nebude
+#: kritérium přesnější než „shoda dvou rolí“. Podrobně `mereni/HYPOTEZY.md`
+#: 2026‑09‑27 a HANDOVER § 6 bod „‑1“.
+_GRAF_SUGGESTIONS_ENABLED = False
 
 
 def set_graf_suggestions_enabled(enabled: bool) -> None:
@@ -42,6 +50,13 @@ def set_graf_suggestions_enabled(enabled: bool) -> None:
     Vstup: `enabled`. Výstup: nic (mění stav modulu)."""
     global _GRAF_SUGGESTIONS_ENABLED  # pylint: disable=global-statement
     _GRAF_SUGGESTIONS_ENABLED = enabled
+
+
+def graf_suggestions_enabled() -> bool:
+    """Aktuální stav mechanismu `graf` — pro uložení/obnovu v testech
+    (aby test, který ho dočasně zapne, obnovil PŮVODNÍ stav, ne natvrdo
+    výchozí). Vstup: nic. Výstup: `bool`."""
+    return _GRAF_SUGGESTIONS_ENABLED
 
 
 @dataclass

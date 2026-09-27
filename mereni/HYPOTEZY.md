@@ -1138,3 +1138,74 @@ různé potřeby, dřív slité do jedné šablony. Rozdělení (odpověď stru�
 `!ukaž` beze změny vyčerpávající) je přesně ten typ úpravy, co J. myslel
 „moudrostí“: neztratit nic, jen neukazovat všechno najednou tomu, kdo se
 jen zeptal.
+
+## 2026-09-27 · pokračování · validace mechanismu `graf` na reálném korpusu — vypnut ve výchozím stavu
+
+**Podnět:** HANDOVER § 6 bod „‑1“ (nejvyšší priorita, otevřeno od kroku 3):
+`Session._suggest_link_from_graph` běžel dosud jen na fragmentech
+(`bench/vazby.py`, 7/7) — nikdy na reálném textu. Riziko pojmenované už
+tehdy: shoda `kdo` + 1 další role u dvou vět o téže osobě nemusí znamenat
+parafrázi, může to být náhoda (jiná událost sdílející místo/datum/objekt).
+
+**Hypotéza:** postavit `bench/graf_audit.py` (sbírá návrhy + dohledá
+zdrojové věty obou stran, samo verdikt nevynáší), spustit na celé reálné
+sadě wiki (16 dokumentů, ~180 000 slov, `--parser spacy` — UDPipe v
+tomhle sezení neběží), ručně přečíst vzorek. Očekávání bylo otevřené
+(„buď je to použitelné, nebo ne — bench rozhodne, ne dohad“), ale
+dvojitá role byla navržená jako opatrnější než `korekce` (jeden signál
+navíc), takže jsem čekal menšinový, ne 100% šum.
+
+**Výsledek:** **80 návrhů** na 16 dokumentech (rozpětí 0–21 na dokument;
+`antarktida`, `fyzika_gravitace` 0; `božena_němcová` 21, `sopka` 16
+nejvíc). Ruční čtení dohledaných vět u vzorku (~35 návrhů, napříč
+`alois_jirásek`, `bohumil_hrabal`, `božena_němcová`, `karel_čapek`,
+`sopka`): **žádný jeden nebyl skutečná parafráze**. Vzorec, co se
+opakoval: dvě věty o téže entitě v jiné souvislosti sdílející náhodou
+i druhou roli — `pokračovat`~`zemřít` (`kde`=Praha ve dvou různých
+větách o Jiráskovi), `mít`~`zaměřovat` (`co`=„prózy“ jen v jedné,
+shoda přes jiný sdílený term), `konat_se`~`uskutečnit_se` (dvě různé
+svatby, sdílí jen kostel), `sopka`: `jednat_se`~`odehrávat_se`,
+`docházet`~`nastávat` a další — impersonální/reflexivní věty o
+tématu dokumentu (ne o osobě), kde `kdo` zjevně drží nějaké téma
+dokumentu misto aby byla role prázdná, což dvojici vět bez jakéhokoli
+sémantického vztahu dá shodu obou rolí. Jeden nález stojí za
+samostatné prošetření jindy: `božena_němcová` „naleznout ~ oslovit“
+spároval větu, kde je Němcová `kdo` slovesa `naleznout`, s větou, kde
+`kdo` slovesa `oslovit` je gramaticky Josef Wenzig (ne Němcová) —
+možná chyba přiřazení role u elipsy podmětu v `read.py`/`ground.py`,
+ne u mechanismu `graf` samotného; nezkoumáno dál v tomhle tahu.
+
+**Rozhodnutí:** `cb6.dialog._GRAF_SUGGESTIONS_ENABLED` výchozí `False`
+(dřív `True`) — pravidlo 2 („recall ↑ + precision ↓ = regrese, nikdy
+nevolit význam kvůli počtu“) platí i mimo verdikt: síla `related` sice
+nemůže poškodit odpověď (I‑3), ale 80 šumových řádků na 16 dokumentech
+by lexikon zbytečně zaplevelilo bez jediného zisku. Kód i zlatá úloha
+`bench vazby` (`graf:parafraze`) zůstávají — dokazují, že MECHANISMUS
+funguje, jen se nepoužívá produkčně, dokud nebude kritérium přesnější
+než topologická shoda dvou rolí (návrh pro příště: sousednost vět nebo
+sémantická blízkost predikátů, ne čistě shoda termů). Přejmenoval jsem
+ablaci z `--bez-graf` (vypínal by něco, co už je vypnuté) na
+`--se-grafem` (zapíná pro budoucí přeměření) — `bench run --se-grafem`.
+**Testy:** `tests/test_dialog.py::test_graf_uci_vazbu_z_parafraze_bez_
+opravy` upraven (dočasně zapíná mechanismus přes nový getter
+`graf_suggestions_enabled()`/setter, ne natvrdo — oprava i latentní
+chyby v `test_graf_ablace`, který dřív obnovoval natvrdo `True` bez
+ohledu na to, jaký byl stav PŘED testem), nový
+`test_graf_vypnuty_ve_vychozim_stavu` (bez explicitního zapnutí — týž
+scénář, žádná vazba). `bench/vazby.py::_run_veta` dostal parametr
+`graf: bool = False` (dočasné zapnutí/obnova pro zlatou úlohu).
+Pytest **223 passed + 2 xfailed** (beze změny počtu — `test_graf_ablace`
+nahrazen `test_graf_vypnuty_ve_vychozim_stavu`, jinak stejná sada), mypy
+čisté (`cb6/dialog.py`, `bench/vazby.py`, `bench/__main__.py`,
+`bench/graf_audit.py`, `tests/test_dialog.py`), pylint diff (`git stash`)
+beze nového nálezu.
+**Poučení:** opatrnostní návrh („dvě role místo jedné“) fragmentový test
+prošel, ale na reálném textu neobstál — encyklopedická próza je plná vět
+o téže osobě/tématu, které náhodou sdílí dvě role a přitom o ničem
+společném nemluví; skutečná parafráze („X udělal A“ / „X udělal B téhož
+A“ jinými slovy) je na reálném textu vzácná, ne běžná. Měření na
+fragmentech dokazuje jen že KÓD dělá, co má — nedokazuje, že HEURISTIKA
+je na reálném vstupu dost ostrá. Bench, co mate tyhle dvě věci, by
+takovouhle regresi (ticho šumu do lexikonu) nezachytil vůbec — proto
+`graf_audit.py` zůstává jako samostatný, opakovatelný nástroj, ne
+jednorázový skript.

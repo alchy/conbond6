@@ -22,8 +22,8 @@
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
 | jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` + `lang/` (jazyková pravidla jako data, `cb6/lang/cs.json`) |
 | bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff vazby __main__` |
-| **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes **7/7** (všechny čtyři mechanismy hotové — `graf` NEvalidováno na reálném korpusu, viz § 8/5) |
-| testy | `tests/` (167 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
+| **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes **7/7** (všechny čtyři mechanismy hotové; `graf` validováno na reálném korpusu 27. 9. 2026 — 80/80 návrhů byl šum, proto VYPNUT ve výchozím stavu, `bench run --se-grafem` ho zapne, viz § 6 „‑1“) |
+| testy | `tests/` (223 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
 | paralelní větev | conbond5 (`~/Projects/conbond5`, jiné sezení, HEAD c503b68) — do něj nesahat |
 | související | inventura conbond0–4: artefakt „Inventura conBond 0–5“ (Claude artifacts, 17. 8.) |
@@ -198,20 +198,32 @@ otázky (od J. nebo nález v korpusu), ne na dohad.
 
 ## 6. Otevřené tahy (pořadí podle toho, co ukázal bench)
 
--1. **(nejvyšší priorita — chybí VALIDACE na reálném textu, ne implementace)
-   `bench vazby` je 7/7 (všechny čtyři mechanismy hotové: `prikaz`, `veta`,
-   `korekce`, `graf` — viz § 5, § 7 deník, HYPOTEZY 27. 9. 2026), ale
-   `graf`/`korekce` NIKDY neběžely na reálném korpusu — jen na fragmentech.
-   `Session._suggest_link_from_graph` (`cb6/dialog.py`) teď běží na KAŽDÉM
-   zapsaném výroku (`ingest()` i `say()`) a hledá páry výroků se shodnou
-   rolí `kdo` + jednou další (přes `Memory.statements_about`, ne plný sken)
-   a různým predikátem. Riziko: kolik falešných párů (dvě různé osoby
-   stejného jména, náhodná shoda objektu) by to navrhlo na 180 000 slovech
-   reálného textu je **neměřeno** — síla `related` limituje škodu (nikdy ve
-   verdiktu), ale lexikon by se mohl zaplevelit šumem. **Ablace už existuje**
-   (`cb6.dialog.set_graf_suggestions_enabled`, `bench run --bez-graf`) —
-   **první tah, jakmile budou služby:** `bench run --vse` s/bez `--bez-graf`,
-   porovnat počet nových `read`-autoritních řádků a ručně posoudit vzorek.
+-1. **(VALIDOVÁNO 27. 9. 2026 — mechanismus `graf` vypnut ve výchozím stavu,
+   viz HYPOTEZY.)** `bench/graf_audit.py` (nový nástroj) proběhl na celé
+   reálné sadě wiki (16 dokumentů, ~180 000 slov, `--parser spacy`, žádný
+   `--strop`): **80 návrhů**. Ruční čtení dohledaných zdrojových vět u
+   vzorku (~35, rozprostřeno přes `alois_jirásek`, `bohumil_hrabal`,
+   `božena_němcová`, `sopka`) **neukázalo ani jednu skutečnou parafrázi** —
+   vzorec „stejné `kdo` + 1 další role, jiný predikát“ na reálném textu
+   skoro vždy chytí dvě věty o téže osobě/tématu v jiné souvislosti
+   (jiná životní událost sdílející místo/datum, jiný dílčí fakt sdílející
+   objekt), ne totéž řečeno jinak — dvojitá role navíc oproti `korekce`
+   nestačí. U dvou dokumentů (`božena_němcová` „naleznout ~ oslovit“,
+   `sopka` řada impersonálních vazeb typu „jedná_se ~ …“) návrh navíc
+   ukázal na jinou, samostatnou věc k prošetření: `kdo` role se u
+   neosobních/reflexivních konstrukcí („jedná se o“, „dochází k“) zřejmě
+   sbíhá na téma dokumentu místo aby zůstala prázdná — netýká se
+   mechanismu `graf` samotného, ale je to potenciální zdroj přesnosti
+   jinde; nezkoumáno dál v tomhle tahu.
+   **Rozhodnutí (pravidlo 2 — recall bez pravdivosti se nepočítá):**
+   `_GRAF_SUGGESTIONS_ENABLED` výchozí `False` (`cb6/dialog.py`); kód i
+   zlatá úloha `bench vazby` (`graf:parafraze`) zůstávají a dál dokazují,
+   že KÓD tuhle schopnost má, jen se nepoužívá produkčně. Zapnutelné pro
+   přeměření přes `bench run --se-grafem` (dřív `--bez-graf`, obráceně).
+   **Další tah, pokud se k tomu vrátit:** kritérium potřebuje víc než shodu
+   dvou rolí — např. požadovat shodu VĚTNÉ POZICE (bezprostředně sousední
+   věty) nebo sémantickou blízkost predikátů (embedding), ne čistě
+   topologickou shodu rolí.
 0. **(priorita až budou služby) Multilingvnost + NN jako
    extraktor struktury** — J.: NN smí dělat skoro vše (parsing, extrakci,
    konverzaci, i pro víc jazyků), ale nikdy „znalost" — ta zůstává výhradně
@@ -301,6 +313,15 @@ Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
   korpusu (cloud) → hotov jen krok 1 (`cb6/lang/`), beze změny chování,
   měřeno pytestem/mypy/pylint, ne bench číslem (viz HYPOTEZY 2026‑09‑27).
 - 17. 8. — Lexikon krok 1: síla vazby se rozhoduje podle významu páru, ne podle počtu zásahů (např. `pracovat ~ působit` same — životopisné „působil v/jako“; jiné významy chrání rámec rolí; `absolvovat`, `vyhrát`, `uvést`, `dostat`… zváženy jednotlivě, viz `pozn` v seedu). Shoda přes `implies` snižuje stupeň důkazu na `derived` (je to odvození, ne záměna). Otázka je vždy první argument shody (`same_pred(dotaz, výrok)`); u můstkových pravidel se pořadí opravilo (`dst_pred` je výrok). Použitý řádek se materializuje i při dotazu (uzel `vazba` v exportu) — jinak by krok `lex` nebyl z grafu doložitelný; nepoužité seed řádky graf nezatěžují.
+- 27. 9. 2026 (pokračování) — Mechanismus `graf` (§ 6 „‑1“) změřen na celém
+  reálném korpusu wiki (16 dok., ~180 000 slov, `bench/graf_audit.py`): 80
+  návrhů, ruční čtení vzorku ukázalo 0 skutečných parafrází — opatrnostní
+  „dvě role místo jedné" fragmentový test prošel (7/7), na reálném textu
+  ne. Rozhodnutí: `_GRAF_SUGGESTIONS_ENABLED` výchozí `False`; kód a zlatá
+  úloha zůstávají (dokazují schopnost KÓDU), produkční ingest ho jen
+  nepoužívá, dokud kritérium nebude přesnější než topologická shoda rolí.
+  Ablace přejmenována `--bez-graf` → `--se-grafem` (teď je to opt-in, ne
+  ablace něčeho zapnutého). Viz `mereni/HYPOTEZY.md` 2026‑09‑27.
 
 ## 8. Kritické zhodnocení architektury (J., 27. 9. 2026 — „kriticky hodnoť“)
 

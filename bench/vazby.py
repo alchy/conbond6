@@ -29,7 +29,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from cb6.dialog import Session
+from cb6.dialog import Session, graf_suggestions_enabled, set_graf_suggestions_enabled
 from cb6.memory import Memory
 from cb6.oracle import Parse, Token
 
@@ -131,12 +131,21 @@ def _run_prikaz(*prikazy: str) -> Callable[[], Memory]:
     return go
 
 
-def _run_veta(*vety: str) -> Callable[[], Memory]:
+def _run_veta(*vety: str, graf: bool = False) -> Callable[[], Memory]:
     def go() -> Memory:
         m = Memory()
         s = Session(m, _DictOracle(_PARSES))  # type: ignore[arg-type]
-        for v in vety:
-            s.say(v)
+        prev = graf_suggestions_enabled()
+        if graf:
+            # mechanismus `graf` je od 27. 9. 2026 vypnutý ve výchozím stavu
+            # (`cb6/dialog.py` — 80/80 návrhů na reálném korpusu byl šum),
+            # ale zlatá úloha na fragmentu má dál dokazovat, že KÓD to umí.
+            set_graf_suggestions_enabled(True)
+        try:
+            for v in vety:
+                s.say(v)
+        finally:
+            set_graf_suggestions_enabled(prev)
         return m
     return go
 
@@ -158,8 +167,10 @@ CASES: tuple[VazbaCase, ...] = (
               _run_veta("Petr bydlí v Praze.", "Ne, Petr žil v Praze."), ("třída", ("bydlet", "žít"), "related")),
     VazbaCase("graf:parafraze", "graf",
               "„Karel Čapek napsal román Krakatit.“ + „…vytvořil román Krakatit.“ — stejné role kdo+co, "
-              "jiný predikát → hypotéza vazby bez věty o vazbě samotné (síla `related`, dvojice seřazená)",
-              _run_veta("Karel Čapek napsal román Krakatit.", "Karel Čapek vytvořil román Krakatit."),
+              "jiný predikát → hypotéza vazby bez věty o vazbě samotné (síla `related`, dvojice seřazená). "
+              "Mechanismus je od 27. 9. 2026 VYPNUTÝ ve výchozím stavu (real-corpus měření: 80/80 šum, "
+              "`mereni/HYPOTEZY.md`) — úloha dočasně zapíná, aby dál dokazovala, že KÓD to umí.",
+              _run_veta("Karel Čapek napsal román Krakatit.", "Karel Čapek vytvořil román Krakatit.", graf=True),
               ("třída", ("napsat", "vytvořit"), "related")),
 )
 
