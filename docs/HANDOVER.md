@@ -11,7 +11,7 @@
 | **ukázky ze živého běhu** (12 scén; přegenerovat `python -m bench ukazky` po tahu, který mění odpovědi) | `docs/UKAZKY.md` (generátor `bench/ukazky.py`) |
 | zadání, invarianty I‑1…I‑12 | `docs/superpowers/specs/2026-08-17-conbond6-design.md` |
 | znalostní vazby jako data (návrh) | `docs/superpowers/specs/2026-08-17-znalostni-vazby-design.md` |
-| lexikon vazeb (krok 1 + `podřazení` + `překryv`) | `cb6/lexicon.py` (operátory `třída`, `implikace`, `podřazení`, `překryv` s modalitou; loader, shoda, materializace, `overlap_targets`/`overlap_rules_by_target`) · seed `synonyma.jsonl` (88 ř.) + `podrazeni.jsonl` (18 ř.) + `prekryv.jsonl` (1 ř., `žít⇒potkat_se`) · dialog `!uč a = b \| a => b \| a ~ b \| a < b` (`!uč překryv …` zatím chybí — dialog se do kroku 2 nedostal) · `cb6/logic.py Evaluator.overlap_verdict` (query-time join, ne `derive()` — viz HANDOVER § 8/1) |
+| lexikon vazeb (krok 1 + `podřazení` + `překryv`) | `cb6/lexicon.py` (operátory `třída`, `implikace`, `podřazení`, `překryv` s modalitou; loader, shoda, materializace, `overlap_targets`/`overlap_rules_by_target`) · seed `synonyma.jsonl` (88 ř.) + `podrazeni.jsonl` (18 ř.) + `prekryv.jsonl` (1 ř., `žít⇒potkat_se`) · dialog `!uč a = b \| a => b \| a ~ b \| a < b \| překryv a => b` · `cb6/logic.py Evaluator.overlap_verdict` (query-time join, ne `derive()` — viz HANDOVER § 8/1) |
 | výpisové otázky (k ověření J.) | `bench/gold/gen-{alois_jirásek,karel_čapek,božena_němcová}.json` (9, `curated: False`, sada `gen`) → `python -m bench gold-gen --overit --dok …` |
 | koncept (proč takhle) | `docs/KONCEPT.md` |
 | plán v1 + stav provedení | `docs/superpowers/plans/2026-08-17-conbond6-v1.md` |
@@ -94,7 +94,9 @@ graphcheck.py` — `lex_path` chodí i po `překryv`, nová jádra `overlap`/
 („Mohli se X a Y potkat?“ z reálného textu) **není hotové** — čeká na UDPipe;
 tenhle krok je jen logická vrstva, ověřená `tests/test_prekryv.py` (4
 fragmenty, `Statement`/`Memory` přímou konstrukcí, `check_graph`/`check_answer`
-0). Podrobně proč query-time (ne `derive()`) v HYPOTEZY 2026-09-27 a § 9 níže.
+0). Dialogová vstupní strana (`!uč překryv a => b`, `Memory.add_link` s
+volitelnou `modality`) hotová, `tests/test_dialog.py::test_prekryv_command`.
+Podrobně proč query-time (ne `derive()`) v HYPOTEZY 2026-09-27 a § 8 níže.
 
 **Jazyk jako data** (27. 9. 2026, `cb6/lang/`): čtecí tabulky (`ROLE_BY_CASE`,
 `DETERMINER_QUANT`, `PARTICLES`, `WH`, `LIST_VERBS`, `PLACE_NOUNS`,

@@ -199,3 +199,19 @@ modulů (`ground.py` typuje, `logic.py` PLACE_FAMILY/TIME_FAMILY) — druhý
 jazyk možná bude potřebovat jiné rodiny rolí (např. jazyk bez pádů řeší
 "kdy/kde" jinak) — dnešní refaktor (`cb6/lang/`) řeší jen SLOVNÍ ZÁSOBU
 čtení, ne úplně tohle.
+
+## 2026-09-27 · pokračování · `!uč překryv a => b` — dialogová vstupní strana
+
+**Změna:** `Memory.add_link` dostal volitelný parametr `modality` (výchozí
+`""`, zpětně kompatibilní se všemi existujícími voláními); `dialog.py`
+rozpozná `!uč překryv X => Y` jako vlastní slovo v příkazu (ne symbol z
+`parse_teach`'s mini-jazyka — nese modalitu `"možnost"`, kterou symbolická
+gramatika `= / => / ~ / <` neumí vyjádřit bez páté značky). Dřív šel operátor
+`překryv` naučit jen ze seedu (JSONL), teď i z dialogu, jako `třída`/
+`implikace`/`podřazení` od kroku 1.
+**Hypotéza:** pytest +1 (`test_dialog.py::test_prekryv_command`), mypy/pylint
+beze regrese (jen posun čísel řádků).
+**Výsledek:** přesně tak — 183 passed + 2 xfailed (bylo 182), mypy čisté,
+pylint diff `cb6/dialog.py`/`cb6/memory.py` beze nového nálezu (ověřeno
+`diff` baseline vs. po změně, ne jen skóre — skóre samo nerozliší posun
+řádků od nového nálezu, poučení z předchozího kroku téhle relace).
