@@ -759,34 +759,54 @@ class _Reader:
         return None
 
     def _relational_name(self, t: Token) -> list[Token] | None:
-        """G‑3 (krok 3): „Jeho bratr Josef Čapek“ — vztahové substantivo +
-        přivlastnění (zájmeno/přídavné jméno) + `flat` vlastní jméno. Na
-        rozdíl od `_title_of` (nmod v Nom, libovolná třída) je spouštěč užší
-        (jen `flat`, jen vztahová substantiva), ale svede se do TÉHOŽ tvaru
-        (`title` → entita + `cls`), protože je to strukturně stejná věc:
-        jméno v přístavku u obecného jména. Přivlastnění navíc zůstává na
+        """„Jeho bratr Josef Čapek“ i holé „Matka Božena Čapková“ — vztahové
+        substantivo + `flat` vlastní jméno. Na rozdíl od `_title_of` (nmod
+        v Nom, libovolná třída) je spouštěč užší (jen `flat`, jen vztahová
+        substantiva), ale svede se do TÉHOŽ tvaru (`title` → entita + `cls`),
+        protože je to strukturně stejná věc: jméno v přístavku u obecného
+        jména — bez tohohle by „matka“ pohltilo „Božena Čapková“ jako
+        (nesmyslné) pokračování SVÉHO jména (víceslovné jméno, `_term`),
+        místo aby vzniklo jméno „Božena Čapková“ ∈ matka.
+
+        Přivlastnění (G‑3, krok 3, „Jeho bratr…“) navíc zůstává na
         `TermSpec.possessor` — `ground.py Grounder._relational_fact` z něj
-        udělá vztahový výrok (`bratr(kdo=Josef Čapek, čí=…)`), ne jen
-        typing (ten vznikne taky, z `cls`, beze změny)."""
+        udělá vztahový výrok (`bratr(kdo=Josef Čapek, čí=…)`), ne jen typing.
+        BEZ přivlastnění (27. 9. 2026, nález z živé ukázky: „Matka Božena
+        Čapková sbírala…“ nemá „Jeho“) entita a typing vzniknou stejně, jen
+        vztahový výrok ne — KDO je čí matka/bratr/… bez zájmena potřebuje
+        odvození z tématu dokumentu, což je jiný, neměřený krok (HANDOVER)."""
         if t.upos != "NOUN" or t.lemma not in D.RELATIONAL_NOUNS:
-            return None
-        has_poss = any(
-            (c.base_deprel == "det" and (c.lemma in D.POSSESSIVE or c.feat("Poss") == "Yes"))
-            or (c.base_deprel == "amod" and c.upos == "ADJ" and c.feat("Poss") == "Yes")
-            for c in self.p.children(t.index)
-        )
-        if not has_poss:
             return None
         flats = [f for f in self.p.children(t.index) if f.base_deprel == "flat" and f.upos == "PROPN"]
         return flats or None
 
+    def _named_conjunct(self, group: list[Token]) -> Token | None:
+        """Který z `group` nese vlastní jméno (`flat` PROPN)? Vrací ho, jen
+        pokud je PRÁVĚ JEDEN — víc jmen napříč skupinou je skutečná
+        nejednoznačnost (dvě různé osoby), ne jedna osoba popsaná dvakrát."""
+        named = [g for g in group if any(f.base_deprel == "flat" and f.upos == "PROPN" for f in self.p.children(g.index))]
+        return named[0] if len(named) == 1 else None
+
     def _is_relational_gen_arg(self, t: Token, c: Token, consumed: list[int]) -> bool:
         """Krok 3 (vztahová substantiva): je `c` prostý genitivní doplněk
-        vztahového jména `t` („manžel dcery“)? Souřadění pod `c`
-        („manžela nebo manželky“) se nepřebírá — dvě jména by se ztratila
-        na jedno; disjunkce takovou větu stejně zamítne (viz `triage.py`)."""
-        return (t.lemma in D.RELATIONAL_NOUNS and c.feat("Case") == "Gen" and c.upos in ("NOUN", "PROPN")
-                and not self.case_of(c.index) and not self.kids(c.index, "cc", "conj") and c.index not in consumed)
+        vztahového jména `t` („manžel dcery“)? Souřadění pod `c` se přebírá
+        JEN když jde o dva POPISY jedné osoby, ne o dvě různé osoby: spojka
+        musí být slučovací (ne „nebo“/„či“ — disjunkce, „manžela nebo
+        manželky“, tam je skutečně nejasné, KTERÝ genitiv platí) a jméno
+        (`flat` PROPN) smí viset jen na JEDNOM z koordinovaných substantiv
+        („malíře A SPISOVATELE Josefa Čapka“ — jedna osoba, dvě profese)."""
+        if not (t.lemma in D.RELATIONAL_NOUNS and c.feat("Case") == "Gen" and c.upos in ("NOUN", "PROPN")
+                and not self.case_of(c.index) and c.index not in consumed):
+            return False
+        conj = self.kids(c.index, "conj")
+        if not conj:
+            return True
+        group = [c] + conj
+        if any(g.upos != "NOUN" or g.feat("Case") != "Gen" for g in group):
+            return False
+        if {cc.lemma for g in group for cc in self.kids(g.index, "cc")} & {"nebo", "anebo", "či", "popřípadě"}:
+            return False
+        return self._named_conjunct(group) is not None
 
     def _term(self, t: Token) -> TermSpec:
         where = "term"
@@ -874,10 +894,20 @@ class _Reader:
                         self.mark(cc.index, where)
                         consumed.append(cc.index)
             elif d == "nmod" and self._is_relational_gen_arg(t, c, consumed):
-                # krok 3: vztahové substantivum + prostý genitiv (bez souřadění —
-                # to zůstává vedlejší predikaci níž, disjunkce ji stejně zamítne) =
-                # určující argument („manžel dcery“), ne vedlejší vztah k zahození.
-                rel_owner = self._term(c)
+                # krok 3: vztahové substantivum + prostý genitiv („manžel dcery“)
+                # = určující argument, ne vedlejší vztah k zahození. Koordinace
+                # dvou POPISŮ jedné osoby („malíře a spisovatele Josefa Čapka“)
+                # — jméno visí na jednom z nich, ten druhý je jen zahozený popis
+                # (méně bohaté, ale ne mylné: neztrácí se osoba, jen její profese).
+                owner_tok = self._named_conjunct([c] + self.kids(c.index, "conj")) or c
+                for g in [c] + self.kids(c.index, "conj"):
+                    if g.index != owner_tok.index:
+                        self.mark(g.index, "particle")
+                        consumed.append(g.index)
+                        for cc in self.kids(g.index, "cc"):
+                            self.mark(cc.index, "particle")
+                            consumed.append(cc.index)
+                rel_owner = self._term(owner_tok)
                 consumed.extend(rel_owner.tokens)
             elif d in ("nmod", "appos", "acl", "parataxis", "obl", "advcl"):
                 if c.index in consumed:

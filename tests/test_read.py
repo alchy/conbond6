@@ -130,6 +130,66 @@ def test_neosobni_se_v_pritomnem_case_nedostane_kdo() -> None:
     assert m.role("kdo") is None
 
 
+def test_relational_noun_bez_privlastneni_da_entitu_ne_slepene_jmeno() -> None:
+    """„Matka Božena Čapková sbírala…“ (živá ukázka 27. 9. 2026, J.): dřív
+    `_relational_name` vyžadovalo přivlastnění („Jeho bratr…“), bez něj
+    `_term` sloučilo „matka“+„Božena“+„Čapková“ do JEDNOHO jména (jako
+    víceslovné jméno typu „Karel Čapek“) — Božena Čapková se tak nedala
+    najít jako entita. Teď i bez přivlastnění vznikne entita `Božena
+    Čapková ∈ matka` (typing z `cls`), jen vztahový výrok (`matka(kdo=…,
+    čí=…)`) ne — ten čeká na odvození vlastníka z tématu dokumentu
+    (`ground.py`), jiný, neměřený krok. Ruční UD (ověřeno křížově proti
+    `SpacyOracle`), ne živý UDPipe."""
+    from cb6.oracle import Parse, Token
+    p = Parse("Matka Božena Čapková sbírala slovesný folklor.", (
+        Token(1, "Matka", "matka", "NOUN", 4, "nsubj", (("Case", "Nom"), ("Gender", "Fem"), ("Number", "Sing"))),
+        Token(2, "Božena", "Božena", "PROPN", 1, "flat", (("Case", "Nom"), ("Gender", "Fem"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(3, "Čapková", "Čapková", "PROPN", 1, "flat", (("Case", "Nom"), ("Gender", "Fem"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(4, "sbírala", "sbírat", "VERB", 0, "root", (("Aspect", "Imp"), ("Gender", "Fem,Neut"), ("Number", "Plur,Sing"), ("Polarity", "Pos"), ("Tense", "Past"), ("VerbForm", "Part"), ("Voice", "Act"))),
+        Token(5, "slovesný", "slovesný", "ADJ", 6, "amod", (("Animacy", "Inan"), ("Case", "Acc"), ("Degree", "Pos"), ("Gender", "Masc"), ("Number", "Sing"), ("Polarity", "Pos"))),
+        Token(6, "folklor", "folklor", "NOUN", 4, "obj", (("Animacy", "Inan"), ("Case", "Acc"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(7, ".", ".", "PUNCT", 4, "punct", ()),
+    ), "ruční UD (ověřeno křížově proti SpacyOracle) — test, ne živý UDPipe")
+    m = read(p).main
+    assert m.pred == "sbírat"
+    kdo = m.role("kdo").terms[0]  # type: ignore[union-attr]
+    assert kdo.kind == "entity" and kdo.name_lemmas == ("Božena", "Čapková") and kdo.cls == ("matka", ())
+    assert kdo.possessor is None
+
+
+def test_relational_gen_arg_koordinovany_popis_jedne_osoby() -> None:
+    """„Byl mladším bratrem malíře a spisovatele Josefa Čapka.“ (živá ukázka
+    27. 9. 2026): genitivní argument vztahového substantiva („manžel
+    dcery“) se dřív u KOORDINACE vůbec nepřebíral (obrana proti „manžela
+    NEBO manželky“ — dvě různé osoby) — Josef Čapek tak z výroku úplně
+    zmizel. Teď se koordinace přebere, když jde o dva POPISY JEDNÉ osoby
+    (jméno visí jen na jednom z konjunktů, spojka je slučovací): Josef
+    Čapek je dohledatelný jako `rel_owner` role `co`. Zbytek beze změny
+    (druhý konjunkt „malíře“ se jen zahodí jako popis — bohatší zpracování
+    dvou tříd na jedné entitě je otevřený tah, ne dnešní oprava). Ruční UD
+    (ověřeno křížově proti `SpacyOracle`), ne živý UDPipe."""
+    from cb6.oracle import Parse, Token
+    p = Parse("Byl mladším bratrem malíře a spisovatele Josefa Čapka.", (
+        Token(1, "Byl", "být", "AUX", 3, "cop", (("Aspect", "Imp"), ("Gender", "Masc"), ("Number", "Sing"), ("Polarity", "Pos"), ("Tense", "Past"), ("VerbForm", "Part"), ("Voice", "Act"))),
+        Token(2, "mladším", "mladý", "ADJ", 3, "amod", (("Animacy", "Anim"), ("Case", "Ins"), ("Degree", "Pos"), ("Gender", "Masc"), ("Number", "Sing"), ("Polarity", "Pos"))),
+        Token(3, "bratrem", "bratr", "NOUN", 0, "root", (("Animacy", "Anim"), ("Case", "Ins"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(4, "malíře", "malíř", "NOUN", 3, "nmod", (("Animacy", "Anim"), ("Case", "Gen"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(5, "a", "a", "CCONJ", 6, "cc", ()),
+        Token(6, "spisovatele", "spisovatel", "NOUN", 4, "conj", (("Animacy", "Anim"), ("Case", "Gen"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(7, "Josefa", "Josef", "PROPN", 6, "flat", (("Animacy", "Anim"), ("Case", "Gen"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(8, "Čapka", "Čapek", "PROPN", 6, "flat", (("Animacy", "Anim"), ("Case", "Gen"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(9, ".", ".", "PUNCT", 3, "punct", ()),
+    ), "ruční UD (ověřeno křížově proti SpacyOracle) — test, ne živý UDPipe")
+    r = read(p)
+    m = r.main
+    assert m.pred == "být"
+    co = m.role("co").terms[0]  # type: ignore[union-attr]
+    assert co.lemma == "bratr" and co.rel_owner is not None
+    assert co.rel_owner.name_lemmas == ("spisovatel", "Josef", "Čapek")
+    assert r.residue == []
+    assert not [t.form for t in r.parse.tokens if t.index not in r.placement()]
+
+
 def test_questions_have_holes(oracle: RecordedOracle) -> None:
     m = R(oracle, "Kde se narodil Alois Jirásek?").main
     assert m.mood == "question"

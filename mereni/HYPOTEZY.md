@@ -1292,3 +1292,78 @@ značka z rozboru, ne dohad podle povrchového tvaru. **Nezkoumáno dál:**
 neosobní slovesa BEZ zvratného „se“ (`docházet k`, `nastávat`) stejnou
 UD značku nemají — potřebovaly by vlastní (malý, ověřený) seznam sloves,
 ne domněnku; ponecháno jako otevřený tah (HANDOVER § 5 „Krok 7“).
+
+## 2026-09-27 · pokračování · vztahová substantiva: bez přivlastnění a koordinovaný genitiv
+
+**Podnět:** živá ukázka konverzace pro J. (na požádání — „ukaz mi ukazku
+konverzace… kde selhává? co jde dobře?") nad reálným textem o Karlu
+Čapkovi ukázala dva konkrétní, ověřitelné pády selhání kolem vztahových
+substantiv (G‑3, krok 3):
+- „Byl mladším bratrem malíře a spisovatele Josefa Čapka.“ →
+  `být(kdo:∅, co:∃bratr)` — **Josef Čapek z výroku úplně zmizel.**
+- „Kdo byla matka Karla Čapka?“ → NEVÍM, přestože `sbírat(kdo:„matka
+  Božena Čapková“, co:∃folklor)` v paměti BYLO — jen pod nenajitelným
+  slepeným jménem.
+
+**Rozbor (ověřeno přímo přes `SpacyOracle`/`read()`, ne dohadem):**
+1. „Matka Božena Čapková“: `_relational_name` vyžadovalo přivlastnění
+   (`has_poss`), tady žádné není (subjekt je holý nominativ). Bez title‑
+   rozpoznání `_term`'s obecná fúze `flat` dětí slila „matka“+„Božena“+
+   „Čapková“ do JEDNOHO jména — přesně stejná cesta jako u „Karel Čapek“
+   (oba tokeny PROPN `flat`), jenže tady hlava „matka“ je obyčejné
+   podstatné jméno, ne část jména.
+2. „bratrem malíře a spisovatele Josefa Čapka“: `_is_relational_gen_arg`
+   odmítalo genitivní argument, jakmile měl JAKOUKOLI koordinaci
+   (`self.kids(c.index, "cc", "conj")` → `False`) — obrana proti „manžela
+   NEBO manželky“ (dvě různé osoby, kde je vážně nejasné, který genitiv
+   platí). Ale „malíře A SPISOVATELE Josefa Čapka“ je JINÝ tvar: dva
+   POPISY jedné osoby (jméno `flat` visí jen na druhém konjunktu) — táž
+   obrana tady jen zahodila celý genitivní podstrom i se jménem, protože
+   šla po přítomnosti koordinace, ne po tom, KOLIK různých jmen je uvnitř.
+
+**Hypotéza:**
+(a) uvolnit `_relational_name` — přivlastnění nechat NEPOVINNÉ (entita +
+`cls` vzniknou vždy, `t.possessor` zůstane `None` bez zájmena, takže
+`ground.py._relational_fact` — pořád gatovaná `if t.possessor is not
+None` — se sama nezavolá; žádná změna na její straně potřeba).
+(b) v `_is_relational_gen_arg` nahradit blanket-zákaz koordinace
+podmínkou „spojka je slučovací A jméno (`flat` PROPN) visí přesně na
+JEDNOM konjunktu“ (nový `_named_conjunct`); jinak (disjunkce, nebo 0/2+
+jmen) zůstává zamítnuto jako dřív — `manžela nebo manželky` se dál
+nepřebírá.
+Očekávání: `pytest` beze regrese (+2 nové testy), mypy/pylint beze
+nového nálezu (jen kategorie už použité jinde v `tests/test_read.py`).
+**Vědomě nezobecňovat** dál — profesní tituly mimo `RELATIONAL_NOUNS`
+(„spisovatel“, „malíř“…) by potřebovaly potvrzení na reálném korpusu,
+ne jen jednu ukázkovou větu.
+
+**Výsledek:** přesně tak. End‑to‑end přes `Session.ingest`: „Matka Božena
+Čapková sbírala slovesný folklor.“ → entita `e0002 Božena Čapková`
+(`cls=("matka",())`), výrok `sbírat(kdo=e0002, co=folklor)` — teď
+DOHLEDATELNÁ. „Byl mladším bratrem malíře a spisovatele Josefa Čapka.“
+→ `být(kdo=Karel Čapek, co=∃bratr, čí=g0003 „spisovatel Josef Čapek“)`
+— Josef Čapek dohledatelný přes roli `čí`, dřív úplně chyběl. **Zbytkové
+zjednodušení** (přiznané): `čí` odkazuje na SKUPINU „spisovatel Josef
+Čapek“ (kind=`group`), ne na čistou entitu s odděleným `cls` — protože
+„spisovatel“ není v `RELATIONAL_NOUNS`, takže se na něj title‑rozpoznání
+nevztahuje (viz hypotéza — vědomě). Josef Čapek je nicméně jmenovaný a
+dohledatelný, jen pod bohatším (ne čistým) jménem skupiny — VÝRAZNĚ lepší
+než předtím (úplná ztráta). Nové testy
+`tests/test_read.py::test_relational_noun_bez_privlastneni_da_entitu_ne_
+slepene_jmeno`, `::test_relational_gen_arg_koordinovany_popis_jedne_osoby`
+(ruční UD, ověřeno křížově proti `SpacyOracle`). Pytest 224+2xfail →
+**226 passed + 2 xfailed**, mypy čisté, pylint diff (`git stash`) jen
+posun řádků + 2 nové nálezy stejné kategorie jako existující v souboru
+(`import-outside-toplevel`, `use-implicit-booleaness-not-comparison`).
+
+**Poučení:** obě mezery byly ve stejné rodině kódu jako G‑3 (krok 3,
+minulý tah), ale žádná z nich nebyla „ještě neimplementovaný operátor“
+— byly to PŘÍLIŠ ÚZKÉ podmínky (přivlastnění povinné, koordinace vždy
+zamítnuta) napsané pro JEDEN konkrétní vzor věty, které na sousedním,
+stejně běžném vzoru selhaly potichu (žádná chyba, jen zmizelá informace).
+Živá ukázka na reálném textu je tu přesně k tomuhle — fragmentové zlaté
+úlohy (jako `test_relational_name`) testují, že vzor FUNGUJE, ne že
+sousední vzor NEPADÁ. Rozdíl mezi „Josef Čapek zmizel úplně“ (dřív) a
+„Josef Čapek je dohledatelný pod méně čistým jménem“ (teď) je přesně ten
+druh postupného zlepšení, co pravidlo 2 chce: víc pravdivé, beze ztráty
+přesnosti jinde.

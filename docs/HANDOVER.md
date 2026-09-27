@@ -23,7 +23,7 @@
 | jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` + `lang/` (jazyková pravidla jako data, `cb6/lang/cs.json`) |
 | bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff vazby __main__` |
 | **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes **7/7** (všechny čtyři mechanismy hotové; `graf` validováno na reálném korpusu 27. 9. 2026 — 80/80 návrhů byl šum, proto VYPNUT ve výchozím stavu, `bench run --se-grafem` ho zapne, viz § 6 „‑1“) |
-| testy | `tests/` (224 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
+| testy | `tests/` (226 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
 | paralelní větev | conbond5 (`~/Projects/conbond5`, jiné sezení, HEAD c503b68) — do něj nesahat |
 | související | inventura conbond0–4: artefakt „Inventura conBond 0–5“ (Claude artifacts, 17. 8.) |
@@ -306,6 +306,43 @@ stejný problém mít můžou, ale nemají spolehlivý morfologický/UD signál
 jako `expl:pv` — potřebovaly by lexikon neosobních sloves (jako `is_time_
 noun`/`PLACE_NOUNS`), ne dohad; ponecháno jako další tah. Podrobně
 `mereni/HYPOTEZY.md` 27. 9. 2026 (pokračování).
+
+**Krok 8 hotový — vztahové substantivum bez přivlastnění a koordinovaný
+genitivní argument** (27. 9. 2026, nález ze živé ukázky pro J.): dvě mezery
+ve stejné rodině (`cb6/read.py`, kolem G‑3/krok 3):
+(a) `_relational_name` vyžadovalo přivlastnění („Jeho bratr…“) — holé
+„Matka Božena Čapková sbírala…“ (bez „Jeho“) nechalo `_term` slít
+„matka“+„Božena“+„Čapková“ do JEDNOHO jména jako obyčejné víceslovné
+jméno (stejný vzor jako „Karel Čapek“), takže Božena Čapková nešla najít
+jako entita. Uvolněno: přivlastnění zůstává NEPOVINNÉ — entita a `cls`
+(„Božena Čapková ∈ matka“) vzniknou i bez něj, `_relational_fact` (vztahový
+výrok „čí“) dál běží jen když přivlastnění JE (`t.possessor is not None`,
+ground.py beze změny) — bez zájmena systém KOHO je čí matka nepozná, to
+čeká na odvození z tématu dokumentu (jiný, neměřený krok).
+(b) `_is_relational_gen_arg` odmítalo KAŽDOU koordinaci pod genitivním
+argumentem („manžela nebo manželky“ — dvě různé osoby, správně odmítnuto),
+ale stejně tak i „malíře A SPISOVATELE Josefa Čapka“ (dva POPISY JEDNÉ
+osoby, jméno visí jen na druhém konjunktu) — Josef Čapek tak z výroku
+úplně zmizel. Oprava: koordinace se přebere, jen když je slučovací (ne
+„nebo“/„či“/„anebo“/„popřípadě“) A jméno (`flat` PROPN) visí přesně na
+JEDNOM konjunktu (`_named_conjunct`); jinak (opravdu dvě osoby, nebo obě/
+žádná se jménem) zůstává odmítnuto jako dřív. **Zbytkové zjednodušení**
+(přiznané, ne opravené): `rel_owner` v tomhle případě je pořád `spisovatel
+Josef Čapek“ jako skupina (ne čistá entita „Josef Čapek“ s `cls`), protože
+`spisovatel`/`malíř` nejsou v `RELATIONAL_NOUNS` — širší zobecnění (`NOUN`
++ `flat` PROPN vždy = titul + jméno, ne jen u vztahových substantiv) by
+zasáhlo VŠECHNY profesní tituly v korpusu bez potvrzení na reálném textu,
+takže zůstává jen u vztahových substantiv (opatrnost, ne dohad). Josef
+Čapek je nicméně teď DOHLEDATELNÝ (`čí` role), dřív úplně chyběl.
+Ověřeno end‑to‑end (`Session.ingest`): „Matka Božena Čapková sbírala…“
+→ entita `Božena Čapková ∈ matka`, výrok `sbírat(kdo=Božena Čapková)`;
+„Byl mladším bratrem malíře a spisovatele Josefa Čapka.“ → `být(kdo=Karel
+Čapek, co=∃bratr, čí=spisovatel Josef Čapek)`. Nové testy
+`tests/test_read.py::test_relational_noun_bez_privlastneni_da_entitu_ne_
+slepene_jmeno` a `::test_relational_gen_arg_koordinovany_popis_jedne_osoby`
+(ruční UD, ověřeno křížově proti `SpacyOracle`). Pytest 224+2xfail →
+**226+2xfail**, mypy/pylint beze regrese (jen posun řádků + kategorie už
+použité jinde v souboru). Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
 9. **Výpis — zbytky z reálného textu:** typing z nadpisů/seznamů („Wikilivres: Josef Čapek: díla“ → Josef Čapek ∈ dílo — paskvil z appos), „Krakatit je román.“ čtené jako obecná věta (⊆ místo ∈; velké písmeno na začátku věty není důkaz jména), „R.U.R. (… 1920) –“ → `zemřít(R.U.R., 1920)` (životopisná závorka u díla); imperativ s vedlejší větou („Vyjmenuj, co napsal…“); ověření 9 gen otázek J.
 10. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
 11. **(housekeeping, čeká na službu) `docs/UKAZKY.md` regenerovat** (`python -m bench ukazky`) — spadne na `segmentace … není v data/cache/parses.json` (scény potřebují přesné věty z živého UDPipe/keše, které tahle relace nemá). Až bude UDPipe po ruce: přegenerovat, ověřit, že „krok 6“ (§ 5) je v ukázkách vidět (kratší NEVÍM sekce, bez zdroje u „vím:“).
@@ -346,6 +383,16 @@ noun`/`PLACE_NOUNS`), ne dohad; ponecháno jako další tah. Podrobně
   korpusu (cloud) → hotov jen krok 1 (`cb6/lang/`), beze změny chování,
   měřeno pytestem/mypy/pylint, ne bench číslem (viz HYPOTEZY 2026‑09‑27).
 - 17. 8. — Lexikon krok 1: síla vazby se rozhoduje podle významu páru, ne podle počtu zásahů (např. `pracovat ~ působit` same — životopisné „působil v/jako“; jiné významy chrání rámec rolí; `absolvovat`, `vyhrát`, `uvést`, `dostat`… zváženy jednotlivě, viz `pozn` v seedu). Shoda přes `implies` snižuje stupeň důkazu na `derived` (je to odvození, ne záměna). Otázka je vždy první argument shody (`same_pred(dotaz, výrok)`); u můstkových pravidel se pořadí opravilo (`dst_pred` je výrok). Použitý řádek se materializuje i při dotazu (uzel `vazba` v exportu) — jinak by krok `lex` nebyl z grafu doložitelný; nepoužité seed řádky graf nezatěžují.
+- 27. 9. 2026 (pokračování) — Živá ukázka pro J. (dialog s reálným textem)
+  ukázala dvě mezery u vztahových substantiv: bez přivlastnění se jméno
+  slilo s titulem („matka Božena Čapková“ jedno jméno); koordinovaný
+  genitiv u JEDNÉ osoby („malíře a spisovatele Josefa Čapka“) se zamítal
+  stejně jako u dvou osob. Obojí opraveno (§ 5 „Krok 8“) — přivlastnění
+  teď nepovinné (jen typing, ne vztahový výrok bez něj), koordinace se
+  přebere, když jméno visí přesně na jednom konjunktu a spojka je
+  slučovací. Vědomě NEzobecněno na profesní tituly mimo `RELATIONAL_
+  NOUNS` (`spisovatel`, `malíř`…) — čekalo by na potvrzení na reálném
+  korpusu, ne na dohad.
 - 27. 9. 2026 (pokračování) — Vedlejší nález z validace `graf`: `_prodrop`
   (`cb6/read.py`) nechytil neosobní `_se` konstrukce v přítomném čase
   (čeština v přítomném čase neznačí rod, podmínka žádala `Gender=="Neut"`)
