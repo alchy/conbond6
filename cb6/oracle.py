@@ -17,6 +17,7 @@ Tvar rozboru (`Token`, `Parse`) je záměrně minimální a **imutabilní**, aby
 from __future__ import annotations
 
 import json
+import re
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -284,6 +285,76 @@ class UDPipeOracle:
         if not isinstance(decoded, dict):
             raise OracleError(f"{path}: očekáván objekt, přišlo {type(decoded)}")
         return decoded
+
+
+class SpacyOracle:
+    """Fasáda nad lokálním NN parserem (spaCy, ne UDPipe) — **NN, ne LLM**:
+    žádné síťové volání za běhu, žádný externí model (J. 27. 9. 2026:
+    „systém by však měl pracovat bez external LLM“). Vznikl jako záchranná
+    cesta pro prostředí bez přístupu na `127.0.0.1:42200`/LINDAT (cloudová
+    sezení) — instaluje se čistě z PyPI (`pip install cs_core_news_sm`),
+    žádné stahování modelu odjinud.
+
+    **Pozor na provenienci (I‑12):** tohle NENÍ UDPipe2 a nesmí se s ním
+    smísit v jednom srovnání. Systematicky změřená shoda proti skutečnému
+    UDPipe2 na 177 větách `tests/data/parses.json`: **50,8 % vět přesně,
+    83,1 % tokenů** (`mereni/HYPOTEZY.md` 2026‑09‑27) — jiná lemmatizace,
+    jiné přiřazení u přívlastků/dat/vztažných vět. `provenance` proto vždy
+    říká `spacy model=…`, nikdy `udpipe2`, a žádný report nemá tahle dvě
+    provenience míchat v jednom číslo (nový label/sada, ne tichá náhrada).
+    Použití: nové, dosud nezaznamenané věty (`cb6.record`‑style), vždy
+    s ručním ověřením rozboru u neobvyklé stavby (viz `tests/test_lex_
+    teach.py` — na tenhle model se tam vědomě NEspoléhá, protože na tu
+    konkrétní konstrukci měřitelně chyboval)."""
+
+    def __init__(self, model: str = "cs_core_news_sm") -> None:
+        module = __import__(model)  # balíček `cs_core_news_sm` má vlastní `load()`
+        self._nlp = module.load()
+        self.provenance = f"spacy model={model}"
+
+    def parse(self, text: str) -> Parse:
+        """Rozbor JEDNÉ věty. Víc vět → `SegmentationError` (použij `segment`)."""
+        parses = self._parses(text)
+        if not parses:
+            raise OracleError(f"parser nevrátil žádnou větu pro {text!r}")
+        if len(parses) > 1:
+            raise SegmentationError(f"text {text!r} nese {len(parses)} vět; rozděl ho přes segment()")
+        return parses[0]
+
+    def segment(self, text: str) -> tuple[Parse, ...]:
+        """Rozdělí text na věty a každou rovnou rozebere."""
+        return self._parses(text)
+
+    #: Vlastní rozdělení na věty PŘED parserem — zjištěno prakticky (27. 9. 2026),
+    #: že `doc.sents` u tohohle malého modelu selhává (druhou větu za tečkou
+    #: umí přilepit jako `conj` k první, žádná druhá věta pak nevznikne).
+    #: Parsovat každou větu zvlášť to obchází úplně (parser nikdy neuvidí
+    #: sousední větu, nemá se čeho zmýlit) — cena je slabší heuristika hranic
+    #: (neumí zkratky typu „T. G. Masaryk“), přiznaný kompromis náhradní cesty.
+    _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ])")
+
+    def _parses(self, text: str) -> tuple[Parse, ...]:
+        out: list[Parse] = []
+        for piece in self._SENT_SPLIT.split(text.strip()):
+            piece = piece.strip()
+            if not piece:
+                continue
+            doc = self._nlp(piece)
+            toks = list(doc)
+            if not toks:
+                continue
+            local = {t.i: i + 1 for i, t in enumerate(toks)}
+            tokens = tuple(
+                Token(
+                    i + 1, t.text, t.lemma_, t.pos_,
+                    0 if t.head == t or t.head.i not in local else local[t.head.i],
+                    "root" if t.dep_ == "ROOT" else t.dep_,
+                    tuple(sorted(t.morph.to_dict().items())),
+                )
+                for i, t in enumerate(toks)
+            )
+            out.append(Parse(doc.text, tokens, self.provenance))
+        return tuple(out)
 
 
 # --------------------------------------------------------------------------

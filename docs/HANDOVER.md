@@ -45,7 +45,12 @@
   větách je jen 50,8 % vět přesně / 83,1 % tokenů (`mereni/HYPOTEZY.md`
   2026‑09‑27) → **nepoužívat na historická čísla** (smísilo by dva parsery
   v jednom srovnání); použitelné jen pro zcela nové věty s ručním ověřením
-  (tak použito pro `tests/test_lex_teach.py`).
+  (tak použito pro `tests/test_lex_teach.py`). **`cb6/oracle.py SpacyOracle`**
+  (NN, ne LLM — J.: „systém by však měl pracovat bez external LLM“) teď
+  funguje a je otestovaný (`tests/test_spacy_oracle.py`, volitelný extra
+  `spacy-cs`) — opraveny dvě chyby (kořen věty `t.head == t`, ne `is`;
+  vlastní věta-splitting regexem, `doc.sents` u tohohle modelu nespolehlivě
+  dělí věty na tečce). Pořád NEnasazeno na historická čísla.
 - Python 3.11, `.venv` (`pip install -e '.[dev]'`), závislost jen `networkx` (+ dev pytest/mypy/pylint; viewbase editable z `~/Projects/viewBase2/python`).
 - **UDPipe** služba z conBond3 na `127.0.0.1:42200` (model `cs_all-ud-2.17-251125`) — jen pro nové rozbory a bench; testy jedou z keše.
 - **Ollama** `gemma4:latest` na `127.0.0.1:11434` — soudce auditu a `gold-gen` (27B qwen se do 24 GiB nevejde vedle UDPipe). **Od 27. 9. 2026 výchozí soudce v `bench/config.json` je `claude-cli`/`haiku`** (`bench/judge.py ClaudeCliJudge`, headless `claude -p` — J.: „Ollamu může zastoupit nižší model Claude“), protože cloudová sezení Ollamu nemají; staré nastavení je zachované v config klíči `_ollama_puvodni`, kdyby J. chtěl Ollamu zpátky na svém stroji.
@@ -186,6 +191,7 @@ lexikonový operátor `překryv` (protnutí dvou období na časové ose).
 - 17. 8. — Statusy `SAFE/HYPOTHESIS/REJECTED` jako pole `claim` (pole `status` v conbond5 je životní cyklus); `RESIDUE`/`OPEN` jsou vrstvy, ne statusy.
 - 17. 8. — Soudce = Ollama gemma4 (27B se nevejde do paměti); prompt v2 (nevyslovený podmět z kontextu, závorka s roky) — změna měřidla zapsaná v HYPOTEZY.
 - 27. 9. 2026 — J.: „Ollamu může zastoupit nižší model Claude.“ `ClaudeCliJudge` (headless `claude -p`, model `haiku`) je nový výchozí soudce (`bench/judge.py`, `bench/config.json`) — cloudová sezení nemají Ollamu ani syrový `ANTHROPIC_API_KEY` pro SDK (`ClaudeJudge`), ale mají autentizaci vlastní CLI relace. `--tools ""` + `cwd` mimo repo, aby CLAUDE.md tohohle projektu soudce nesvedlo z role (ověřeno prakticky). Viz HYPOTEZY.
+- 27. 9. 2026 — J. upřesnil: „systém by však měl pracovat bez external LLM.“ Čteno jako potvrzení I‑9 pro krok 6 (NN extraktor struktury): extrakce má stát na skutečné NN (trénovaný parser jako spaCy/UDPipe), ne na živém LLM volání — LLM zůstává jen soudce/generátor otázek (bench, offline), nikdy součást odpovídání za běhu. `ClaudeCliJudge` tohle neporušuje (je jen v `bench/judge.py`). Dotaženo: `cb6.oracle.SpacyOracle` opraveno a otestováno (dvě tiché chyby nalezené a spravené), pořád NEnasazeno na historická čísla.
 - 17. 8. — Kurátorované a automatické otázky se vykazují zvlášť; auto po valenčním filtru; LM‑generované jen po lidském ověření (požadavek J.: otázky s hlavou a patou).
 - 17. 8. — `read.py` v1 beze změny konstrukcí; opravy jen tam, kde výroky lhaly (precision).
 - 17. 8. — viewBase → viewBase2 (github.com/alchy/viewBase2), oblasti podle dokumentu (`skupina`).

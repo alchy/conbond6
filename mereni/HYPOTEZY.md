@@ -556,3 +556,54 @@ síťové politiky), audit s soudcem půjde spustit rovnou, bez čekání na
 Ollamu. Cena za volání je reálná (haiku ~0,001–0,005 $/dotaz, viz živé
 ověření) — `audit_sample` v configu (dnes 50) limituje běžný audit na
 desítky dolarů max, `CachedJudge` navíc nesoudí týž výrok dvakrát.
+
+## 2026-09-27 · pokračování · `SpacyOracle` opraveno a otestováno (J.: „systém by však měl pracovat bez external LLM“)
+
+**Podnět J.:** po `ClaudeCliJudge` (LLM přes CLI, ale JEN pro bench/audit)
+upřesnění: „systém by však měl pracovat bez external LLM.“ Čteno jako
+potvrzení I‑9 (LM je jen soudce/generátor otázek, nikdy za běhu součást
+odpovídání) a jako směr pro „krok 6“ (NN extraktor struktury) — extrakce
+má stát na skutečné NN (trénovaný parser), ne na živém volání LLM. Přesně
+to spaCy `cs_core_news_sm` je: lokální síť, žádná síť za běhu, žádný LLM.
+
+**Nález + oprava dvou chyb v `SpacyOracle`** (byl navržený, ne dokončený
+dřív tuhle relaci — dnes dotažen a otestován):
+1. Kořen věty vycházel s `head≠0` — `t.head is t` (identita) u spaCy
+   Token objektů nesedí (`token.head` vrací pokaždé nový wrapper), musí
+   být `t.head == t` (spaCy `Token.__eq__` porovnává index). Bez opravy
+   by `Parse.root()` v každém rozboru selhalo.
+2. `doc.sents` u tohohle malého modelu nespolehlivě dělí věty — prakticky
+   ověřeno: „Petr bydlí v Praze. Karel žije v Brně.“ dá JEDNU větu, druhý
+   kořen „žije“ se přilepí jako `conj` k prvnímu přes tečku. Oprava:
+   vlastní rozdělení na věty regexem PŘED parserem (`(?<=[.!?])\s+(?=
+   [A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ])`), každá věta se parsuje zvlášť — parser pak
+   nemá šanci slévat věty, protože sousední větu vůbec nevidí. Cena:
+   slabší heuristika hranic (neumí zkratky „T. G. Masaryk“) — přiznaný
+   kompromis náhradní cesty, ne tichá aproximace.
+
+**Změna:** `cb6/oracle.py SpacyOracle` (`parse`/`segment`/`_parses`,
+`provenance="spacy model=…"`, nikdy `udpipe2` — I‑12 provenience).
+`pyproject.toml` volitelný extra `spacy-cs`. `tests/test_spacy_oracle.py`
+(`pytest.importorskip` — hlavní sada na tom nezávisí): kořen, `segment`
+na dvě věty se správným kořenem KAŽDÉ, prázdný text selže nahlas, a
+**zámek na shodu s UDPipe2** (90/177 vět přesně, 153/907 tokenů jinak) —
+ne aby se nasadilo na historická čísla (výslovně ne), ale aby tichá
+regrese/zlepšení modelu bylo vidět hned.
+**Hypotéza:** pytest +6 (podmíněně, jen když je `cs_core_news_sm`
+nainstalovaný), mypy/pylint beze regrese na `cb6/oracle.py` (jen posun
+řádků).
+**Výsledek:** přesně tak — 203 → **209 passed** + 2 xfailed (`cs_core_
+news_sm` je v tomhle sezení nainstalovaný, takže testy běžely, ne jen
+přeskočily), mypy 34 souborů čisté, `cb6/oracle.py` diff beze nového
+nálezu (`tests/test_spacy_oracle.py` nálezy odpovídají zavedené konvenci
+— `W0621` na fixture `oracle`, stejný tvar jako fixture `s` v `test_
+dialog.py`).
+**Poučení:** `SpacyOracle` teď FUNGUJE korektně (dřív měl dvě tiché
+chyby, které by se projevily až na první reálné použití) — ale pořád
+platí rozhodnutí nenasazovat na historická čísla (83,1 % shoda tokenů
+je málo na míchání s UDPipe2 daty). Použitelný je teď pro přesně to, co
+`tests/test_lex_teach.py`/`bench/vazby.py` dělaly ručně: nové věty,
+s ručním ověřením neobvyklé stavby, ne naslepo. Otevřené: zapojit jako
+volitelné orákulum do `cb6.record`/`bench` s explicitním `--parser spacy`
+přepínačem (nikdy jako tichý fallback za UDPipe), až bude jasné, na
+kterou konkrétní novou konstrukci se má použít.

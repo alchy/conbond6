@@ -7,6 +7,10 @@ dependencies = ["networkx>=3.0"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "mypy>=1.8"]
+# SpacyOracle (cb6/oracle.py) — NN parser, ne LLM; záchrana pro prostředí
+# bez UDPipe (viz mereni/HYPOTEZY.md 2026-09-27). Volitelné: čtení jádra
+# na tomhle nezávisí, jen nová záchranná cesta orákula.
+spacy-cs = ["cs_core_news_sm"]
 
 [tool.setuptools]
 packages = ["cb6", "cb6.lang", "bench"]
