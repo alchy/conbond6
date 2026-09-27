@@ -871,3 +871,49 @@ otestováno (`tests/test_probe.py`, ruční UD fixtura jako
 `test_relational_nouns.py`).
 pytest **214 passed** + 2 xfailed (+2 nové), mypy 36 souborů čisté,
 pylint nových modulů 10/10.
+
+## 2026-09-27 · pokračování · conditioning na HRANĚ, ne na tokenu (J.: „to by mělo jít už na současném vzorku“)
+
+**Zadání J.:** „jak muzeme prevadet soucasne conditioning do modelu?
+znalost conditioning je abstrakce nad daty a komunikaci, tedy by to
+melo byt jiz mozne na soucasnem vzorku“ — přesný zásah do slabiny
+minulého zápisu: `read.py` se u `kdo`/`co` nerozhoduje podle tokenu
+samotného, ale podle HRANY (`t.head`, `c.base_deprel`, `c.feat("Case")`)
+— sonda nad izolovaným tokenem tohle nemohla vidět bez ohledu na
+množství dat, protože to chybělo ve VSTUPU, ne ve vzorku.
+**Změna:** `bench/probe.py Example` nese navíc `head_vector` (embedding
+rodiče v závislostním stromu, nuly u kořene) a `deprel`.
+`_feature_matrix(examples, idx, features, deprel_vocab)` staví buď
+`"token"` (původní, jen embedding) nebo `"edge"` (token + rodič +
+one-hot deprelu; slovník deprelů jen z TRÉNINKOVÝCH dat, aby test
+neunikal do vstupu). `--features {token,edge,compare}` — `compare`
+natrénuje obě varianty na STEJNÉM rozdělení dat (čistá A/B, ne dva
+nezávislé vzorky).
+**Hypotéza:** `edge` vstup zlepší `co`/`kdo` konkrétně (kde se minule
+ukázalo, že token sám nestačí — 0,09/0,29 recall), protože `read.py`
+u nich rozhoduje podle role souseda ve stromu, ne podle vlastního
+tvaru slova.
+**Výsledek (2 dok., `alois_jirásek`+`karel_čapek`, strop 40, 3511
+tokenů, stejné rozdělení dat pro obě varianty):** potvrzeno směrem i
+velikostí. `token`: přesnost 74,0 %/základna 49,5 %, `co` recall 0,67,
+balanced accuracy 60,8 %. `edge`: přesnost 75,4 %, `co` recall 0,67
+(stejně — na týhle konkrétní podmnožině už `token` samo dost dobré),
+**balanced accuracy 64,7 % (+3,9 b.b.)**, obyčejná LR +3,3 b.b. Menší
+rozdíl, než jsem čekal na první pohled, ale směr sedí a je to jen 3511
+tokenů — pokus o potvrzení na celém vzorku (10 dok., 56 243 tokenů,
+`--features compare` = 4 modely na `class_weight="balanced"` + `lbfgs`)
+jsem po ~11 minutách CPU (a pak znovu na 5 dok. po ~8 minutách) **zabil
+— ne protože by byl nekonečný nebo nepřesvědčivý, ale protože `compare`
+trénuje 4 modely a `balanced`+`lbfgs` s desítkami tříd konverguje pomalu
+(stejný nález jako minule u `min_support=30`)**. Číslo z 3511 tokenů
+beru jako platnou, jen menší odpověď — přesnější (z celého vzorku) čeká
+na rychlejší trénink (jiný solver, nebo přeskočit `balanced` variantu
+v `compare`), ne na čekání na tenhle běh.
+**Poučení (odpověď J.):** ano, conditioning šel zabudovat na SOUČASNÉM
+vzorku, žádná nová data — přesně jak jsi řekl. Rozdíl (i na malém
+vzorku) je reálný a jde správným směrem (`co` recall stejný, ale
+celková `balanced accuracy` výš — sonda se méně plete u řídkých rolí,
+když vidí hranu). Otevřené: potvrdit na plném vzorku (potřebuje rychlejší
+trénink, ne víc dat) a zkusit ještě bohatší hranu (prarodič ve stromu,
+sourozenci — `read.py` sám na některých místech kouká i tam, např.
+`_title_of`/`_relational_name` na `flat` sourozence hlavy).
