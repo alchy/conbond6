@@ -7,12 +7,22 @@ nezapisuje výrok a nerozhoduje verdikt (I‑9). Verze promptu jde do zprávy,
 aby čísla z různých běhů byla srovnatelná.
 
 Implementace:
-    RecordedJudge  – testy: slovník otisk → (verdikt, poznámka)
-    OllamaJudge    – lokální model přes `POST /api/chat` (bez závislostí)
-    ClaudeJudge    – Anthropic SDK (líný import; extra `bench[judge]`)
-    CachedJudge    – obal, který si pamatuje verdikty podle (otisk, soudce,
-                     verze promptu) v JSON souboru — opakované běhy nesoudí
-                     tytéž výroky znovu
+    RecordedJudge   – testy: slovník otisk → (verdikt, poznámka)
+    OllamaJudge     – lokální model přes `POST /api/chat` (bez závislostí)
+    ClaudeJudge     – Anthropic SDK (líný import; extra `bench[judge]`) —
+                      potřebuje syrový `ANTHROPIC_API_KEY`; v cloudovém
+                      sezení (jen harness OAuth) SDK selže.
+    ClaudeCliJudge  – headless `claude -p` (J. 27. 9. 2026: „Ollamu může
+                      zastoupit nižší model Claude“) — běží přes harness
+                      autentizaci téhle relace, žádný syrový klíč netřeba;
+                      výchozí model malý (`haiku`), ne `opus`/`sonnet` —
+                      soudce je klasifikační úloha, ne generování. Běží
+                      bez nástrojů (`--tools ""`) a s `cwd` mimo repo, aby
+                      nesplynul s CLAUDE.md tohohle projektu (soudce má
+                      soudit, ne se chovat jako asistent na projektu).
+    CachedJudge     – obal, který si pamatuje verdikty podle (otisk, soudce,
+                      verze promptu) v JSON souboru — opakované běhy nesoudí
+                      tytéž výroky znovu
 """
 
 from __future__ import annotations
@@ -20,6 +30,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
+import tempfile
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -177,6 +189,51 @@ class ClaudeJudge:
         return _parse_verdict(text)
 
 
+class ClaudeCliJudge:
+    """Soudce přes lokální `claude` CLI headless (`-p`), ne Anthropic SDK.
+
+    Proč: `ClaudeJudge` (SDK) potřebuje syrový `ANTHROPIC_API_KEY` — tahle
+    (cloudová) relace má jen harness OAuth, SDK by na klíč selhal. `claude
+    -p` běží přes tutéž autentizaci, kterou má tahle relace už teď. Model
+    výchozí **malý** (`haiku`) — J. (27. 9. 2026): „Ollamu může zastoupit
+    nižší model Claude“; soudce je klasifikace tvrdí/netvrdí/částečně, ne
+    úkol pro největší model. `--tools ""` (žádný přístup k souborům/shellu)
+    a `cwd` mimo repo (`tempfile.gettempdir()`) — jinak by CLAUDE.md
+    tohohle projektu soudce nasměrovalo jako asistenta na conbond6, ne
+    jako nestranného soudce věty×výroku."""
+
+    def __init__(self, model: str = "haiku", timeout: float = 60.0) -> None:
+        self.model = model
+        self.timeout = timeout
+        self.name = f"claude-cli:{model}"
+
+    def judge(self, render: str, sentence: str, context: str = "") -> tuple[Verdikt, str]:
+        """Jeden headless dotaz; chyba/timeout/neplatný JSON → `RuntimeError`
+        (audit pokračuje bez soudce, stejně jako u `OllamaJudge`)."""
+        schema = {
+            "type": "object",
+            "properties": {"verdikt": {"type": "string", "enum": list(VERDIKTY)}, "pozn": {"type": "string"}},
+            "required": ["verdikt", "pozn"], "additionalProperties": False,
+        }
+        cmd = ["claude", "-p", "--model", self.model, "--tools", "", "--output-format", "json",
+               "--permission-prompts", "none", "--system-prompt", JUDGE_PROMPT_V1,
+               "--json-schema", json.dumps(schema), _user_message(render, sentence, context)]
+        try:
+            proc = subprocess.run(cmd, cwd=tempfile.gettempdir(), capture_output=True, text=True,
+                                   timeout=self.timeout, check=False)
+        except (subprocess.TimeoutExpired, OSError) as exc:
+            raise RuntimeError(f"Claude CLI soudce nedostupný: {exc}") from exc
+        if proc.returncode != 0:
+            raise RuntimeError(f"Claude CLI soudce selhal (kód {proc.returncode}): {proc.stderr.strip()[:300]}")
+        try:
+            data = json.loads(proc.stdout)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(f"Claude CLI soudce: nečitelná odpověď: {exc}") from exc
+        if data.get("is_error"):
+            return "částečně", f"soudce chyba: {str(data.get('result', ''))[:200]}"
+        return _parse_verdict(str(data.get("result", "")))
+
+
 class CachedJudge:
     """Obal: verdikty podle (otisk, soudce, verze promptu) v JSON souboru."""
 
@@ -212,7 +269,11 @@ class CachedJudge:
 
 
 def make_judge(cfg: dict) -> Judge | None:
-    """Soudce podle `config.json` (`judge.kind`: none | ollama | claude), s keší."""
+    """Soudce podle `config.json` (`judge.kind`: none | ollama | claude |
+    claude-cli), s keší. `claude-cli` (headless `claude -p`, malý model)
+    nahrazuje `ollama`, když lokální Ollama služba není po ruce — cloudové
+    sezení (27. 9. 2026, viz HYPOTEZY) nemá ani Ollamu, ani syrový
+    `ANTHROPIC_API_KEY` pro `claude` (SDK)."""
     j = cfg.get("judge", {})
     kind = j.get("kind", "none")
     inner: Judge | None
@@ -220,6 +281,8 @@ def make_judge(cfg: dict) -> Judge | None:
         inner = OllamaJudge(j.get("model", "qwen3.6:27b-mlx"), j.get("endpoint", "http://127.0.0.1:11434"))
     elif kind == "claude":
         inner = ClaudeJudge(j.get("model", "claude-opus-5"))
+    elif kind == "claude-cli":
+        inner = ClaudeCliJudge(j.get("model", "haiku"))
     else:
         return None
     from bench.data import ROOT  # pylint: disable=import-outside-toplevel

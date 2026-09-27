@@ -516,3 +516,43 @@ korpus na vyladění), `_resolve_possessed` (opraveno), `Session.topics`/
 zbytek buď potřebuje reálný text na vyladění, nebo je to větší
 architektonické rozhodnutí, které by J. měl chtít vidět, ne dostat
 hotové.**
+
+## 2026-09-27 · pokračování · `ClaudeCliJudge` — Ollamu nahradí menší Claude model (J. pokyn)
+
+**Podnět J.:** „Ollamu může zastoupit nižší model Claude.“ Soudce auditu
+(I‑9: LM je jen soudce, nikdy zdroj znalosti) dřív měl dvě cesty:
+`OllamaJudge` (lokální služba, nedostupná v cloudu) a `ClaudeJudge`
+(Anthropic SDK, potřebuje syrový `ANTHROPIC_API_KEY` — tahle relace má
+jen harness OAuth, SDK by na klíč selhal — ověřeno: `pip show anthropic`
+nic nenašlo, žádný `ANTHROPIC_API_KEY`/`ANTHROPIC_AUTH_TOKEN` v prostředí).
+Řešení: `claude` CLI je v tomhle sandboxu k dispozici a běží přes
+autentizaci, kterou relace už má (`claude -p --model haiku ...`).
+
+**Změna:** `bench/judge.py ClaudeCliJudge` — headless `claude -p`
+(`--tools ""` bez přístupu k souborům/shellu, `--json-schema` strukturovaný
+výstup místo spoléhání na markdown formátování, `cwd=tempfile.gettempdir()`
+**mimo repo** — jinak by CLAUDE.md tohohle projektu soudce nasměrovalo
+jako asistenta na conbond6 místo nestranného soudce věty×výroku, ověřeno
+prakticky: volání z `/home/user/conbond6` vrátilo „Ahoj, jsem Claude
+Haiku 4.5, ready to work on conbond6…“ místo JSON verdiktu). Výchozí
+model **`haiku`**, ne `opus`/`sonnet` — soudce je klasifikace, ne úkol
+pro největší model (přesně duch J. pokynu „nižší model“). `make_judge`
+dostal nový `kind="claude-cli"`; `bench/config.json` defaultní soudce
+přepnut z `ollama`/`gemma4` na `claude-cli`/`haiku` (starý ollama nastavení
+zachováno v `_ollama_puvodni` klíči, ne smazáno — J. ho možná na svém
+stroji chce zpátky).
+**Hypotéza:** pytest +7 (`tests/test_judge.py`, `subprocess.run` nahraný
+— žádné skutečné volání CLI v testech, drahé a nehermetické), mypy/pylint
+čisté (`bench/judge.py` diff beze regrese). Živé ověření (1 skutečné
+volání, mimo pytest): „Alois Jirásek se narodil v Hronově.“ + shodný
+výrok → „tvrdí“ se správným zdůvodněním.
+**Výsledek:** přesně tak — 196 → **203 passed** + 2 xfailed, mypy 34
+souborů čisté, `bench/judge.py` diff beze nového pylint nálezu. Živé
+ověření prošlo (viz výše).
+**Poučení:** tohle NEotevírá `bench run --vse --soudce` (pořád chybí
+korpus/UDPipe pro samotné rozbory), ale odstraňuje JEDNU ze dvou překážek
+plného měření — až bude korpus/UDPipe po ruce (lokálně, nebo rozšířením
+síťové politiky), audit s soudcem půjde spustit rovnou, bez čekání na
+Ollamu. Cena za volání je reálná (haiku ~0,001–0,005 $/dotaz, viz živé
+ověření) — `audit_sample` v configu (dnes 50) limituje běžný audit na
+desítky dolarů max, `CachedJudge` navíc nesoudí týž výrok dvakrát.
