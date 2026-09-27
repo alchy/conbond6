@@ -564,11 +564,13 @@ class Memory:
         self.rules.append(rule)
         return rule
 
-    def add_link(self, op: str, args: Sequence[str], strength: str, authority: str, source: str, note: str = "") -> Link:
+    def add_link(self, op: str, args: Sequence[str], strength: str, authority: str, source: str, note: str = "",
+                 modality: str = "") -> Link:
         """Zapiš řádek lexikonu s vlastní autoritou (dialog `!uč` → `said`).
         Proč sem: řádek je součást paměti (JSON, export), ne kódu; id `lex:said:NNNN`.
-        Vstup: operátor, argumenty, síla, autorita, zdroj, poznámka. Výstup: `Link`."""
-        link = Link(self._next("lex:said:"), op, tuple(args), strength, authority, source, note)
+        Vstup: operátor, argumenty, síla, autorita, zdroj, poznámka, modalita
+        (jen `překryv`, spec krok 2). Výstup: `Link`."""
+        link = Link(self._next("lex:said:"), op, tuple(args), strength, authority, source, note, modality)
         link.validate()
         self.links[link.id] = link
         return link

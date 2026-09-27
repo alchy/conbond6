@@ -377,10 +377,17 @@ class Session:
             return f"naučeno: {surface} = {name}; přejmenováno v {n} výrocích"
         if cmd in ("uč", "uc", "synonymum", "synonym"):
             # vazba jako řádek dat s autoritou `said` (lexikon, krok 1): `=` třída/same,
-            # `=>` implikace/implies (fakt vlevo odpovídá na otázku vpravo), `~` jen nápověda
+            # `=>` implikace/implies (fakt vlevo odpovídá na otázku vpravo), `~` jen nápověda;
+            # `překryv` (krok 2) má vlastní slovo v příkazu, ne symbol — nese modalitu
+            # `možnost` vždy (spec § 2), mini-jazyk `parse_teach` ji neumí vyjádřit.
+            mt = re.match(r"^překryv\s+(\S+)\s*=>\s*(\S+)$", arg.strip())
+            if mt:
+                a, b = mt.groups()
+                link = m.add_link("překryv", (a, b), "implies", "said", f"dialog tah {self.turn_no}", modality="možnost")
+                return f"naučeno {link.id}: {link.label()} (překryv, možnost)"
             parsed = parse_teach(arg)
             if parsed is None:
-                return "užití: !uč kázat = hlásat · !uč bydlet => žít · !uč vydat ~ napsat · !uč drama < dílo"
+                return "užití: !uč kázat = hlásat · !uč bydlet => žít · !uč vydat ~ napsat · !uč drama < dílo · !uč překryv žít => potkat_se"
             op, args, strength = parsed
             link = m.add_link(op, args, strength, "said", f"dialog tah {self.turn_no}")
             return f"naučeno {link.id}: {link.label()} ({op}, {strength})"
@@ -489,7 +496,7 @@ class Session:
     @staticmethod
     def _help() -> str:
         return (
-            "příkazy: !zapomeň s0001 · !role v+Loc = kde · !uč kázat = hlásat | bydlet => žít | vydat ~ napsat | drama < dílo · "
+            "příkazy: !zapomeň s0001 · !role v+Loc = kde · !uč kázat = hlásat | bydlet => žít | vydat ~ napsat | drama < dílo | překryv žít => potkat_se · "
             "!pravidlo jet(kam:X) => být(kde:X) · !výjimka létat pták tučňák · !otevřené · "
             "!odpověz o0001 kde · !program · !popiš Jirásek · !ukaž s0042 · !hypotéza s0042 potvrď · !statusy · "
             "!ulož p.json · !načti p.json · !graf g.json"

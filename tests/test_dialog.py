@@ -89,6 +89,16 @@ def test_synonym_command(s: Session) -> None:
     assert "užití" in s.say("!uč nesmysl").text
 
 
+def test_prekryv_command(s: Session) -> None:
+    """`!uč překryv a => b` (krok 2) — vlastní slovo v příkazu, ne symbol
+    (nese modalitu `možnost`, kterou mini-jazyk `parse_teach` neumí)."""
+    from cb6.lexicon import Lexicon
+    r = s.say("!uč překryv bydlet => setkat_se")
+    assert "naučeno lex:said:" in r.text and "možnost" in r.text
+    link = Lexicon.for_memory(s.memory).overlap_rules_by_target("setkat_se")
+    assert len(link) == 1 and link[0].args == ("bydlet", "setkat_se") and link[0].modality == "možnost"
+
+
 def test_quantifier_fix(s: Session) -> None:
     s.say("Ptáci létají.")
     a = s.say("Ne každý pták.")
