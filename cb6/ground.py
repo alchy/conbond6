@@ -314,6 +314,7 @@ class Grounder:
                        residue=list(residue or []), claim=dec.claim, reason=dec.reason)
         self._defaults.extend(dec.defaults)
         nested_specs: list[tuple[Role, Predication]] = []
+        rel_owners: list[str] = []
         for rf in p.roles:
             role = Role(rf.name, [], None, rf.authority, rf.surface, wh=rf.wh, wh_kind=rf.wh_kind)
             if rf.nested is not None:
@@ -329,9 +330,17 @@ class Grounder:
                     role.quant = t.quant
                 if t.quant_authority.startswith("default") and t.quant_authority not in ("default:předmět",):
                     pass  # už je v p.defaults z čtení
+                if t.rel_owner is not None:
+                    # krok 3: genitivní argument vztahového substantiva („manžel
+                    # dcery“) → role `čí` na výroku, ne vedlejší (rejected) nmod.
+                    owner_id = self.resolve_term(t.rel_owner, role="čí", subject_specific=False, pred=p.pred)
+                    if owner_id is not None:
+                        rel_owners.append(owner_id)
             if rf.authority == "surface" and not rf.wh and p.kind not in ("nmod", "appos"):
                 self._pending_open.append(("role_name", rf.surface, f"Co znamená role „{rf.name}“ ({rf.surface})? (kde, kdy, kudy, čím, …)", ["kde", "kdy", "kam", "odkud", "kudy", "čím", "s_kým", "komu"]))
             st.roles.append(role)
+        if rel_owners:
+            st.roles.append(Role("čí", rel_owners, "·", "structural"))
         # výčet členů skupiny („děti: Helena, Josef, Emílie“ → Helena ∈ dítě, …) není
         # totožnost (same_as by spojila všechny navzájem — otrava identity); převeď na member
         kdo_r, co_r = st.role("kdo"), st.role("co")

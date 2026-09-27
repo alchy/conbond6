@@ -65,6 +65,10 @@ class LanguageRules:
     seasons: tuple[str, ...]
     relative_days: tuple[str, ...]
     time_nouns_base: frozenset[str]
+    #: Vztahová substantiva (kinship/relační jména jako `otec`, `manžel`, `zeť`) —
+    #: jejich genitivní doplněk je určující argument, ne vedlejší vztah (krok 3,
+    #: `2026-08-17-znalostni-vazby-design.md`).
+    relational_nouns: frozenset[str]
 
 
 @lru_cache(maxsize=8)
@@ -105,6 +109,7 @@ def load_language(code: str) -> LanguageRules:
         seasons=tuple(d["seasons"]),
         relative_days=tuple(d["relative_days"]),
         time_nouns_base=frozenset(d["time_nouns_base"]),
+        relational_nouns=frozenset(d["relational_nouns"]),
     )
 
 

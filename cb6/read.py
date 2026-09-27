@@ -68,6 +68,11 @@ class TermSpec:
     name_lemmas: tuple[str, ...] = ()
     #: Přivlastnění: `("pron", "jeho")` nebo `("adj", "Filipův")` — rozřeší se v paměti.
     possessor: tuple[str, str] | None = None
+    #: Krok 3 (vztahová substantiva): genitivní doplněk vztahového jména
+    #: („manžel **dcery**“) jako term role `čí` — ne vlastnictví (`possessor`),
+    #: je to určující argument vztahu, ne kdo term VLASTNÍ. Rozřeší se v `ground.py`
+    #: stejně jako každý jiný term (`resolve_term`), ne jménovou shodou.
+    rel_owner: "TermSpec | None" = None
     #: Zúžení group vztažnou / participiální větou apod. jen jako poznámka pro render.
     note: str = ""
     #: Nominativ jmenovací („drama R.U.R.“, „román Krakatit“, „město Praha“): term je
@@ -746,6 +751,14 @@ class _Reader:
             return sorted(toks, key=lambda x: x.index)
         return None
 
+    def _is_relational_gen_arg(self, t: Token, c: Token, consumed: list[int]) -> bool:
+        """Krok 3 (vztahová substantiva): je `c` prostý genitivní doplněk
+        vztahového jména `t` („manžel dcery“)? Souřadění pod `c`
+        („manžela nebo manželky“) se nepřebírá — dvě jména by se ztratila
+        na jedno; disjunkce takovou větu stejně zamítne (viz `triage.py`)."""
+        return (t.lemma in D.RELATIONAL_NOUNS and c.feat("Case") == "Gen" and c.upos in ("NOUN", "PROPN")
+                and not self.case_of(c.index) and not self.kids(c.index, "cc", "conj") and c.index not in consumed)
+
     def _term(self, t: Token) -> TermSpec:
         where = "term"
         consumed: list[int] = [t.index]
@@ -757,6 +770,7 @@ class _Reader:
         attrs: list[str] = []
         count: int | None = None
         possessor: tuple[str, str] | None = None
+        rel_owner: TermSpec | None = None
         quant: Quant | None = None
         qauth = ""
         kind: Kind
@@ -830,6 +844,12 @@ class _Reader:
                         attrs.append(cc.lemma)
                         self.mark(cc.index, where)
                         consumed.append(cc.index)
+            elif d == "nmod" and self._is_relational_gen_arg(t, c, consumed):
+                # krok 3: vztahové substantivum + prostý genitiv (bez souřadění —
+                # to zůstává vedlejší predikaci níž, disjunkce ji stejně zamítne) =
+                # určující argument („manžel dcery“), ne vedlejší vztah k zahození.
+                rel_owner = self._term(c)
+                consumed.extend(rel_owner.tokens)
             elif d in ("nmod", "appos", "acl", "parataxis", "obl", "advcl"):
                 if c.index in consumed:
                     continue
@@ -886,6 +906,7 @@ class _Reader:
             gender=t.feat("Gender"), number=t.feat("Number"), person=t.feat("Person"),
             quant=quant, quant_authority=qauth, tokens=tuple(sorted(set(consumed))),
             name_tokens=tuple(name_tokens), name_lemmas=tuple(name_lemmas), possessor=possessor, cls=cls,
+            rel_owner=rel_owner,
         )
         if possessor is not None and spec.quant is None:
             spec.quant, spec.quant_authority = "·", "default:přivlastnění"

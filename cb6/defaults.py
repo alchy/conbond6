@@ -94,3 +94,8 @@ ATTITUDE_VERBS: frozenset[str] = _L.attitude_verbs
 DISJUNCTION_CC: frozenset[str] = _L.disjunction_cc
 #: Kardinalita („aspoň jeden“, „nejvýše dva“, „právě jeden“) → REJECTED (v1).
 CARDINALITY_ADVERBS: frozenset[str] = _L.cardinality_adverbs
+
+#: Vztahová substantiva (krok 3 znalostních vazeb, 27. 9. 2026): genitivní
+#: doplněk je určující argument („manžel dcery“ ≠ „manžel“), ne vedlejší
+#: vztah, který se zahazuje jako `nmod` (viz `cb6/read.py Reader._term`).
+RELATIONAL_NOUNS: frozenset[str] = _L.relational_nouns

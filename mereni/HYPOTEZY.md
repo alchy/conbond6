@@ -679,3 +679,54 @@ nad touhle podmnožinou. Neimplementoval jsem opravu bez tohohle rozlišení
 (`!uč vztah manžel(X, Y)` nebo podobně) + operátor, který genitivní
 doplněk vztahového substantiva ADOPTUJE do role, místo aby ho zahodil
 jako `nmod`; teprve pak měřit prevalenci a případně inverzi/skládání.
+
+## 2026-09-27 · pokračování · krok 3: lexikon vztahových substantiv (data) + role `čí`
+
+**Změna:** `cb6/lang/cs.json relational_nouns` (34 slov: otec/matka/syn/
+dcera/bratr/sestra/manžel/manželka/tchán/tchyně/zeť/snacha/švagr(ová)/
+děd(eček)/bab(ička)/vnuk/vnučka/strýc/teta/synovec/neteř/bratranec/
+sestřenice/pravnuk(-čka)/prarodič/praděd/prababička/kmotr(a)/nevlastní_
+otec/nevlastní_matka — pojmenovaná data, ne graf; podobně jako `place_
+nouns`/`time_nouns_base`, ne `cb6/lexicon.py` řádky, protože tohle je
+ČTECÍ pravidlo „kdy genitiv u substantiva NENÍ ozdoba“, ne znalostní
+vazba mezi predikáty). `cb6/read.py TermSpec.rel_owner` (nové pole) +
+`Reader._is_relational_gen_arg(t, c, consumed)`: prostý genitivní NOUN/
+PROPN doplněk vztahového substantiva (bez `cc`/`conj` — souřadění
+zůstává staré cestě, disjunkce ji zamítne beze změny) se už nepošle do
+`_pending_secondary` (→ dřív REJECTED „vedlejší vztah bez sémantiky“),
+ale rozřeší se jako normální term a nese se ven jako `TermSpec.rel_
+owner`. `cb6/ground.py ground_predication`: term s `rel_owner` přidá
+roli `čí` PŘÍMO na hlavní výrok (`resolve_term` stejně jako každý jiný
+term — žádná jmenná shoda, žádný odhad).
+**Hypotéza:** `vztahy_příbuzenské.txt` (16 vět, `--parser spacy`) — 2/16
+nedisjunktivní věty („Zeť je manžel dcery.“, „Snacha je manželka
+syna.“) přestanou mít sesterský REJECTED nmod:Gen výrok; zůstane 1 SAFE
+výrok s rolí `čí` místo 2 výroků (SAFE + REJECTED); 14/16 disjunktivních
+vět beze změny (pořád REJECTED „disjunkce bez prostoru modelů“, teď i
+bez `čí“ — koordinace se nepřebírá); pytest +2 (nový modul, hand-built
+UD fixture jako `test_lex_teach.py`), mypy/pylint beze regrese; QA na
+existujících dvou dokumentech (`alois_jirásek`, `karel_čapek`) beze
+změny (relační substantiva tam nejsou frekventovaná).
+**Výsledek:** přesně tak. Live test na `vztahy_příbuzenské.txt` (spaCy,
+`data/cache/parses-spacy.json`): 34 výroků celkem, **2 SAFE nesou roli
+`čí`** (dcera / syn), **žádný sesterský REJECTED nmod:Gen výrok pro tyhle
+dvě věty už nevzniká** (dřív 2 statementy na větu, teď 1). 31 REJECTED
+zůstává (14 disjunktivních hlavních + jejich koordinované vedlejší
+predikace — beze změny, ověřeno testem `test_koordinovany_genitiv_
+zustava_vedlejsi_a_disjunkce_zamitne`). `bench run --sada wiki --strop
+40 --dok alois_jirásek karel_čapek --parser spacy`: QA 9/25 (36 %),
+audit grafu **0**, determinismus ano — beze změny proti hodnotám bez
+téhle změny (relační substantiva se v těchhle dvou životopisech
+prakticky nevyskytují, čekaně). pytest **211 passed** + 2 xfailed (+2
+nové), mypy 34 souborů čisté, pylint diff beze nového nálezu (nová
+podmínka v `_term` byla `R0916` 7/5 — vytažena do pojmenované metody
+`_is_relational_gen_arg`, 0 nálezů).
+**Poučení:** genitiv u vztahového substantiva je přesně ten případ, kdy
+„vedlejší vztah bez sémantiky“ byl špatná triáž — sémantika TAM byla,
+jen se nerozpoznala jako argument vztahu. Řešení je čtecí pravidlo (jazyk
+jako data), ne operátor nad grafem — shoduje se s `place_nouns`/`time_
+nouns_base`, ne s `cb6/lexicon.py`. Krok 3 dál: samotné vztahy (inverze
+„zeť“↔„tchán“, skládání „otec otce“→„děd“) — teď máme čistý vstup (`čí`
+roli, ne zahozený zbytek), na kterém se dá stavět, ale operátor sám
+ještě chybí (G‑3 pořád čeká na čtecí konstrukci „Jeho bratr Josef
+Čapek“ → vztahový predikát, HANDOVER § 6/8).

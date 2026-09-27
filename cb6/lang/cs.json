@@ -123,5 +123,13 @@
     "doba", "období", "věk", "éra", "epocha", "dekáda", "desetiletí", "sezóna", "noc",
     "ráno", "večer", "poledne", "půlnoc", "začátek", "konec", "polovina", "závěr", "průběh",
     "dětství", "mládí", "stáří", "život", "válka", "středověk", "starověk", "novověk"
+  ],
+  "relational_nouns": [
+    "otec", "matka", "syn", "dcera", "bratr", "sestra", "manžel", "manželka",
+    "tchán", "tchyně", "zeť", "snacha", "švagr", "švagrová",
+    "děd", "dědeček", "bába", "babička", "vnuk", "vnučka",
+    "strýc", "teta", "synovec", "neteř", "bratranec", "sestřenice",
+    "pravnuk", "pravnučka", "prababička", "praděd", "prarodič",
+    "kmotr", "kmotra", "nevlastní_otec", "nevlastní_matka"
   ]
 }
