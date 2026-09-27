@@ -500,8 +500,11 @@ class Session:
                 return out
             sv, dv = parse_roles(sroles), parse_roles(droles)
             role_map = {sv[v]: dv[v] for v in sv if v in dv}
-            rule = m.add_rule(src, dst, role_map, f"dialog tah {self.turn_no}")
-            return f"pravidlo {rule.id}: {src}({', '.join(f'{k}' for k in role_map)}) ⇒ {dst}({', '.join(role_map.values())})"
+            # krok 5: můstkové pravidlo je řádek lexikonu (`implikace` + mapa
+            # rolí), ne zvláštní `Memory.rules` — stejná provenience/graf jako
+            # ostatní vazby (I-11/I-12), viz mereni/HYPOTEZY.md.
+            link = m.add_link("implikace", (src, dst), "implies", "said", f"dialog tah {self.turn_no}", role_map=role_map)
+            return f"pravidlo {link.id}: {src}({', '.join(f'{k}' for k in role_map)}) ⇒ {dst}({', '.join(role_map.values())})"
         if cmd in ("výjimka", "vyjimka"):
             ws = arg.split()
             if len(ws) != 3:

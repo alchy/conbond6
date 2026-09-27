@@ -1025,3 +1025,67 @@ query-time join + graphcheck), stejně jako krok 2 (`překryv`) — obě dvě
 predikáty vztahových substantiv se teď ZAPISUJÍ (dnešní ráno) i
 DOTAZUJÍ (teď) — jen čtecí strana otázky („Je X sourozenec Y?“ z
 reálné věty) chybí, a to záměrně, dokud nebude co číst.
+
+## 2026-09-27 · pokračování · krok 5: `Memory.rules` sjednoceno s lexikonem
+
+**Zadání J.:** „pokracuj sam dal, krok 5 sjednotit Memory.rules s
+lexikonem“. Nález ze samotného návrhu (`docs/superpowers/specs/2026-
+08-17-znalostni-vazby-design.md` § 0): `Memory.rules` (můstková
+pravidla z `!pravidlo jet(kam:X) => být(kde:X)`) měla provenienci
+označenou jako „částečná (`uses_rule` na id `r…`, ale uzel `r…` v
+exportu není výrok s proveniencí)“ — ověřil jsem přímo v kódu
+(`cb6/logic.py` staré `evaluate`/`enumerate_`): most opravdu jen
+`p.steps.append(f"pravidlo {rule.id}: …")`, ŽÁDNÝ `hard` krok — o
+POZNÁNÍ HORŠÍ, než spec psal (ne „částečná“, ale ŽÁDNÁ strojová
+rekonstrukce z grafu — I‑12 díra, ne jen kosmetika).
+**Změna:**
+- `cb6/lexicon.py Link`: nové pole `role_map: dict[str,str]` (jen
+  `implikace`, validace hlídá) — do JSON jen když neprázdné
+  (`mapa_rolí`, jako `modalita`). `Lexicon.bridge_rules()` — všechny
+  `implikace` řádky s mapou rolí (volající si shodu s `args[1]` ověří
+  přes `same_pred`, protože dotaz smí být i synonymem cíle, ne jen
+  přesná shoda — beze změny proti starému chování).
+- `cb6/memory.py`: **`Rule` třída, `Memory.rules`, `add_rule` zaniklo
+  úplně** (ne jen zastaralé — smazáno; staré JSON soubory s klíčem
+  `"rules"` se tiše přeskočí, žádný v repu populovaný nebyl). `add_link`
+  dostal `role_map` parametr.
+- `cb6/logic.py`: obě místa „pravidla“ (`evaluate`, `enumerate_`) čtou
+  `self.lex.bridge_rules()` místo `m.rules` — a NAVÍC (oprava, ne jen
+  refaktor) teď volají `self.m.use_links((link,))` + `p.hard.append(
+  ("lex", src_pred, dst_pred))` — most je od teď STROJOVĚ
+  rekonstruovatelný z exportu (dřív nebyl vůbec).
+- `cb6/dialog.py`: `!pravidlo` píše `m.add_link("implikace", (src,dst),
+  "implies", "said", …, role_map=…)` místo `m.add_rule` — id se změnilo
+  z `r0001` na `lex:said:0001` (řádek lexikonu, ne zvláštní prostor id).
+- Testy: `test_dialog.py::test_rule_command_bridges` (nový assert na
+  `vazba` uzel s `mapa_rolí` v exportu), `test_logic.py::test_rule_
+  bridges` (nový assert na `hard=("lex",…)` a `proof.links`),
+  `tests/test_lexicon.py` (2 nové: `bridge_rules()` vrací jen řádky s
+  mapou, `implikace` bez mapy funguje beze změny; validace + JSON
+  round-trip mapy rolí).
+**Hypotéza:** pytest beze změny počtu krom 2 aktualizovaných asercí
+(chování, ne API, se mění — id formát), +2 nové v `test_lexicon.py`;
+mypy/pylint beze regrese; real-corpus smoke (`--parser spacy`) beze
+pádu a beze změny QA (bridge rules se v těch dokumentech nepoužívají).
+**Výsledek:** přesně tak. **220 passed** (+2) + 2 xfailed (nesouvisející
+G‑1/G‑2 nálezy, beze změny) — první průchod po refaktoru měl 2 selhání
+přesně na starý id formát (`r0001` → `lex:said:0001`), opraveno
+aktualizací asercí, ne obejito. mypy 36 souborů čisté (1 drobná
+anotace typu u `Link.to_json` kvůli novému poli), pylint diff jen
+posun řádků (ověřeno `git stash`) + 1 nová „missing docstring“ (stejná
+konvence jako sousední testy v souboru). Smoke test QA 9/25 beze
+změny, audit grafu 0.
+**Poučení:** tohle byla oprava reálné I‑12 díry, ne jen úklid — most
+`!pravidlo` dřív nešel doložit z grafu vůbec, teď jde (`vazba` uzel +
+tvrdý krok `lex`). `kind="rule"` (podmínkové věty z textu, `derive()`)
+jsem VĚDOMĚ nesjednotil — je to jiná věc: vzor s KONKRÉTNÍMI vázanými
+termy (entitami), ne čistě jméno-na-jméno predikátová vazba jako
+lexikon; navíc už je plně graf-viditelný (`derived_from`, `uses_rule`,
+`source`) už dnes. Násilné sloučení by nic nezlepšilo, jen zamlžilo
+rozdíl mezi „vazba mezi predikáty“ a „odvození nad konkrétním faktem“.
+Krok 5 návrhu je tím hotový — počet míst, kde „vazby“ žily, kleslo ze
+čtyř (`SYNONYMS`, `Memory.learned`, `Memory.rules`, `kind=rule`) na dvě
+(lexikon jako data + `kind=rule` jako odvození nad entitami), přesně
+jak návrh chtěl („cíl integrace je počet míst snížit na jedno“ — jedno
+by smazalo skutečný rozdíl mezi nimi; dvě se zbytkovým, ODLIŠNÝM
+významem je správný cíl, ne kompromis).

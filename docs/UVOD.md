@@ -82,7 +82,7 @@ Jména rolí jsou česká slova (`kdo`, `co`, `kde`, `kam`, `odkud`, `kudy`, `kd
 `member` (Hrabal ∈ spisovatel), `subset` (spisovatel ⊆ člověk; negované = `disjoint`), `within` (Praha ⊆ Česko, místa), `same_as` (dvě jména téže věci), `before` (čas), `name`. Uzávěry (`member_star`, `subset_star`, `within_star`, `same_as_star`, `time_within`, `disjoint`) jsou v `memory.py`; `restricts` (zúžená skupina → základ) se počítá jako `subset`.
 
 ### Verdikt a důkaz (`Verdict`, `Proof`)
-`ANO` (shoda), `NE` (jen z opačné polarity, disjunktnosti nebo jiného počtu — nikdy „z ticha“), `NEVÍM` (s tím, co chybí a co je blízko + propad), `KONFLIKT` (obojí), `MOŽNÁ` (výrok je jen modální). `Proof`: `statements` (id výroků), `steps` (text kroků: `Hrabal ∈ spisovatel`, `implikace: bydlet ⇒ žít [lex:syn:0031]`, `pravidlo r0001: jet→být`), `hard` (strojově: `(jádro, a, b)` — `member`/`subset`/`within`/`same_as`/`time`/`disjoint`/`lex`; audit je ověřuje jen z exportu), `defaults`, `grade` (nejslabší premisa), `links` (id řádků lexikonu). Otázka je *přechod bez zápisu*: aktivuje kontext, ale bázi nemění (uzly založené jen dotazem se uklidí).
+`ANO` (shoda), `NE` (jen z opačné polarity, disjunktnosti nebo jiného počtu — nikdy „z ticha“), `NEVÍM` (s tím, co chybí a co je blízko + propad), `KONFLIKT` (obojí), `MOŽNÁ` (výrok je jen modální). `Proof`: `statements` (id výroků), `steps` (text kroků: `Hrabal ∈ spisovatel`, `implikace: bydlet ⇒ žít [lex:syn:0031]`, `pravidlo lex:said:0001: jet(kam) ⇒ být(kde)`), `hard` (strojově: `(jádro, a, b)` — `member`/`subset`/`within`/`same_as`/`time`/`disjoint`/`lex`; audit je ověřuje jen z exportu), `defaults`, `grade` (nejslabší premisa), `links` (id řádků lexikonu). Otázka je *přechod bez zápisu*: aktivuje kontext, ale bázi nemění (uzly založené jen dotazem se uklidí).
 
 ### Aktivace, registr, segmenty (stavovost)
 Text je hierarchie stavů dokument › segment › věta. Věta mění registr referentů (hrany `mention`), aktivaci (kontext, s útlumem `Memory.DECAY`) a znalost. **Aktivace řadí, registr rozhoduje** (kdo připadá v úvahu — rod, číslo, okno tento + předchozí segment), pravidla odvozují (pevný bod). Nejednoznačná koreference → jádro bez termu + `HYPOTHESIS` alternativy + otevřená položka.
@@ -90,8 +90,8 @@ Text je hierarchie stavů dokument › segment › věta. Věta mění registr r
 ### Znalost jako data
 | co | kde | jak přidat | provenience v grafu |
 |---|---|---|---|
-| **vazby predikátů a tříd** — `třída` (~ same), `implikace` (⇒), `podřazení` (⊆); síla `same`/`implies`/`related` (jen recall) | `cb6/lexicon.py`, seed `cb6/lexikon/*.jsonl` | `!uč kázat = hlásat` · `!uč bydlet => žít` · `!uč vydat ~ napsat` · `!uč drama < dílo` | uzel `vazba` (líně, až při použití), krok `lex`, `uses_rule` |
-| **můstková pravidla** (dotaz na X zkus jako Y s přemapovanými rolemi) | `Memory.rules` | `!pravidlo jet(kam:X) => být(kde:X)` | krok `pravidlo r…` (sjednocení s lexikonem = plánovaný krok 5) |
+| **vazby predikátů a tříd** — `třída` (~ same), `implikace` (⇒), `podřazení` (⊆), `překryv`, `inverze`; síla `same`/`implies`/`related` (jen recall) | `cb6/lexicon.py`, seed `cb6/lexikon/*.jsonl` | `!uč kázat = hlásat` · `!uč bydlet => žít` · `!uč vydat ~ napsat` · `!uč drama < dílo` · `!uč inverze bratr => sourozenec` | uzel `vazba` (líně, až při použití), krok `lex`, `uses_rule` |
+| **můstková pravidla** (dotaz na X zkus jako Y s přemapovanými rolemi) | `implikace` s `role_map` (`Lexicon.bridge_rules()`, krok 5 — `Memory.rules` zaniklo) | `!pravidlo jet(kam:X) => být(kde:X)` | uzel `vazba`, krok `lex` (id `lex:said:…`) |
 | **pravidla z textu** („pokud/když/jestliže“, `only if`, `iff`) | výroky `kind="rule"` se vzory | text | `derived_from`, `uses_rule` |
 | **výjimky** z ∀ | `Memory.exceptions` | `!výjimka létat pták tučňák` | doložka v důkazu |
 | **role** | `Memory.learned["roles"]` | `!role v+Loc = kde` | `authority=learned`, `defaults` |

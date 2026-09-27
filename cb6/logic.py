@@ -432,19 +432,23 @@ class Evaluator:
                 modal.append(p)
                 continue
             (neg if f.neg else pos).append(p)
-        # pravidla (můstky)
+        # pravidla (můstky, krok 5: řádky `implikace` s mapou rolí, ne `Memory.rules`)
         if depth == 0:
-            for rule in m.rules:
-                lm = self.same_pred(q.pred, rule.dst_pred)
+            for link in self.lex.bridge_rules():
+                src_pred, dst_pred = link.args
+                lm = self.same_pred(q.pred, dst_pred)
                 if lm is None:
                     continue
-                inv = {v: k for k, v in rule.role_map.items()}
-                q2 = Statement("", rule.src_pred, q.kind, roles=[Role(inv.get(r.name, r.name), list(r.terms), r.quant, r.authority, r.surface, wh=r.wh, wh_kind=r.wh_kind, counts=dict(r.counts)) for r in q.roles], mood="question")
+                inv = {v: k for k, v in link.role_map.items()}
+                q2 = Statement("", src_pred, q.kind, roles=[Role(inv.get(r.name, r.name), list(r.terms), r.quant, r.authority, r.surface, wh=r.wh, wh_kind=r.wh_kind, counts=dict(r.counts)) for r in q.roles], mood="question")
                 v2 = self.evaluate(q2, depth=1)
                 for p in v2.proofs:
-                    p.steps.append(f"pravidlo {rule.id}: {rule.src_pred}→{rule.dst_pred}")
+                    p.steps.append(f"pravidlo {link.id}: {link.label()}")
                     p.grade = weakest(p.grade, "derived")
-                    self.lex_proof(q.pred, rule.dst_pred, lm, p)
+                    self.lex_proof(q.pred, dst_pred, lm, p)
+                    self.m.use_links((link,))
+                    p.links.append(link.id)
+                    p.hard.append(("lex", src_pred, dst_pred))
                     pos.append(p)
                 for p in v2.counter:
                     neg.append(p)
@@ -644,19 +648,23 @@ class Evaluator:
             if fr.nested and fr.nested not in seen and restrict is None:
                 seen.add(fr.nested)
                 fillers.append((fr.nested, p))
-        # pravidla
-        for rule in m.rules:
-            lm = self.same_pred(q.pred, rule.dst_pred)
+        # pravidla (krok 5: řádky `implikace` s mapou rolí, ne `Memory.rules`)
+        for link in self.lex.bridge_rules():
+            src_pred, dst_pred = link.args
+            lm = self.same_pred(q.pred, dst_pred)
             if lm is None:
                 continue
-            inv = {v: k for k, v in rule.role_map.items()}
-            q2 = Statement("", rule.src_pred, q.kind, roles=[Role(inv.get(r.name, r.name), list(r.terms), r.quant, r.authority, r.surface, wh=r.wh, wh_kind=r.wh_kind) for r in q.roles], mood="question")
+            inv = {v: k for k, v in link.role_map.items()}
+            q2 = Statement("", src_pred, q.kind, roles=[Role(inv.get(r.name, r.name), list(r.terms), r.quant, r.authority, r.surface, wh=r.wh, wh_kind=r.wh_kind) for r in q.roles], mood="question")
             v2 = self.enumerate(q2) if q2.pred != q.pred else Verdict("NEVÍM")
             for t, p in v2.fillers:
                 if t not in seen:
                     seen.add(t)
-                    p.steps.append(f"pravidlo {rule.id}: {rule.src_pred}→{rule.dst_pred}")
-                    self.lex_proof(q.pred, rule.dst_pred, lm, p)
+                    p.steps.append(f"pravidlo {link.id}: {link.label()}")
+                    self.lex_proof(q.pred, dst_pred, lm, p)
+                    self.m.use_links((link,))
+                    p.links.append(link.id)
+                    p.hard.append(("lex", src_pred, dst_pred))
                     fillers.append((t, p))
         # rodina rolí: „kde“ bez `kde` → sourozenci (kam/odkud/kudy) s přiznáním; totéž čas
         family = PLACE_FAMILY if hole.name in PLACE_FAMILY else TIME_FAMILY if hole.name in TIME_FAMILY else ()

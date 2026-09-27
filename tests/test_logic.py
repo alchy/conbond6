@@ -142,12 +142,15 @@ def test_synonym_match(oracle: RecordedOracle) -> None:
 
 
 def test_rule_bridges(oracle: RecordedOracle) -> None:
+    """Krok 5: můstek je řádek lexikonu (`implikace` + mapa rolí), doložený
+    tvrdým krokem `lex` — ne jen text v `Memory.rules` (I-11/I-12)."""
     b = Box(oracle)
     b.say("Petr jel v pondělí do Prahy.", "Praha je v Česku.")
     assert b.ask("Byl Petr v pondělí v Česku?").value == "NEVÍM"
-    b.m.add_rule("jet", "být", {"kam": "kde"}, "kdo někam jel, tam byl")
+    b.m.add_link("implikace", ("jet", "být"), "implies", "said", "kdo někam jel, tam byl", role_map={"kam": "kde"})
     v = b.ask("Byl Petr v pondělí v Česku?")
     assert v.value == "ANO" and any("pravidlo" in s for s in v.proofs[0].steps)
+    assert ("lex", "jet", "být") in v.proofs[0].hard and v.proofs[0].links
 
 
 def test_exception_narrows_forall(oracle: RecordedOracle) -> None:

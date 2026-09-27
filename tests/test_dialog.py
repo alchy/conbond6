@@ -156,12 +156,18 @@ def test_role_learning_closes_open_item(s: Session) -> None:
 
 
 def test_rule_command_bridges(s: Session) -> None:
+    """Krok 5: můstkové pravidlo je řádek lexikonu (`implikace` + mapa rolí),
+    id `lex:said:…` — ne zvláštní `Memory.rules` (`r…`)."""
     s.say("Petr jel v pondělí do Prahy.")
     s.say("Praha je v Česku.")
     assert s.say("Byl Petr v pondělí v Česku?").verdict.value == "NEVÍM"  # type: ignore[union-attr]
-    assert "pravidlo r0001" in s.say("!pravidlo jet(kam:X) => být(kde:X)").text
+    assert "pravidlo lex:said:0001" in s.say("!pravidlo jet(kam:X) => být(kde:X)").text
     a = s.say("Byl Petr v pondělí v Česku?")
-    assert a.verdict.value == "ANO" and "pravidlo r0001" in a.text  # type: ignore[union-attr]
+    assert a.verdict.value == "ANO" and "pravidlo lex:said:0001" in a.text  # type: ignore[union-attr]
+    # I-12: můstek je teď materializovaný jako `vazba` v exportu, ne jen text v důkazu
+    g = s.memory.graph()
+    assert any(d.get("kind") == "vazba" and d.get("op") == "implikace" and d.get("mapa_rolí") == {"kam": "kde"}
+               for _, d in g.nodes(data=True))
 
 
 def test_synonym_command(s: Session) -> None:

@@ -216,3 +216,25 @@ def test_podrazeni_je_orientovane_a_tranzitivni() -> None:
         Lexicon([Link("x", "podřazení", ("a", "b"), "same", "seed", "z")])
     seed = Lexicon(load_seed())
     assert seed.match("dílo", "román") is not None and seed.match("dílo", "drama") is not None
+
+
+def test_implikace_s_mapou_roli_je_bridge_rules() -> None:
+    """Krok 5: bývalé `Memory.rules` (můstek `!pravidlo jet(kam:X) => být(kde:X)`)
+    je teď řádek `implikace` s `role_map` — `bridge_rules()` ho vrátí, obyčejné
+    `implikace` řádky (bez mapy) ne."""
+    bridge = Link("lex:b:1", "implikace", ("jet", "být"), "implies", "seed", "t#1", role_map={"kam": "kde"})
+    plain = Link("lex:b:2", "implikace", ("bydlet", "žít"), "implies", "seed", "t#2")
+    lx = Lexicon([bridge, plain])
+    assert lx.bridge_rules() == (bridge,)
+    # obyčejná implikace pořád funguje beze změny (match po predikátech)
+    assert lx.match("žít", "bydlet") is not None
+
+
+def test_mapa_roli_validace_a_json() -> None:
+    with pytest.raises(ValueError):  # mapu rolí smí nést jen implikace
+        Lexicon([Link("x", "třída", ("a", "b"), "same", "seed", "z", role_map={"kam": "kde"})])
+    l = Link("lex:t:1", "implikace", ("a", "b"), "implies", "seed", "z")
+    assert "mapa_rolí" not in l.to_json()
+    b = Link("lex:b:1", "implikace", ("jet", "být"), "implies", "seed", "z", role_map={"kam": "kde"})
+    d = b.to_json()
+    assert d["mapa_rolí"] == {"kam": "kde"} and Link.from_json(d) == b

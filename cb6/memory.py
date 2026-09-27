@@ -22,7 +22,7 @@ import json
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Iterator, Literal, Sequence
+from typing import Any, Iterator, Literal, Mapping, Sequence
 
 import networkx as nx
 
@@ -201,18 +201,6 @@ class Statement:
         )
 
 
-@dataclass
-class Rule:
-    """Můstkové pravidlo z dialogu: dotaz na `dst_pred` se zkusí jako dotaz
-    na `src_pred` s přemapovanými rolemi (`{"kde": "kam"}`)."""
-
-    id: str
-    src_pred: str
-    dst_pred: str
-    role_map: dict[str, str]
-    reason: str = ""
-
-
 class Memory:
     """Graf výroků. Viz docstring modulu."""
 
@@ -223,7 +211,6 @@ class Memory:
         self.nodes: dict[str, Node] = {}
         self.statements: dict[str, Statement] = {}
         self.open_items_: dict[str, OpenItem] = {}
-        self.rules: list[Rule] = []
         self.counters: dict[str, int] = defaultdict(int)
         self.activation_: dict[str, float] = defaultdict(float)
         self.soft: dict[tuple[str, str], float] = defaultdict(float)
@@ -559,18 +546,16 @@ class Memory:
 
     # ---- pravidla, výjimky ------------------------------------------------------
 
-    def add_rule(self, src_pred: str, dst_pred: str, role_map: dict[str, str], reason: str = "") -> Rule:
-        rule = Rule(self._next("r"), src_pred, dst_pred, dict(role_map), reason)
-        self.rules.append(rule)
-        return rule
-
     def add_link(self, op: str, args: Sequence[str], strength: str, authority: str, source: str, note: str = "",
-                 modality: str = "") -> Link:
-        """Zapiš řádek lexikonu s vlastní autoritou (dialog `!uč` → `said`).
+                 modality: str = "", role_map: Mapping[str, str] | None = None) -> Link:
+        """Zapiš řádek lexikonu s vlastní autoritou (dialog `!uč`/`!pravidlo` → `said`).
         Proč sem: řádek je součást paměti (JSON, export), ne kódu; id `lex:said:NNNN`.
         Vstup: operátor, argumenty, síla, autorita, zdroj, poznámka, modalita
-        (jen `překryv`, spec krok 2). Výstup: `Link`."""
-        link = Link(self._next("lex:said:"), op, tuple(args), strength, authority, source, note, modality)
+        (jen `překryv`, spec krok 2), mapa rolí (jen `implikace` s různými
+        jmény rolí — `!pravidlo`, krok 5: sjednocení bývalého `Memory.rules`
+        s lexikonem, viz `mereni/HYPOTEZY.md`). Výstup: `Link`."""
+        link = Link(self._next("lex:said:"), op, tuple(args), strength, authority, source, note, modality,
+                    dict(role_map or {}))
         link.validate()
         self.links[link.id] = link
         return link
@@ -905,7 +890,6 @@ class Memory:
             "nodes": [n.to_json() for n in self.nodes.values()],
             "statements": [s.to_json() for s in self.statements.values()],
             "open": [asdict(o) for o in self.open_items_.values()],
-            "rules": [asdict(r) for r in self.rules],
             "exceptions": [list(x) for x in self.exceptions],
             "learned": self.learned,
             "links": [l.to_json() for l in self.links.values()],
@@ -935,8 +919,10 @@ class Memory:
         for od in d.get("open", []):  # type: ignore[union-attr]
             o = OpenItem(**od)
             m.open_items_[o.id] = o
-        for rd in d.get("rules", []):  # type: ignore[union-attr]
-            m.rules.append(Rule(**rd))
+        # `Memory.rules` (krok 5) zaniklo — bývalé bázové soubory s klíčem
+        # "rules" (můstková pravidla z `!pravidlo`) se tiše přeskočí; nová
+        # pravidla se ukládají jako řádky lexikonu (`links`, `implikace` s
+        # `mapa_rolí`), stejně jako u zániku `Memory.learned["synonyms"]`.
         m.exceptions = [tuple(x) for x in d.get("exceptions", [])]  # type: ignore[misc,union-attr]
         m.learned = d.get("learned", m.learned)  # type: ignore[assignment]
         for ld in d.get("links", []):  # type: ignore[union-attr]

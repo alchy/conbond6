@@ -31,7 +31,7 @@ from __future__ import annotations
 import json
 import re
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable, Sequence
@@ -83,13 +83,22 @@ class Link:
     #: jistota). Prázdné u operátorů, které modalitu nepotřebují; proto se
     #: do JSON píše jen když je vyplněné (zpětná kompatibilita starších řádků).
     modality: str = ""
+    #: Jen `implikace` (krok 5, sjednocení s `Memory.rules`, spec § 0/5):
+    #: přemapování jmen rolí, když se liší mezi zdrojovým a cílovým predikátem
+    #: (`!pravidlo jet(kam:X) => být(kde:X)` → `{"kam": "kde"}` — dotaz na
+    #: `kde` se ptá faktu `jet` na roli `kam`). Prázdné u prostých synonym
+    #: (`bydlet ⇒ žít`, stejné role obou stran); proto se do JSON píše jen
+    #: když je vyplněné.
+    role_map: dict[str, str] = field(default_factory=dict)
 
     def to_json(self) -> dict[str, Any]:
         """Řádek do JSON (české klíče návrhu). Vstup: self. Výstup: dict."""
-        d = {"id": self.id, "op": self.op, "args": list(self.args), "síla": self.strength,
-             "autorita": self.authority, "zdroj": self.source, "pozn": self.note}
+        d: dict[str, Any] = {"id": self.id, "op": self.op, "args": list(self.args), "síla": self.strength,
+                              "autorita": self.authority, "zdroj": self.source, "pozn": self.note}
         if self.modality:
             d["modalita"] = self.modality
+        if self.role_map:
+            d["mapa_rolí"] = dict(self.role_map)
         return d
 
     @classmethod
@@ -103,6 +112,7 @@ class Link:
             source=str(d.get("zdroj", d.get("source", ""))),
             note=str(d.get("pozn", d.get("note", ""))),
             modality=str(d.get("modalita", d.get("modality", ""))),
+            role_map=dict(d.get("mapa_rolí", d.get("role_map", {}))),
         )
 
     def label(self) -> str:
@@ -142,6 +152,8 @@ class Link:
                 raise ValueError(f"{self.id}: překryv chce modalitu 'možnost' (spec krok 2, jinak by NEVÍM tiše sklouzlo na ANO)")
         elif self.modality:
             raise ValueError(f"{self.id}: modalitu má jen překryv (má ji {self.op!r})")
+        if self.role_map and self.op != "implikace":
+            raise ValueError(f"{self.id}: mapu rolí má jen implikace (má ji {self.op!r})")
 
 
 @dataclass(frozen=True)
@@ -367,6 +379,19 @@ class Lexicon:
         n‑tice řádků (deterministicky seřazená podle id)."""
         return tuple(self._inverze.get(pred, ()))
 
+    def bridge_rules(self) -> tuple[Link, ...]:
+        """Řádky `implikace` s mapou rolí (krok 5 — sjednocení bývalého
+        `Memory.rules` s lexikonem, viz `mereni/HYPOTEZY.md`): „dotaz na
+        `být.kde` se zkusí jako `jet.kam`“ (`!pravidlo jet(kam:X) =>
+        být(kde:X)`). Na rozdíl od prostých synonym (`bydlet ⇒ žít`, stejné
+        role) potřebuje volající JMÉNO role přemapovat, ne jen predikát —
+        proto vlastní přístupová metoda, ne obecné `match()` (viz
+        `Evaluator.evaluate`/`enumerate_`, sekce „pravidla“); volající si
+        shodu s `link.args[1]` (cíl) ověří sám přes `same_pred` (dotaz
+        smí být i SYNONYMEM cíle, ne jen přesná shoda).
+        Vstup: nic. Výstup: n‑tice řádků (deterministicky podle id)."""
+        return tuple(l for l in self.rows.values() if l.op == "implikace" and l.role_map)
+
 
 _TEACH = re.compile(r"^(\S+)\s*(=>|=|~|<)\s*(\S+)$")
 
@@ -398,5 +423,7 @@ def links_for_graph(links: Sequence[Link]) -> list[tuple[str, dict[str, Any]]]:
                                   "activation": 0.0}
         if l.modality:
             attrs["modalita"] = l.modality
+        if l.role_map:
+            attrs["mapa_rolí"] = dict(l.role_map)
         out.append((l.id, attrs))
     return out
