@@ -14,12 +14,15 @@ Kontroly (`check_graph`, spec § 5.7):
     vazba       – uzel `vazba` (řádek lexikonu) má `zdroj` a známý `op`/`síla`
 `check_answer` ověří odpověď: výroky důkazu existují, jsou znalost
 (claim SAFE, mood assert, grade read/said/derived), mají provenienci; každý
-tvrdý krok (`member`/`subset`/`within`/`same_as`/`time`/`disjoint`/`lex`) je cesta
-po hranách daného typu (BFS), obsažení časů z atributů `t_start`/`t_end`,
-disjunkce existence hrany `disjoint` mezi nadtřídami, `lex` cesta od predikátu
-výroku (nebo lemmatu skupiny) k predikátu/skupině dotazu po uzlech `vazba`
-(`třída`+`same` oběma směry, `implikace`/`podřazení`+`implies` po směru;
-`related` se nepočítá — ve verdiktu být nesmí).
+tvrdý krok (`member`/`subset`/`within`/`same_as`/`time`/`disjoint`/`lex`/
+`overlap`/`no_overlap`) je cesta po hranách daného typu (BFS), obsažení časů
+z atributů `t_start`/`t_end`, disjunkce existence hrany `disjoint` mezi
+nadtřídami, `lex` cesta od predikátu výroku (nebo lemmatu skupiny) k
+predikátu/skupině dotazu po uzlech `vazba` (`třída`+`same` oběma směry,
+`implikace`/`podřazení`/`překryv`+`implies` po směru; `related` se nepočítá
+— ve verdiktu být nesmí), `overlap`/`no_overlap` protnutí, resp. neprotnutí,
+dvou časových uzlů z `t_start`/`t_end` (spec krok 2, operátor `překryv` —
+„mohli se potkat“ / silné NE, ne že se potkali).
 """
 
 from __future__ import annotations
@@ -125,7 +128,7 @@ def lex_path(g: nx.MultiDiGraph, fact_pred: str, query_pred: str, limit: int = 4
         return []
     adj: dict[str, list[tuple[str, str]]] = {}
     for n, d in g.nodes(data=True):
-        if d.get("kind") != "vazba" or d.get("op") not in ("třída", "implikace", "podřazení"):
+        if d.get("kind") != "vazba" or d.get("op") not in ("třída", "implikace", "podřazení", "překryv"):
             continue
         args = list(d.get("args", []))
         if len(args) != 2:
@@ -228,6 +231,21 @@ def _time_within(g: nx.MultiDiGraph, a: str, b: str) -> bool:
     return norm(sb, False) <= norm(sa, False) and norm(ea, True) <= norm(eb, True)
 
 
+def _time_overlap(g: nx.MultiDiGraph, a: str, b: str) -> bool:
+    """Protnou se dva časové uzly (bod/interval) — z atributů `t_start`/`t_end`
+    (spec krok 2, operátor `překryv`). Zrcadlí `cb6.chronos.overlap`, ale jen
+    z exportu — audit nesmí sahat do jádra (viz docstring modulu)."""
+    da, db = g.nodes.get(a, {}), g.nodes.get(b, {})
+    sa, ea = da.get("t_start"), da.get("t_end") or da.get("t_start")
+    sb, eb = db.get("t_start"), db.get("t_end") or db.get("t_start")
+    if not sa or not sb:
+        return False
+    def norm(t: list[int], end: bool) -> tuple[int, int, int]:
+        t = list(t) + ([12, 31] if end else [1, 1])[len(t) - 1:] if len(t) < 3 else list(t)
+        return (int(t[0]), int(t[1]), int(t[2]))
+    return norm(sa, False) <= norm(eb, True) and norm(sb, False) <= norm(ea, True)
+
+
 def _disjoint(g: nx.MultiDiGraph, a: str, b: str) -> bool:
     for u, v, d in g.edges(data=True):
         if d.get("type") != "disjoint":
@@ -275,6 +293,10 @@ def check_answer(g: nx.MultiDiGraph, proof_statement_ids: list[str], hard_steps:
             ok = _disjoint(g, a, b)
         elif kernel == "lex":
             ok = lex_path(g, a, b) is not None
+        elif kernel == "overlap":
+            ok = _time_overlap(g, a, b)
+        elif kernel == "no_overlap":
+            ok = not _time_overlap(g, a, b)
         if not ok:
             out.append(Violation("rekonstrukce", a, f"krok {kernel}({a}, {b}) není v grafu"))
     return out

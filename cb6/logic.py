@@ -20,6 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
+from cb6.chronos import overlap as time_overlap
 from cb6.defaults import PLACE_NOUNS
 from cb6.lexicon import Lexicon, LexMatch
 from cb6.memory import Memory, Role, Statement
@@ -297,6 +298,59 @@ class Evaluator:
                 g = weakest(g, st.grade)
         return g if len(sids) <= 1 else weakest(g, "derived")
 
+    # ---- překryv (spec krok 2): protnutí dvou období ⇒ možnost --------------
+
+    def _time_role(self, entity: str, pred: str) -> tuple[str, str] | None:
+        """Najdi výrok o `entity` s predikátem `pred` (přes lexikon, ne jen
+        přesnou shodu) a jedinou výplní role `kdy` typu `time`.
+        Vstup: id entity, predikát (`link.args[0]`, např. `"žít"`). Výstup:
+        `(id výroku, id časového uzlu)`, nebo `None`."""
+        for f in self.m.knowledge():
+            if self.same_pred(pred, f.pred) is None:
+                continue
+            kdo, kdy = f.role("kdo"), f.role("kdy")
+            if not kdo or entity not in kdo.terms or not kdy or len(kdy.terms) != 1:
+                continue
+            if self._kind(kdy.terms[0]) != "time":
+                continue
+            return f.id, kdy.terms[0]
+        return None
+
+    def overlap_verdict(self, q: Statement) -> Verdict | None:
+        """Otázka na MOŽNOST („Mohli se X a Y potkat?“, operátor `překryv`):
+        dvě žitá období se protnou ⇒ ANO, neprotnou ⇒ NE (obojí `derived`,
+        s materializovaným řádkem lexikonu a časovým krokem `overlap` v
+        důkazu — I‑12). Jen když se dotaz sám ptá na možnost
+        (`q.modality == "možnost"`, spec § 2 „modalita do řádku“) — faktická
+        otázka („Potkali se?“) touhle cestou neprojde a zůstane NEVÍM: overlap
+        dvou nezávislých životů není důkaz skutečného setkání.
+        Vstup: dotaz s rolí `kdo` (přesně 2 termy). Výstup: `Verdict`, nebo
+        `None` (nesedí nebo chybí údaje → obecné NEVÍM)."""
+        if q.modality != "možnost" or q.pred is None:
+            return None
+        kdo = q.role("kdo")
+        if not kdo or kdo.wh or len(kdo.terms) != 2:
+            return None
+        a, b = kdo.terms
+        for link in self.lex.overlap_rules_by_target(q.pred):
+            src = link.args[0]
+            pa, pb = self._time_role(a, src), self._time_role(b, src)
+            if pa is None or pb is None:
+                continue
+            (sid_a, tid_a), (sid_b, tid_b) = pa, pb
+            ta, tb = self.m.node(tid_a), self.m.node(tid_b)
+            ov = time_overlap(ta.time, tb.time)  # type: ignore[arg-type]
+            if ov is None:
+                continue
+            proof = Proof([sid_a, sid_b], [f"{ta.label()} × {tb.label()}: {'protnutí' if ov else 'bez protnutí'}"],
+                          grade="derived", hard=[("overlap" if ov else "no_overlap", tid_a, tid_b)])
+            self.m.use_links((link,))
+            proof.links.append(link.id)
+            proof.hard.append(("lex", src, q.pred))
+            proof.defaults.append(f"překryv jen podle {src}.kdy, ne podle skutečného setkání (řádek {link.id})")
+            return Verdict("ANO", [proof]) if ov else Verdict("NE", [], [proof])
+        return None
+
     # ---- ano/ne --------------------------------------------------------------
 
     def evaluate(self, q: Statement, *, depth: int = 0) -> Verdict:
@@ -313,6 +367,11 @@ class Evaluator:
                     return kv
                 neg.extend(kv.counter)
                 pos.extend(kv.proofs)
+        ov = self.overlap_verdict(q)
+        if ov is not None:
+            if ov.value == "ANO":
+                return ov
+            neg.extend(ov.counter)
         candidates = [f for f in m.knowledge() if self.same_pred(q.pred, f.pred) is not None]
         for f in candidates:
             p = self.match(q, f, depth=depth)

@@ -1,0 +1,7 @@
+# Překryv (spec krok 2): dvě období na téže časové ose se protnou ⇒ odvození
+# nese modalitu "možnost" (mohli, ne jistota — nepřekryv naopak dává jisté NE).
+# op překryv, args [zdrojový predikát, cílový predikát], síla implies, modalita možnost.
+# Zdrojový predikát čte roli "kdy" u dvou různých "kdo"; join dělá volající
+# (cb6/lexicon.py Lexicon.overlap_targets vrací jen řádek — spojení dvou výroků
+# do jednoho odvození čeká na rozšíření Statement.derived_from, viz HYPOTEZY 2026-09-27).
+{"id": "lex:prekryv:0001", "op": "překryv", "args": ["žít", "potkat_se"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/prekryv.jsonl#6", "modalita": "možnost", "pozn": "žít.kdy × žít.kdy ⇒ mohli se potkat (dvě žitá období se protnou)"}

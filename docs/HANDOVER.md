@@ -11,7 +11,7 @@
 | **ukázky ze živého běhu** (12 scén; přegenerovat `python -m bench ukazky` po tahu, který mění odpovědi) | `docs/UKAZKY.md` (generátor `bench/ukazky.py`) |
 | zadání, invarianty I‑1…I‑12 | `docs/superpowers/specs/2026-08-17-conbond6-design.md` |
 | znalostní vazby jako data (návrh) | `docs/superpowers/specs/2026-08-17-znalostni-vazby-design.md` |
-| lexikon vazeb (krok 1 + `podřazení`) | `cb6/lexicon.py` (operátory `třída`, `implikace`, `podřazení`; loader, shoda, materializace) · seed `cb6/lexikon/synonyma.jsonl` (88 ř.) + `podrazeni.jsonl` (18 ř., žánry ⊆ dílo) · dialog `!uč a = b | a => b | a ~ b | a < b` |
+| lexikon vazeb (krok 1 + `podřazení` + `překryv`) | `cb6/lexicon.py` (operátory `třída`, `implikace`, `podřazení`, `překryv` s modalitou; loader, shoda, materializace, `overlap_targets`/`overlap_rules_by_target`) · seed `synonyma.jsonl` (88 ř.) + `podrazeni.jsonl` (18 ř.) + `prekryv.jsonl` (1 ř., `žít⇒potkat_se`) · dialog `!uč a = b \| a => b \| a ~ b \| a < b` (`!uč překryv …` zatím chybí — dialog se do kroku 2 nedostal) · `cb6/logic.py Evaluator.overlap_verdict` (query-time join, ne `derive()` — viz HANDOVER § 8/1) |
 | výpisové otázky (k ověření J.) | `bench/gold/gen-{alois_jirásek,karel_čapek,božena_němcová}.json` (9, `curated: False`, sada `gen`) → `python -m bench gold-gen --overit --dok …` |
 | koncept (proč takhle) | `docs/KONCEPT.md` |
 | plán v1 + stav provedení | `docs/superpowers/plans/2026-08-17-conbond6-v1.md` |
@@ -81,6 +81,21 @@ Paměť v2 (`claim`, `mood`, `parent`, `rule`, `alternatives`; JSON v2 čte v1) 
 
 Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná závorka jen u osob s tvarem „A – B“ bez slovesa; přivlastnění → `mít` jako HYPOTHESIS; částečná shoda jména jen s příjmením; tvary jmen jako jedno jméno; výčet „děti: Helena, Josef…“ = member, ne same_as; typing není odpověď; otázky nezanechávají osiřelé uzly.
 
+**Krok 2 (částečně): operátor `překryv`** (27. 9. 2026, fragmenty bez UDPipe):
+`cb6/lexicon.py` — `Link.modality` (JSON `modalita`), validace `překryv`
+(2 argy, síla `implies`, modalita musí být `možnost`), `Lexicon.overlap_targets`/
+`overlap_rules_by_target`; seed `cb6/lexikon/prekryv.jsonl` (`žít ⇒ potkat_se`).
+`cb6/logic.py` — `Evaluator.overlap_verdict` (**query-time join**, ne
+`derive()`: dotaz s `modality="možnost"` a rolí `kdo` o 2 termech → `chronos.
+overlap` na jejich `žít.kdy` → ANO/NE/`None`→NEVÍM; faktická otázka bez
+modality NEprojde — overlap není důkaz skutečného setkání). `bench/
+graphcheck.py` — `lex_path` chodí i po `překryv`, nová jádra `overlap`/
+`no_overlap` (`_time_overlap` čistě z `t_start`/`t_end`). Čtení věty
+(„Mohli se X a Y potkat?“ z reálného textu) **není hotové** — čeká na UDPipe;
+tenhle krok je jen logická vrstva, ověřená `tests/test_prekryv.py` (4
+fragmenty, `Statement`/`Memory` přímou konstrukcí, `check_graph`/`check_answer`
+0). Podrobně proč query-time (ne `derive()`) v HYPOTEZY 2026-09-27 a § 9 níže.
+
 **Jazyk jako data** (27. 9. 2026, `cb6/lang/`): čtecí tabulky (`ROLE_BY_CASE`,
 `DETERMINER_QUANT`, `PARTICLES`, `WH`, `LIST_VERBS`, `PLACE_NOUNS`,
 `CONDITIONAL_MARKERS`, `ATTITUDE_VERBS`… + chronosu `MONTHS`/`WEEKDAYS`/
@@ -114,7 +129,7 @@ lexikonový operátor `překryv` (protnutí dvou období na časové ose).
 5. Prostor modelů pro disjunkci/ekvivalenci/kardinalitu (přenos `conBond3/cb_logic/models.py`) — dnes REJECTED s důvodem.
 6. Adaptéry conbond1/conbond4 pro zpětný běh QA (Task 12 — neproveden).
 7. Valence jako data (`valence.json` conbond1 / VALLEX), relativní čas (conbond1 chronos), nominalizace, rekurze v dotazu (jellyAI3 SubQuery) — každý jako měřený tah, až bench ukáže potřebu.
-8. **Znalostní vazby jako data** (návrh `2026-08-17-znalostni-vazby-design.md`): **krok 1 hotový** (synonyma se sílou, lexikon, materializace — viz § 5), **`podřazení` hotové** (výpis). Dál: krok 2 překryv/porovnání + veličiny ("mohli se potkat", "vejde se", "Jaká je délka") → krok 3 příbuzenství (inverze/skládání, G‑3) → antonyma až na otázku → krok 5 `Memory.rules` (můstky) jako řádky `implikace` s mapou rolí. Zbývá sjednotit dvě dnešní místa (`Memory.rules`, `kind=rule`) s lexikonem.
+8. **Znalostní vazby jako data** (návrh `2026-08-17-znalostni-vazby-design.md`): **krok 1 hotový** (synonyma se sílou, lexikon, materializace — viz § 5), **`podřazení` hotové** (výpis), **`překryv` hotový na logické vrstvě** (operátor + query-time join, viz § 5 „Krok 2 (částečně)“ a § 8/1) — **chybí jen čtení věty/otázky z reálného textu** (potřebuje UDPipe, žádná zdejší relace ho neměla). Dál po službách: napojit `překryv` do `read.py` (rozpoznat „Mohli se X a Y potkat?“ jako otázku s `modality=možnost`, „žil v letech…“ jako zdroj `žít.kdy`) a změřit na etalonu; pak `porovnání` + veličiny ("vejde se", "Jaká je délka") → krok 3 příbuzenství (inverze/skládání, G‑3 — **pozor, potřebuje 3 premisy, viz § 8/1**) → antonyma až na otázku → krok 5 `Memory.rules` (můstky) jako řádky `implikace` s mapou rolí. Zbývá sjednotit dvě dnešní místa (`Memory.rules`, `kind=rule`) s lexikonem.
 9. **Výpis — zbytky z reálného textu:** typing z nadpisů/seznamů („Wikilivres: Josef Čapek: díla“ → Josef Čapek ∈ dílo — paskvil z appos), „Krakatit je román.“ čtené jako obecná věta (⊆ místo ∈; velké písmeno na začátku věty není důkaz jména), „R.U.R. (… 1920) –“ → `zemřít(R.U.R., 1920)` (životopisná závorka u díla); imperativ s vedlejší větou („Vyjmenuj, co napsal…“); ověření 9 gen otázek J.
 10. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
 
@@ -144,7 +159,62 @@ lexikonový operátor `překryv` (protnutí dvou období na časové ose).
   měřeno pytestem/mypy/pylint, ne bench číslem (viz HYPOTEZY 2026‑09‑27).
 - 17. 8. — Lexikon krok 1: síla vazby se rozhoduje podle významu páru, ne podle počtu zásahů (např. `pracovat ~ působit` same — životopisné „působil v/jako“; jiné významy chrání rámec rolí; `absolvovat`, `vyhrát`, `uvést`, `dostat`… zváženy jednotlivě, viz `pozn` v seedu). Shoda přes `implies` snižuje stupeň důkazu na `derived` (je to odvození, ne záměna). Otázka je vždy první argument shody (`same_pred(dotaz, výrok)`); u můstkových pravidel se pořadí opravilo (`dst_pred` je výrok). Použitý řádek se materializuje i při dotazu (uzel `vazba` v exportu) — jinak by krok `lex` nebyl z grafu doložitelný; nepoužité seed řádky graf nezatěžují.
 
-## 8. Jak předat dál (checklist pro nové sezení)
+## 8. Kritické zhodnocení architektury (J., 27. 9. 2026 — „kriticky hodnoť“)
+
+Zapsáno po krok-2 fragmentu (`překryv`), na žádost J. Ne vyčerpávající audit —
+tři konkrétní nálezy z dnešní práce, každý s návrhem, co by ho ověřilo.
+
+1. **`Statement.derived_from` je jednorodičovské — druhá vícepremisová
+   derivace (`překryv`) to už obešla query-time cestou, třetí (krok 3
+   `skládání`: bratr∘rodič ⇒ strýc, tři premisy) bude potřebovat totéž znovu.**
+   Dnes existují DVA rozšiřovací body odvození: `derive()` (fixní bod nad
+   textovými pravidly, JEDNA premisa, persistovaný `Statement`) a bridging v
+   `Evaluator.evaluate()` (`m.rules`, teď i `overlap_verdict` — query-time,
+   víc premis, žádný nový `Statement`). To funguje, ale je to `implicitní`
+   rozlišení, které nikde není napsané jako pravidlo — příští tah, co bude
+   potřebovat derivaci z 2+ premis, si musí sám vzpomenout na tenhle
+   precedens, jinak riskuje natahovat `derived_from` na seznam a rozbít
+   `revoke()`/`render.py`/`viewbase_app.py`/`check_graph`ovu kontrolu
+   derivace beze zkoušky na reálném textu. **Návrh:** až krok 3 přijde, buď
+   se rozšiřovací bod pojmenuje explicitně (dokumentační pravidlo „derivace
+   z 1 premisy → derive(), z 2+ → query-time join v evaluate()“), nebo se
+   zváží, jestli `derive()` nezaslouží zobecnění.
+2. **Unsupported % (30,1 %) se přes ~10 tahů měřených oprav hýbe málo —
+   opravy jsou case-by-case (přivlastnění, částečná shoda jmen, appos…),
+   ne systematické.** To může být buď (a) reálný strop metody (dependency
+   parsing + ruční pravidla bez sémantických rolí/koreference za hranicí
+   věty má fyzikální mez), nebo (b) signál, že další case-by-case oprava má
+   klesající výnos a je čas na jinou vrstvu (sémantické role z UD, nebo NN
+   extrakce rovnou — přesně směr, který J. navrhl 27. 9.). **Návrh:** až
+   půjde bench spustit, rozložit unsupported podle PŘÍČINY (ne jen podle
+   deprel jako dnes) a spočítat, kolik dnešních 30 % je „stejná chyba
+   podruhé jinde“ vs. „nová třída chyby“ — to řekne, jestli case-by-case
+   ještě má cenu.
+3. **Krok 2 (`lexicon.py` operátory) řeší jen ČÁST toho, co J. myslel
+   „vazby jako data“: lexikon sám ještě jednou roste case-by-case (dnes 1
+   seed řádek `žít⇒potkat_se`, přidaný ručně, protože to je jediný pár, co
+   šel bez textu ověřit).** Bez NN extraktoru, co by lexikonové řádky sám
+   navrhoval z korpusu (a člověk/LM jen schvaloval — přesně I‑9 duch), se
+   lexikon může stát druhou verzí `SYNONYMS` tabulky, jen rozdělenou do víc
+   souborů a s lepší proveniencí. Provenience ≠ škálovatelnost. **Návrh:**
+   až bude NN/UDPipe po ruce, měřit ne jen „kolik řádků lexikon má“, ale
+   „kolik řádků NN navrhl vs. kolik jich člověk musel ručně dopsat“ — to je
+   číslo, které řekne, jestli se cíl (autonomní růst) plní.
+4. **Role-klíče (`kde`,`kdo`,`co`…) jsou opaque symboly grafu (správně), ale
+   jejich SÉMANTIKA (case frames — co je čas vs. místo, `ROLE_BY_CASE`) je
+   zabudovaná do dvou míst (`ground.py` typuje výplň, `logic.py`
+   `PLACE_FAMILY`/`TIME_FAMILY` je hardcoded tuple, ne data).** Dnešní `cb6/
+   lang/` refaktor (27. 9.) přesunul do dat jen SLOVNÍ ZÁSOBU čtení
+   (měsíce, částice…), ne tenhle strukturní předpoklad, že role se dají
+   rozdělit do rodin „místo“/„čas“ podle univerzálních vzorů. Čeština řeší
+   kde/kdy pádem a předložkou; jazyk bez pádů (angličtina) to řeší jinak
+   (slovosled, jiné předložky) — ale rodiny `PLACE_FAMILY`/`TIME_FAMILY`
+   samy o sobě jsou už univerzálnější (sémantické role, ne povrchové tvary)
+   a možná není potřeba je stěhovat — jen to zatím nikdo neprověřil na
+   druhém jazyce. **Návrh:** až bude `cb6/lang/en.json`, tohle je první věc
+   k ověření (fungují `PLACE_FAMILY`/`TIME_FAMILY` beze změny, nebo ne?).
+
+## 9. Jak předat dál (checklist pro nové sezení)
 
 0. Nové sezení v tomto adresáři dostane zadání automaticky z `CLAUDE.md` (pravidla spolupráce, kde co je, další tah).
 1. Přečíst `docs/KONCEPT.md`, spec § 0–1, tuto stránku, poslední záznam v `mereni/HYPOTEZY.md`.

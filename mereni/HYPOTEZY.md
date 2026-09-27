@@ -120,3 +120,82 @@ teď má `overlap` primitiv připravený) a na multilingvní krok 2 (anglická
 potvrdil, že jsou); (b) `docs/HANDOVER.md` a spec dostaly zápis rozhodnutí, ale
 krok 2 samotný (operátory `překryv`/`porovnání` v `lexicon.py`, čtení „Jaká je
 délka…“/„Mohli se potkat?“) **není hotový** — jen jeho časový primitiv.
+
+## 2026-09-27 · pokračování · `překryv` (operátor + query-time join) na fragmentech, bez UDPipe
+
+**Podnět J.:** UDPipe je prý dostupné online (veřejné) — zkoušel jsem
+`lindat.mff.cuni.cz`, ale síťová politika tohoto kontejneru CONNECT zamítla
+(403 na proxy) — hlášeno J., čeká na rozšíření Network access v nastavení
+prostředí. Ollama netřeba (žádný druhý model — J.: „projekt by se bez něj měl
+obejít“). J.: „pokračuj samostatně, kriticky hodnoť architekturu, měřením
+postup (na fragmentech textu a úloh)“ — bez korpusu/UDPipe měřím na **ručně
+sestavených úlohách** (`Statement`/`Memory` přímou konstrukcí, ne přes NL
+čtení — poctivě přiznáno v docstringu testu, ne vydáváno za rozbor).
+
+**Změna:**
+1. `cb6/lexicon.py`: `Link.modality` (JSON klíč `modalita`, jen když
+   vyplněná — zpětná kompatibilita), validace `překryv` (2 argy, síla jen
+   `implies`, modalita musí být `"možnost"` — jinak by NEVÍM tiše sklouzlo na
+   jistotu), `Lexicon._overlap`/`overlap_targets`/`overlap_rules_by_target`,
+   `links_for_graph` píše `modalita` do exportu. Seed `cb6/lexikon/prekryv.jsonl`
+   (1 řádek: `žít ⇒ potkat_se`, možnost).
+2. `cb6/logic.py`: `Evaluator._time_role` (najde výrok o entitě s predikátem
+   a jedinou výplní role `kdy` typu `time`), `Evaluator.overlap_verdict` —
+   **query-time join** (ne `derive()`‑style persistovaný odvozený výrok):
+   dotaz s `modality == "možnost"` a rolí `kdo` o přesně 2 termech zkusí
+   `chronos.overlap` na jejich `žít.kdy`; protnutí ⇒ ANO, neprotnutí ⇒ **NE**
+   (spec: „Nepřekryv ⇒ NE je silné a správné“), nesrovnatelné/chybí ⇒ `None`
+   (spadne do obecného NEVÍM). Zapojeno do `evaluate()` vedle `kernel_verdict`.
+   **Architektonické rozhodnutí (proč query-time, ne `derive()`):**
+   `Statement.derived_from` je jednorodičovské — `derive()` odvozuje z JEDNÉ
+   premisy; `překryv` potřebuje DVĚ (výrok o A, výrok o B). Násilné natažení
+   `derived_from` na dva rodiče by bylo neověřené riziko (dotklo by se
+   `revoke()`, `render.py`, `viewbase_app.py`, `check_graph`u derivace) bez
+   možnosti to tu bez služeb prověřit na reálném textu. Query-time join
+   (jako už existující „pravidla“/můstky v `evaluate()`) žádnou trvalou
+   derivaci nepíše — `Proof` nese oba zdrojové výroky přímo, graf zůstává
+   beze změny schématu. Tohle je obecnější zjištění: **`derive()` (fixní bod
+   z textových pravidel) a bridging v `evaluate()` (query-time, víc premis)
+   jsou dva různé rozšiřovací body** a spec krok 2 patří pod druhý, ne první.
+3. `bench/graphcheck.py`: `lex_path` navíc chodí po hranách `překryv`
+   (jednořádková změna — už bylo obecné pro `implies`); nová jádra `overlap`/
+   `no_overlap` v `check_answer` (`_time_overlap` — zrcadlí `chronos.overlap`
+   čistě z atributů `t_start`/`t_end`, bez importu `cb6`, jak modul vyžaduje).
+4. `tests/test_prekryv.py` — 4 fragmenty: protnuté životy → ANO (`derived`,
+   `check_graph`/`check_answer` 0, materializovaný řádek `lex:prekryv:0001`
+   ověřený i negativně — bez uzlu `vazba` je krok `rekonstrukce`); neprotnuté
+   → NE silné (`check_answer` 0); faktická otázka bez modality → NEVÍM (i
+   při protnutí — overlap není důkaz skutečného setkání); chybějící údaj o
+   jedné osobě → NEVÍM. `tests/test_lexicon.py` +5 (validace, JSON, seed).
+
+**Hypotéza:** pytest +9 (182+2xfail), mypy/pylint beze regrese (`bench/
+graphcheck.py`, `cb6/lexicon.py` 10/10; `cb6/logic.py` stejný počet nálezů
+jako baseline, žádný nový). Žádné bench/QA číslo — čtení „Mohli se potkat?“
+z reálné věty (`read.py`) čeká na UDPipe, tenhle tah je jen logická vrstva.
+**Výsledek:** přesně tak — 182 passed + 2 xfailed (bylo 174), mypy 32 souborů
+čisté, `bench/graphcheck.py`/`cb6/lexicon.py` 10.00/10 beze změny, `cb6/logic.py`
+14 nálezů před i po (0 nových — `overlap_verdict`/`_time_role` mají
+docstringy). Fragmenty potvrzují: primitivum (`chronos.overlap`) + datový
+model (`Lexicon` `překryv`) + query-time join (`Evaluator.overlap_verdict`)
+skládají se do správné, auditovatelné odpovědi na malé úloze bez jediné
+řádky natvrdo v kódu (řádek lexikonu je jediné místo, které o `žít ⇒
+potkat_se` něco ví).
+**Kritické hodnocení architektury (na žádost J.), krátce — dlouhá verze v
+HANDOVER § 9:** (1) `Statement.derived_from` (jednorodičovská derivace) je
+reálný dluh, jakmile začnou přibývat vícepremisová odvození (krok 3
+příbuzenství — `skládání`, bratr∘rodič ⇒ strýc — bude potřebovat TŘI
+premisy: bratr(X,Y), rodič(Y,Z) ⇒ strýc(X,Z); query-time join to zvládne
+znovu, ale je to už druhý takový případ → stojí za zvážení, jestli si
+`derive()` nezaslouží zobecnění na n‑premisové odvození místo dalšího
+obcházení); (2) `list_verdict`/`fits_class` a čtecí heuristiky (`výchozí
+volba“) v `read.py`/`logic.py` přibývají rychleji než klesá unsupported %
+(30,1 % po ~10 tazích) — to je varovný signál, že cesta „oprava za opravou“
+míří k platu; krok 2/3 (operátory) je systematičtější směr, ale i ten roste
+case-by-case (dnes 1 seed řádek `žít⇒potkat_se`) — bez druhého jazyka/NN
+extraktoru hrozí, že se lexikon stane novou verzí `SYNONYMS` tabulky, jen
+rozdělenou do víc souborů; (3) role-klíče (`kde`,`kdo`,`co`…) jsou opaque, ale
+jejich VÝZNAM (case frames, co je "kdy" vs "kde") je zabudovaný do dvou
+modulů (`ground.py` typuje, `logic.py` PLACE_FAMILY/TIME_FAMILY) — druhý
+jazyk možná bude potřebovat jiné rodiny rolí (např. jazyk bez pádů řeší
+"kdy/kde" jinak) — dnešní refaktor (`cb6/lang/`) řeší jen SLOVNÍ ZÁSOBU
+čtení, ne úplně tohle.

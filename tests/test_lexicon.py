@@ -162,6 +162,46 @@ def test_derive_pres_lexikon_nese_uses_rule_na_vazbu() -> None:
     assert s.say("Platí Petr daně?").verdict.value == "ANO"
 
 
+def test_prekryv_je_radek_s_modalitou_moznost() -> None:
+    """Operátor `překryv` (spec krok 2): jen data + validace + přístup k řádkům —
+    spojení dvou výroků různých entit (přes `chronos.overlap`) je architektonicky
+    otevřená položka (`Statement.derived_from` jednorodičovské), viz HYPOTEZY."""
+    link = Link("lex:p:1", "překryv", ("žít", "potkat_se"), "implies", "seed", "t#1", modality="možnost")
+    lx = Lexicon([link])
+    assert lx.overlap_targets("žít") == (link,)
+    assert lx.overlap_targets("zemřít") == ()
+    # nemá vliv na `match`/`related` — `překryv` nespojuje predikáty jako synonymum
+    assert lx.match("potkat_se", "žít") is None and not lx.related("potkat_se", "žít")
+
+
+def test_prekryv_validace() -> None:
+    with pytest.raises(ValueError):  # špatná síla
+        Lexicon([Link("x", "překryv", ("žít", "potkat_se"), "same", "seed", "z", modality="možnost")])
+    with pytest.raises(ValueError):  # bez modality by NEVÍM tiše sklouzlo na jistotu
+        Lexicon([Link("x", "překryv", ("žít", "potkat_se"), "implies", "seed", "z")])
+    with pytest.raises(ValueError):  # špatná modalita
+        Lexicon([Link("x", "překryv", ("žít", "potkat_se"), "implies", "seed", "z", modality="jistota")])
+    with pytest.raises(ValueError):  # jeden argument
+        Lexicon([Link("x", "překryv", ("žít",), "implies", "seed", "z", modality="možnost")])
+    with pytest.raises(ValueError):  # modalita u jiného operátoru
+        Lexicon([Link("x", "třída", ("a", "b"), "same", "seed", "z", modality="možnost")])
+
+
+def test_prekryv_json_a_zpetna_kompatibilita() -> None:
+    """`modalita` v JSON jen když je vyplněná — starší řádky bez ní zůstávají beze změny klíčů."""
+    l = Link("lex:t:1", "třída", ("a", "b"), "same", "seed", "z")
+    assert "modalita" not in l.to_json()
+    p = Link("lex:p:1", "překryv", ("žít", "potkat_se"), "implies", "seed", "z", modality="možnost")
+    d = p.to_json()
+    assert d["modalita"] == "možnost" and Link.from_json(d) == p
+
+
+def test_prekryv_seed_se_nacte() -> None:
+    seed = Lexicon(load_seed())
+    ov = seed.overlap_targets("žít")
+    assert len(ov) == 1 and ov[0].args == ("žít", "potkat_se") and ov[0].modality == "možnost"
+
+
 def test_podrazeni_je_orientovane_a_tranzitivni() -> None:
     """`podřazení`: drama ⊆ dílo — fakt „x ∈ drama“ sedí na dotaz „dílo“, ne naopak; řetězí se."""
     lx = Lexicon([

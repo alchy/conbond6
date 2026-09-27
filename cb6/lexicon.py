@@ -75,11 +75,19 @@ class Link:
     authority: str
     source: str
     note: str = ""
+    #: Jen `překryv` (spec krok 2): druh modality, kterou odvození nese —
+    #: dnes vždy `"možnost"` (dva protnuté intervaly ⇒ *mohli* se potkat, ne
+    #: jistota). Prázdné u operátorů, které modalitu nepotřebují; proto se
+    #: do JSON píše jen když je vyplněné (zpětná kompatibilita starších řádků).
+    modality: str = ""
 
     def to_json(self) -> dict[str, Any]:
         """Řádek do JSON (české klíče návrhu). Vstup: self. Výstup: dict."""
-        return {"id": self.id, "op": self.op, "args": list(self.args), "síla": self.strength,
-                "autorita": self.authority, "zdroj": self.source, "pozn": self.note}
+        d = {"id": self.id, "op": self.op, "args": list(self.args), "síla": self.strength,
+             "autorita": self.authority, "zdroj": self.source, "pozn": self.note}
+        if self.modality:
+            d["modalita"] = self.modality
+        return d
 
     @classmethod
     def from_json(cls, d: dict[str, Any]) -> "Link":
@@ -91,6 +99,7 @@ class Link:
             authority=str(d.get("autorita", d.get("authority", "seed"))),
             source=str(d.get("zdroj", d.get("source", ""))),
             note=str(d.get("pozn", d.get("note", ""))),
+            modality=str(d.get("modalita", d.get("modality", ""))),
         )
 
     def label(self) -> str:
@@ -119,6 +128,15 @@ class Link:
             raise ValueError(f"{self.id}: třída nemůže mít sílu implies (použij implikace)")
         if self.op in ("implikace", "podřazení") and self.strength == "same":
             raise ValueError(f"{self.id}: {self.op} nemůže mít sílu same (použij třída)")
+        if self.op == "překryv":
+            if len(self.args) != 2:
+                raise ValueError(f"{self.id}: překryv chce dva argumenty (predikát, cíl), má {len(self.args)}")
+            if self.strength != "implies":
+                raise ValueError(f"{self.id}: překryv nese jen implies (protnutí ⇒ možnost, nikdy jistota)")
+            if self.modality != "možnost":
+                raise ValueError(f"{self.id}: překryv chce modalitu 'možnost' (spec krok 2, jinak by NEVÍM tiše sklouzlo na ANO)")
+        elif self.modality:
+            raise ValueError(f"{self.id}: modalitu má jen překryv (má ji {self.op!r})")
 
 
 @dataclass(frozen=True)
@@ -172,6 +190,8 @@ class Lexicon:
         self._adj: dict[str, list[tuple[str, Link]]] = {}
         #: pro `related`: sousedé přes jakoukoli sílu, neorientovaně
         self._loose: dict[str, set[str]] = {}
+        #: `překryv`: zdrojový predikát → řádky (cíl v `link.args[1]`, viz `overlap_targets`).
+        self._overlap: dict[str, list[Link]] = {}
         self._parent: dict[str, str] = {}
         self._memo: dict[tuple[str, str], LexMatch | None] = {}
         for link in rows:
@@ -179,6 +199,9 @@ class Lexicon:
             if link.id in self.rows:
                 raise ValueError(f"duplicitní id {link.id}")
             self.rows[link.id] = link
+            if link.op == "překryv":
+                self._overlap.setdefault(link.args[0], []).append(link)
+                continue
             if link.op not in ("třída", "implikace", "podřazení"):
                 continue  # rezervované operátory: řádek držíme, kód zatím nemá
             a, b = link.args
@@ -195,6 +218,8 @@ class Lexicon:
                 self._adj.setdefault(b, [])
         for lst in self._adj.values():
             lst.sort(key=lambda x: (x[1].id, x[0]))  # determinismus cest
+        for ov in self._overlap.values():
+            ov.sort(key=lambda l: l.id)
 
     # ---- stavba -----------------------------------------------------------------
 
@@ -298,6 +323,24 @@ class Lexicon:
                 break
         return False
 
+    def overlap_rules_by_target(self, pred: str) -> tuple[Link, ...]:
+        """Řádky `překryv`, jejichž cíl (`link.args[1]`) je tenhle predikát —
+        opačný směr než `overlap_targets` (dotaz zná cíl, ne zdroj).
+        Vstup: cílový predikát (např. `"potkat_se"`). Výstup: n‑tice řádků."""
+        return tuple(l for l in self.rows.values() if l.op == "překryv" and l.args[1] == pred)
+
+    def overlap_targets(self, pred: str) -> tuple[Link, ...]:
+        """Řádky `překryv` s tímto zdrojovým predikátem (`link.args[0]`).
+
+        Vrací řádky, ne rovnou derivaci: spojení dvou výroků různých entit
+        (přes `chronos.overlap` na jejich časové roli) dělá volající — dnes
+        nikdo (§ krok 2 zůstal na téhle vrstvě, viz HYPOTEZY 2026‑09‑27:
+        `Statement.derived_from` je jednorodičovské, spojení dvou výroků do
+        jednoho odvození je architektonická mez, ne detail k tichému obejití).
+        Vstup: zdrojový predikát (`link.args[0]`, např. `"žít"`). Výstup:
+        n‑tice řádků `překryv` (deterministicky seřazená podle id)."""
+        return tuple(self._overlap.get(pred, ()))
+
 
 _TEACH = re.compile(r"^(\S+)\s*(=>|=|~|<)\s*(\S+)$")
 
@@ -324,7 +367,10 @@ def links_for_graph(links: Sequence[Link]) -> list[tuple[str, dict[str, Any]]]:
     Vstup: řádky. Výstup: seznam `(id, atributy)` pro `add_node`."""
     out: list[tuple[str, dict[str, Any]]] = []
     for l in links:
-        out.append((l.id, {"kind": "vazba", "label": l.label(), "op": l.op, "args": list(l.args),
-                           "síla": l.strength, "autorita": l.authority, "zdroj": l.source, "pozn": l.note,
-                           "activation": 0.0}))
+        attrs: dict[str, Any] = {"kind": "vazba", "label": l.label(), "op": l.op, "args": list(l.args),
+                                  "síla": l.strength, "autorita": l.authority, "zdroj": l.source, "pozn": l.note,
+                                  "activation": 0.0}
+        if l.modality:
+            attrs["modalita"] = l.modality
+        out.append((l.id, attrs))
     return out
