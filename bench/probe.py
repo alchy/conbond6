@@ -252,11 +252,99 @@ def render(result: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def correction_experiment(examples: list[Example], *, n: int = 8, split_seed: int = 0, sample_seed: int = 1,
+                          test_size: float = 0.25) -> dict[str, Any]:
+    """„Dá se sonda formovat dialogem?“ (J. 27. 9. 2026): vezmi `n` NÁHODNÝCH
+    špatně klasifikovaných příkladů rolí `kdo`/`co` (nejdůležitější, nejvíc
+    postižené — viz `run_probe`), pro KAŽDÝ zvlášť (od stejného základního
+    rozdělení) přesuň JEN JEHO do tréninku („člověk ho opravil“), přetrénuj a
+    změř: (a) opravilo se PRÁVĚ tohle jedno místo? (b) nezhoršil se ZBYTEK
+    held‑out množiny (zapomnělo se něco jinam)? Korekce jsou NEZÁVISLÉ (vždy
+    z téhož základu), ne kumulativní — měří se síla JEDNÉ korekce, ne dialog
+    o mnoha chybách najednou.
+
+    Proč tohle, ne živé/gradientové učení za běhu: I‑9/I‑10/I‑11/I‑12 — sonda
+    zůstává mimo graf (jen diagnostika), verzované PŘETRÉNOVÁNÍ z ulehčeného,
+    auditovatelného seznamu příkladů je bezpečnější než tiché úpravy vah
+    (viz `mereni/HYPOTEZY.md` diskuse s J.). Vstup: příklady (viz
+    `build_examples`), počet korekcí, semínka (determinismus). Výstup: dict
+    se souhrnem (základní přesnost, počet špatných kdo/co, na příklad opravil/
+    nezhoršil zbytek, průměr/směrodatná odchylka dopadu na zbytek)."""
+    import numpy as np  # pylint: disable=import-outside-toplevel
+    from sklearn.linear_model import LogisticRegression  # pylint: disable=import-outside-toplevel
+    from sklearn.model_selection import train_test_split  # pylint: disable=import-outside-toplevel
+    from sklearn.preprocessing import StandardScaler  # pylint: disable=import-outside-toplevel
+
+    y_all = np.array([e.label for e in examples])
+    all_idx = np.arange(len(examples))
+    idx_tr, idx_te, ytr, yte = train_test_split(all_idx, y_all, test_size=test_size, random_state=split_seed)
+    deprel_vocab = sorted({examples[i].deprel for i in idx_tr})
+
+    def _fit(tr_idx: Any, tr_y: Any) -> tuple[Any, Any]:
+        x = _feature_matrix(examples, tr_idx, "edge", deprel_vocab)
+        scaler = StandardScaler().fit(x)
+        clf = LogisticRegression(max_iter=1000, class_weight="balanced")
+        clf.fit(scaler.transform(x), tr_y)
+        return clf, scaler
+
+    clf0, scaler0 = _fit(idx_tr, ytr)
+    xte = _feature_matrix(examples, idx_te, "edge", deprel_vocab)
+    pred0 = clf0.predict(scaler0.transform(xte))
+    baseline_acc = clf0.score(scaler0.transform(xte), yte)
+
+    wrong = [i for i, (p, y) in enumerate(zip(pred0, yte)) if y in ("kdo", "co") and p != y]
+    rng = np.random.default_rng(sample_seed)
+    sample = rng.choice(wrong, size=min(n, len(wrong)), replace=False) if wrong else np.array([], dtype=int)
+
+    rows: list[dict[str, Any]] = []
+    for pos in sample:
+        pos = int(pos)
+        ex = examples[idx_te[pos]]
+        true_lab = yte[pos]
+        new_tr_idx = np.concatenate([idx_tr, [idx_te[pos]]])
+        rest_te_idx = np.delete(idx_te, pos)
+        rest_yte = np.delete(yte, pos)
+        clf1, scaler1 = _fit(new_tr_idx, np.concatenate([ytr, [true_lab]]))
+        own_pred = clf1.predict(scaler1.transform(_feature_matrix(examples, [idx_te[pos]], "edge", deprel_vocab)))[0]
+        rest_after = clf1.score(scaler1.transform(_feature_matrix(examples, rest_te_idx, "edge", deprel_vocab)), rest_yte)
+        rest_before = clf0.score(scaler0.transform(_feature_matrix(examples, rest_te_idx, "edge", deprel_vocab)), rest_yte)
+        rows.append({"form": ex.form, "deprel": ex.deprel, "true": true_lab, "pred_before": pred0[pos],
+                     "pred_after": own_pred, "fixed": bool(own_pred == true_lab),
+                     "rest_before": rest_before, "rest_after": rest_after, "delta": rest_after - rest_before})
+
+    deltas = [r["delta"] for r in rows]
+    return {
+        "n_examples": len(examples), "baseline_accuracy": round(baseline_acc, 4),
+        "n_wrong_kdo_co": len(wrong), "n_tried": len(rows),
+        "n_fixed": sum(1 for r in rows if r["fixed"]),
+        "mean_delta": round(float(np.mean(deltas)), 5) if deltas else 0.0,
+        "std_delta": round(float(np.std(deltas)), 5) if deltas else 0.0,
+        "rows": rows,
+    }
+
+
+def render_correction(result: dict[str, Any]) -> str:
+    """Čitelný výpis `correction_experiment` — na řádek, pak souhrn."""
+    lines = [
+        f"korekční pokus (edge sonda, {result['n_examples']} tokenů, základní přesnost {result['baseline_accuracy']:.1%}, "
+        f"{result['n_wrong_kdo_co']} špatných kdo/co v testu, vyzkoušeno {result['n_tried']}):",
+    ]
+    for r in result["rows"]:
+        mark = "OPRAVENO" if r["fixed"] else "pořád špatně"
+        lines.append(f"  '{r['form']}' ({r['deprel']}): {r['true']} ← {r['pred_before']} → po opravě: {r['pred_after']} "
+                     f"[{mark}] · zbytek testu {r['rest_before']:.4f} → {r['rest_after']:.4f} ({r['delta']:+.4f})")
+    lines.append(f"\nshrnutí: {result['n_fixed']}/{result['n_tried']} cílených korekcí uspělo; "
+                 f"průměrný dopad na zbytek held-out množiny: {result['mean_delta']:+.5f} (směrodatná odchylka {result['std_delta']:.5f})")
+    return "\n".join(lines)
+
+
 def main(argv: list[str]) -> int:  # pragma: no cover — tenká CLI fasáda
-    """`python -m bench probe [--strop N] [--dok jméno...] [--features token|edge|compare]`
-    — natrénuj sondu a vypiš přesnost. `compare` natrénuje obě varianty na
-    STEJNÉM rozdělení dat a ukáže rozdíl (drahý krok — dvě sondy). Vždy
-    vrací 0 (informační bench)."""
+    """`python -m bench probe [--strop N] [--dok jméno...] [--features token|edge|compare]
+    [--korekce N]` — natrénuj sondu a vypiš přesnost. `compare` natrénuje obě
+    varianty na STEJNÉM rozdělení dat a ukáže rozdíl (drahý krok — dvě sondy).
+    `--korekce N` místo toho spustí `correction_experiment` („dá se sonda
+    formovat dialogem?“ — N nezávislých cílených oprav, viz jeho docstring).
+    Vždy vrací 0 (informační bench)."""
     import argparse  # pylint: disable=import-outside-toplevel
 
     import cs_core_news_sm  # pylint: disable=import-outside-toplevel
@@ -267,12 +355,15 @@ def main(argv: list[str]) -> int:  # pragma: no cover — tenká CLI fasáda
     ap.add_argument("--features", choices=["token", "edge", "compare"], default="edge",
                      help="token = jen embedding; edge = + rodič + deprel (výchozí); "
                           "compare = obě, na stejném rozdělení dat")
+    ap.add_argument("--korekce", type=int, default=0, help="místo sondy spusť N nezávislých cílených korekcí (0 = normální sonda)")
     args = ap.parse_args(argv)
     cfg = load_config()
     docs = load_wiki(cfg, only=args.dok, with_auto=False)
     nlp = cs_core_news_sm.load()
     examples = build_examples(docs, nlp, strop=args.strop)
-    if args.features == "compare":
+    if args.korekce:
+        print(render_correction(correction_experiment(examples, n=args.korekce)))
+    elif args.features == "compare":
         r_token = run_probe(examples, features="token")
         r_edge = run_probe(examples, features="edge")
         print(render(r_token))

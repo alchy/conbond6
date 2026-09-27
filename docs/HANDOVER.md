@@ -241,16 +241,34 @@ otázky (od J. nebo nález v korpusu), ne na dohad.
    (destilační dataset parse→`Predication`, `read.py` jako učitel) +
    `bench probe` (lineární sonda: role z `read.py` ← `tok2vec` embedding
    spaCy parseru, bez tréninku čehokoli nového). Výsledek na 56 243
-   tokenech (10 dok.): sonda +18,5 b.b. nad základnou (70,5 % vs. 52,0 %)
-   — signál JE v embeddingu, ale jen ČÁSTEČNĚ: silný u „ostřejších“ rolí
-   (jak/pořadí/kdy/komu), slabý u nejdůležitějších (`kdo` recall 0,29,
-   `co` recall jen 0,09) — lineární sonda nad IZOLOVANÝM tokenem nevidí
-   strukturu (kdo je podmět vs. předmět), jen token sám. **Závěr:
-   `read.py` se dnes nedá nahradit prostou lineární klasifikací nad
-   tokenem** — další krok by featurizoval hranu (embedding + rodič +
-   deprel), ne architekturu navíc. Role `čí` (krok 3) má jen 45 příkladů
-   v tomhle vzorku — na učení zatím nestačí, zůstává na pravidle.
-   Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
+   tokenech (10 dok.): sonda nad IZOLOVANÝM tokenem +18,5 b.b. nad
+   základnou, ale slabá u nejdůležitějších rolí (`kdo` recall 0,29, `co`
+   jen 0,09) — nevidí strukturu (kdo je podmět vs. předmět), jen token.
+   **Krok „hrana, ne token“ (týž den, J.: „conditioning je abstrakce nad
+   daty, mělo by jít už na současném vzorku“):** `Example.head_vector`/
+   `deprel`, `--features edge` (token + rodič + one‑hot deprelu) —
+   POTVRZENO na plném vzorku: `kdo` recall 0,29→**0,46** (+17 b.b.), `co`
+   0,08→**0,37** (+29 b.b.), obyčejná LR 70,6 %→76,4 %. **Závěr:** `read.py`
+   se dnes nedá nahradit prostou lineární klasifikací nad IZOLOVANÝM
+   tokenem, ale s hranou (embedding + rodič + deprel) už signál pokrývá
+   skoro polovinu případů — částečná, ne úplná náhrada.
+   **Krok „formovatelná dialogem?“ (pokračování, J.: „nemůžeme již vyrobit
+   lingvistickou DNA s využitím NN, kterou bychom mohli formovat
+   dialogem?“):** `bench/probe.py::correction_experiment` (`--korekce N`)
+   — vzít N špatně klasifikovaných `kdo`/`co` příkladů, KAŽDÝ zvlášť
+   přesunout do tréninku („dialogová korekce“), přetrénovat, změřit
+   opravu + dopad na zbytek. Výsledek (5 dok., 35 693 tokenů, 12 korekcí):
+   **jen 3/12 (25 %) se opravilo** (lineární model má globální hranici,
+   jeden bod z desítek tisíc ji těžko pohne, leda na okraji), ale **žádné
+   zapomnění** (dopad na zbytek held‑out −0,0003 ± 0,0006, šum kolem
+   nuly) — korekce nikdy neškodí, jen nejsou dost silné samy o sobě.
+   **Závěr pro architekturu:** „lingvistická DNA formovaná dialogem“ ve
+   smyslu „jedna oprava spolehlivě přetvoří chování" takhle NEFUNGUJE;
+   potřebovala by buď exemplářovou/výjimkovou vrstvu NAD modelem (jako
+   dnešní grafový lexikon — vítězí explicitně, ne hlasováním), nebo
+   váhované přeučení. Ani jedno není dnešní krok. Role `čí` (krok 3) má
+   jen 45 příkladů v tomhle vzorku — na učení zatím nestačí, zůstává na
+   pravidle. Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026 (tři pokračování).
 1. **Lidský audit** — J.: `python -m bench audit --dok alois_jirásek --rucne` (a druhý dokument), min. 30 výroků; pak zpráva hlásí shodu soudce/člověk a „nechápu z grafu“ %.
 2. **Ověření generovaných otázek** — `python -m bench gold-gen --dok karel_čapek --n 12` → `--overit` (kurátorované číslo 29/130 je malé a korpus 7/90 tvrdý).
 3. Zbývající chyby precision (z auditu): kvantifikátor ∀ z „všechna jeho dramata“ (∀ bez omezení přivlastněním), plošná koordinace (`kdo: Petr+Karel` i tam, kde jde o dvě klauze — „otcem byl Josef…, matkou Vincencie“), vztažné věty (`kdo:∀sousoší`), participia jako predikáty.

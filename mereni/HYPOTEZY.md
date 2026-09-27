@@ -1367,3 +1367,56 @@ sousední vzor NEPADÁ. Rozdíl mezi „Josef Čapek zmizel úplně“ (dřív) 
 „Josef Čapek je dohledatelný pod méně čistým jménem“ (teď) je přesně ten
 druh postupného zlepšení, co pravidlo 2 chce: víc pravdivé, beze ztráty
 přesnosti jinde.
+
+## 2026-09-27 · pokračování · dá se sonda (edge-conditioning) formovat dialogem? — `correction_experiment`
+
+**Podnět:** J.: „nemůžeme již vyrobit lingvistickou DNA s využitím NN,
+kterou bychom mohli formovat dialogem?“ — filosofická otázka o architektuře
+za konkrétním krokem. Odpověděl jsem, že tohle chce napřed ověřit, jestli
+edge‑conditioning (`kdo` 0,29→0,46, `co` 0,08→0,37 recall — už změřeno,
+viz výše) je vůbec „hodný formování“, a navrhl přesně tenhle test; J.:
+„ano, jdi do toho“.
+
+**Hypotéza:** vezmi `n` nezávislých špatně klasifikovaných `kdo`/`co`
+testovacích příkladů, pro KAŽDÝ zvlášť (od stejného základu) přesuň jen
+JEHO do tréninku („dialogová korekce“), přetrénuj, změř (a) opravilo se
+přesně tohle místo? (b) nezhoršil se zbytek held‑out množiny (zapomnění)?
+Očekávání bylo OTEVŘENÉ — první rychlá zkouška (1 příklad, `televize`
+nmod, `kde`→`co`) opravu ukázala hned a beze ztráty na zbytku, ale jeden
+příklad není číslo, je anekdota — proto `correction_experiment` v `bench/
+probe.py` dělá tohle systematicky na víc nezávislých vzorcích.
+
+**Výsledek (5 dok. — `alois_jirásek`, `karel_čapek`, `božena_němcová`,
+`bohumil_hrabal`, `josef_čapek`; 35 693 tokenů; edge sonda, základní
+přesnost 65,7 %; `python -m bench probe --korekce 12`):**
+- **3 z 12 (25 %)** cílených korekcí opravdu překlopilo predikci na
+  správnou (`stavem` s_kým→kdo, `jiných` v+forma:Gen→co, „19“ koncem+Gen→co).
+- **9 z 12 (75 %)** se NEOPRAVILO — jedna přidaná trénovací věta nestačí
+  přebít systematický vzor, který model už viděl mnohokrát jinde
+  (`nmod`/`obl` chyby u `kdo`/`co` jsou časté, ne ojedinělé).
+- **Žádné měřitelné zapomnění:** průměrný dopad na ZBYTEK held‑out
+  množiny je **−0,00028** (směrodatná odchylka 0,00056) — šum kolem nuly,
+  ne systematická ztráta. Jedna korekce nikdy nic nepokazila jinde.
+
+**Poučení (přesná odpověď J.):** „lingvistická DNA“ ve smyslu „jedna
+oprava v dialogu spolehlivě přetvaruje chování na tom místě“ TAKHLE
+(sdílený lineární model nad edge‑conditioned embeddingem) NEFUNGUJE — jen
+1 ze 4 korekcí „chytne“, protože lineární model rozhoduje podle GLOBÁLNÍ
+hranice, kterou jeden bod z desítek tisíc těžko pohne, pokud náhodou
+nebyl přesně na okraji (proto se povedly zrovna ty tři — byly to
+hraniční případy, ne systematické). Co FUNGUJE spolehlivě: korekce
+NIKDY NEUŠKODÍ zbytku (žádné zapomínání) — bezpečné pro dialog, jen ne
+DOSTATEČNĚ SILNÉ samo o sobě. Závěr pro architekturu: „DNA formovaná
+dialogem“ potřebuje buď (a) exemplářovou/výjimkovou vrstvu NAD
+statistickým modelem (explicitní, auditovatelná tabulka „tenhle
+strukturní vzor → tahle role“, přesně v duchu existujícího grafového
+lexikonu — vyhraje před statistickým hlasem, ne splyne s ním), nebo
+(b) váhované přetrénování (opravený příklad s vyšší váhou než 1×), ne
+prosté přidání jednoho řádku dat. Ani jedno není dnešní krok — dnešní
+krok byl ZMĚŘIT, jestli „prostá“ verze funguje (nefunguje spolehlivě,
+ale neškodí), než se stavbou jde dál.
+**Ověření:** `bench/probe.py::correction_experiment`/`render_correction`
++ `--korekce N` v CLI (žádný nový pytest — `sklearn`/`spacy`-závislý kód
+se v týhle sadě netestuje jednotkově, stejná konvence jako zbytek
+`bench/probe.py`, viz `tests/test_probe.py`). Pytest 226+2xfail beze
+změny, mypy čisté, pylint diff prázdný (0 nových nálezů).
