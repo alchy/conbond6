@@ -22,6 +22,10 @@ ROLE_LABELS: dict[str, str] = {
 
 GRADE_LABELS = {"said": "řekls to", "read": "přečteno z textu", "derived": "odvozeno"}
 
+#: Kolik „blízkých“ výroků se u NEVÍM ukáže bez vyžádání (`!ukaž <id>` dá zbytek
+#: i zdroj) — krok „méně dat, víc klidu“ (27. 9. 2026): NEVÍM nemá být report.
+KNOWN_SHOWN_MAX = 3
+
 TEMPLATES = {
     "ANO": "→ ANO",
     "NE": "→ NE",
@@ -211,17 +215,23 @@ def render_answer(m: Memory, verdict: Verdict, *, wh: bool, recalled: Sequence[S
             for proof in verdict.counter:
                 lines.extend(_proof_lines(m, proof, "   "))
     if verdict.value == "NEVÍM" or (wh and not verdict.fillers):
-        for miss in verdict.missing:
-            lines.append(f"   {TEMPLATES['missing']} {miss}")
-        for note in verdict.notes:
-            lines.append(f"   ⚠ {note}")
+        if verdict.missing:
+            lines.append(f"   {TEMPLATES['missing']} " + "; ".join(verdict.missing))
+        if verdict.notes:
+            lines.append("   ⚠ " + "; ".join(verdict.notes))
         near = [m.statements[s] for s in verdict.near if s in m.statements]
         shown: list[Statement] = []
         for st in list(near) + list(recalled):
             if st not in shown:
                 shown.append(st)
         if shown:
+            # NEVÍM zůstává NEVÍM — tohle je nejbližší, co paměť má, ne skrytá
+            # odpověď (I‑4). Bez zdroje a s menším stropem: `!ukaž <id>` dá
+            # zdroj i celý výrok tomu, kdo ho chce — tady stačí vědět, že to
+            # tam je (krok „render odpovědí — méně dat, víc klidu“, 27. 9. 2026).
             lines.append("   " + TEMPLATES["known"])
-            for st in shown[:5]:
-                lines.append(f"   - {render_statement(m, st, with_source=True)}")
+            for st in shown[:KNOWN_SHOWN_MAX]:
+                lines.append(f"   - {render_statement(m, st)}")
+            if len(shown) > KNOWN_SHOWN_MAX:
+                lines.append(f"   (+ {len(shown) - KNOWN_SHOWN_MAX} další)")
     return "\n".join(lines)

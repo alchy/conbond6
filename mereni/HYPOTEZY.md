@@ -1089,3 +1089,52 @@ Krok 5 návrhu je tím hotový — počet míst, kde „vazby“ žily, kleslo z
 jak návrh chtěl („cíl integrace je počet míst snížit na jedno“ — jedno
 by smazalo skutečný rozdíl mezi nimi; dvě se zbytkovým, ODLIŠNÝM
 významem je správný cíl, ne kompromis).
+
+## 2026-09-27 · pokračování · krok 6: render odpovědí — méně dat, víc klidu
+
+**Zadání J.:** filosofická řada zpráv o „moudrosti, ne chytrosti“, „partner
+pro moudro, ne databáze“ — a pak konkrétně: „krok 6 render odpovědí —
+méně dat, víc klidu“. Necílil jsem na PROSU (spec § 9 výslovně chce
+strukturovaný výpis „role: výplň“, protože hezká věta bez krytí je přesně
+ten paskvil, co conbond4 § 8 poučil) — cílil jsem na to, co dělá odpověď
+REPORTEM místo klidné věty: kolik řádků a kolik dat na řádek.
+**Rozbor před změnou:** `answer_matches` (bench QA) čte hlavně STRUKTUROVANÁ
+data (`fillers`), text jen jako slabší `text_hit` (substring) — takže
+`render.py` šlo bezpečně přeformátovat beze změny QA čísel. Pinovaných
+testů na PŘESNÝ text NEVÍM/MOŽNÁ výstupu nebylo (`verdict.notes`/`.missing`
+se testují jako data, ne přes `.text`) — jen ANO/NE proof-rendering má
+pinované asercie (zdroj, statement id) → nechal jsem ho beze změny (bezpečnější,
+větší riziko regrese), soustředil se na NEVÍM/MOŽNÁ, kde je „hodně dat, málo
+klidu“ nejvíc vidět (`docs/UKAZKY.md` „vím:“ sekce — až 5 plných výroků se
+zdrojem u KAŽDÉHO).
+**Změna (`cb6/render.py`):**
+- `KNOWN_SHOWN_MAX = 3` (dřív natvrdo 5): u NEVÍM se blízké/vyvolané výroky
+  ukážou nejvýš 3×, bez zdroje (`with_source=False` — `!ukaž <id>` dá zdroj
+  i celý výrok tomu, kdo ho chce); zbytek se jen SPOČÍTÁ („+ N další“), ne
+  zahodí — nic z I‑12 se neztrácí, jen se nezobrazuje defaultně navíc.
+- `missing`/`notes` (může jich být víc) se slučují do JEDNÉ řádky (`"; "`
+  join) místo jedné řádky na položku — stejná informace, míň vizuální váhy.
+- `tests/test_render_answer.py` (3, ruční `Statement`/`Memory`/`Verdict`):
+  strop + počítadlo zbytku, pod stropem se nic nepočítá, missing/notes
+  sloučené do jedné řádky každé.
+**Hypotéza:** pytest +3, mypy/pylint beze regrese (ověřeno `git stash`
+diffem); `docs/UKAZKY.md` čeká na regeneraci (potřebuje UDPipe/spaCy
+keš na konkrétní věty scén — zablokováno stejným chybějícím prostředím
+jako zbytek dneška, ne mou změnou).
+**Výsledek:** přesně tak. **223 passed** (+3) + 2 xfailed beze změny, mypy
+36 souborů čisté, pylint diff jen posun řádků. Ruční ověření na reálném
+scénáři (`RecordedOracle tests/data/parses.json`, „Bydlí Petr v Brně?“):
+před — `- bydlet(kdo: Petr, kde: Praha)  — zdroj: „Petr bydlí v Praze.“
+(dialog, věta 1)`; po — `- bydlet(kdo: Petr, kde: Praha)` (zdroj pryč,
+zbytek věty stejný). `docs/UKAZKY.md` se NEregenerovalo (`bench ukazky`
+spadlo na `segmentace … není v data/cache/parses.json` — scény potřebují
+přesné věty z živého UDPipe, které tahle relace nemá) — zapsáno jako
+otevřený dluh, ne obejito náhradou za spaCy (jiná provenience by
+kanonický demo dokument tiše zkreslila, I‑12).
+**Poučení:** „klid“ v odpovědi nejde přidat jako styl navrch — je to
+otázka, KOLIK toho systém řekne, když už neví. Zdroj/plný výrok pro
+KAŽDÝ blízký fakt byl užitečný pro AUDIT (`!ukaž`), ne pro ODPOVĚĎ — dvě
+různé potřeby, dřív slité do jedné šablony. Rozdělení (odpověď stručná,
+`!ukaž` beze změny vyčerpávající) je přesně ten typ úpravy, co J. myslel
+„moudrostí“: neztratit nic, jen neukazovat všechno najednou tomu, kdo se
+jen zeptal.
