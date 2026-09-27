@@ -730,3 +730,57 @@ nouns_base`, ne s `cb6/lexicon.py`. Krok 3 dál: samotné vztahy (inverze
 roli, ne zahozený zbytek), na kterém se dá stavět, ale operátor sám
 ještě chybí (G‑3 pořád čeká na čtecí konstrukci „Jeho bratr Josef
 Čapek“ → vztahový predikát, HANDOVER § 6/8).
+
+## 2026-09-27 · pokračování · krok 3: G-3 opraven — „Jeho bratr Josef Čapek“ je entita + vztah, ne slepené jméno
+
+**Zjištění před opravou** (ověření na reálném korpusu, ne jen na 1
+zaznamenané větě — HANDOVER varoval, že vzorek je tenký): grep přes
+`data/corpus/conBond2/data/raw/*.txt` na vzor „(Jeho|Její|Jejich)
+<vztahové substantivum> <Jméno>“ našel dalších 4 reálné výskyty
+(Jaroslav Hašek: „Jeho otec Josef Hašek“; Karel Havlíček Borovský:
+„Jeho matka Josefína Havlíčková“; Milan Kundera: „Jeho manželka Věra“;
+Petr Bezruč: „Jeho otec Antonín Vašek“) vedle testové věty — konstrukce
+je běžná encyklopedická fráze, ne ojedinělost. Zdrojový rozbor
+(`tests/data/parses.json`): jméno visí na vztahovém substantivu jako
+`flat` (ne `nmod`/`appos`), stejně jako „vitamín C“ — proto se dřív
+slepilo do jednoho jména skupiny („bratr Josef Čapek“), Josef Čapek
+jako ENTITA nikdy nevznikl a „byl malíř“ viselo na neidentifikovatelné
+skupině.
+**Změna:** `cb6/read.py Reader._relational_name(t)` — nová „hlava“ pro
+`title` (vedle `_title_of`): vztahové substantivum + přivlastnění
+(zájmeno/adj, `det Poss=Yes` nebo `amod ADJ Poss=Yes`) + `flat` vlastní
+jméno → `title` = jméno, přesně stejná cesta jako nominativ jmenovací
+(„drama R.U.R.“): entita + `cls` (typing). `TermSpec.possessor` se tím
+pádem nese i na entitu (dřív ho `_resolve_term_inner` v `entity` větvi
+ignorovalo). `cb6/ground.py`: `_owner_nodes(t)` (vytažen sdílený kus
+`_resolve_possessed`, beze změny chování) + nová `Grounder.
+_relational_fact(t, entity_id)` — když má entita `cls` i `possessor`,
+vytvoří skutečný vztahový výrok (`bratr(kdo=Josef Čapek, čí=Karel
+Čapek)`, SAFE, nebo HYPOTHESIS na každého kandidáta při nejednoznačném
+vlastníkovi — stejná I‑3/I‑8 disciplína jako u „Filipovo auto“).
+**Hypotéza:** `tests/test_dialog_g.py` (existující fixtura, žádná nová
+zaznamenaná věta) — Josef Čapek vznikne jako samostatná entita odlišná
+od Karla, „malíř“ na něm, plus výrok `bratr` s rolí `čí`; existující
+testy beze změny výsledku; pytest +1, mypy/pylint beze regrese;
+real-corpus smoke (`--parser spacy` na `jaroslav_hašek`, `petr_bezruč`)
+beze pádu, audit grafu 0.
+**Výsledek:** přesně tak. Nový test
+`test_g3_pristavek_je_vztah_ne_slepene_jmeno` potvrzuje: Josef Čapek ≠
+Karel Čapek (různá id), `bratr(kdo=Josef Čapek, čí=Karel Čapek)` SAFE,
+„být malíř“ visí na Josefovi. Všech 8 testů `test_dialog_g.py` prochází
+(2 xfail beze změny — G‑1/G‑2 nesouvisí). Celkem **212 passed** + 2
+xfailed (+1), mypy 34 souborů čisté, pylint diff beze nového nálezu.
+Real-corpus smoke (spaCy, `jaroslav_hašek`+`petr_bezruč`, strop 30):
+audit grafu 0, determinismus ano, žádný pád.
+**Poučení:** stejné jako u genitivu — architektura to snesla skoro
+zadarmo, protože „entita s třídou“ (`TermSpec.cls`) už existovala pro
+jiný účel (nominativ jmenovací) a stačilo ji spustit i z jiného
+spouštěče. Riziko bylo přesně to, co HANDOVER předvídal („moc tenký
+vzorek“) — vyřešeno tím, že jsem si PŘED psaním kódu ověřil další 4
+reálné výskyty v korpusu, ne jen věřil jedné zaznamenané větě.
+**Zbývá (krok 3, poslední kus):** samotný vztahový OPERÁTOR nad rolí
+`čí`/predikátem vztahového substantiva — inverze („X je bratr Y“ ⇒ „Y
+je sourozenec X“, pozor na pohlaví), skládání („otec otce“ → „děd“,
+potřebuje 2 statementy → `derive()` nejde, query-time join jako
+`překryv`). Zatím žádná otázka typu „Kdo je čí tchán?“ nemá odpověď —
+vztah SE ZAPÍŠE, ale nic ho zatím nedotazuje.

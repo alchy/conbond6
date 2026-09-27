@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from cb6.defaults import POSSESSIVE_SUFFIXES
+from cb6.defaults import POSSESSIVE_SUFFIXES, RELATIONAL_NOUNS
 from cb6.discourse import Registry, ambiguous
 from cb6.memory import Memory, Node, OpenItem, Provenance, Role, Statement
 from cb6.read import Predication, Reading, TermSpec
@@ -95,6 +95,10 @@ class Grounder:
                 group = self.m.ensure_group(t.cls[0], t.cls[1])
                 if self.m.member_star(node.id, group.id) is None:
                     self._member(node.id, group.id, note=f"třída z nominativu jmenovacího: {node.label()} ∈ {group.label()}")
+                if t.possessor is not None:
+                    # G‑3 (krok 3): „Jeho bratr Josef Čapek“ — přivlastnění u
+                    # entity z přístavku je vztahový argument, ne jen typing.
+                    self._relational_fact(t, node.id)
             return node.id
         if t.kind == "place":
             node = self.m.ensure_place(t.name_lemmas or (t.lemma,), t.forms)
@@ -215,6 +219,51 @@ class Grounder:
             return ranked[:3]
         return ranked[:1]
 
+    def _owner_nodes(self, t: TermSpec) -> list[Node]:
+        """Kandidáti na vlastníka/referenta přivlastnění (`t.possessor`) —
+        sdíleno `_resolve_possessed` (kdo VLASTNÍ) a `_relational_fact`
+        (čí je vztah): jmenná shoda stonku u přídavného jména (`kind="adj"`,
+        „Filipovo“ → „Filip“), jinak aktivace/téma (`kind="pron"`, „jeho“).
+        Nejednoznačnost řeší `_owner_candidates` (aktivace prvního a
+        druhého blízko u sebe → víc kandidátů, ne tichý odhad)."""
+        kind, word = t.possessor  # type: ignore[misc]
+        if kind == "adj":
+            stem = word
+            for suf in POSSESSIVE_SUFFIXES:
+                if word.endswith(suf):
+                    stem = word[: -len(suf)]
+                    break
+            raw = [n for n in self.m.nodes.values() if n.kind == "entity" and any(w.lower().startswith(stem.lower()) for name in n.names for w in name.split()) and len(stem) >= 3]
+        else:
+            raw = self.m.most_active(kinds=("entity",)) or ([self.m.nodes[self.topic]] if self.topic and self.topic in self.m.nodes else [])
+        return self._owner_candidates(raw) if raw else []
+
+    def _relational_fact(self, t: TermSpec, entity_id: str) -> None:
+        """G‑3 (krok 3): „Jeho bratr Josef Čapek“ — `t.cls` už dal typing
+        (Josef Čapek ∈ bratr), tady navíc vzniká skutečný vztahový výrok
+        `bratr(kdo=Josef Čapek, čí=…)` z přivlastnění (`t.possessor`), ne
+        jen typing. Stejná I‑3/I‑8 disciplína jako `_resolve_possessed`:
+        nejednoznačný vlastník → HYPOTHESIS na KAŽDÉHO kandidáta."""
+        assert t.cls is not None and t.possessor is not None
+        pred = t.cls[0]
+        if pred not in RELATIONAL_NOUNS or not self.write:
+            return
+        _, word = t.possessor
+        owners = self._owner_nodes(t)
+        if not owners:
+            self._pending_open.append(("reference", word, f"Čí je „{t.lemma} {' '.join(t.name_lemmas)}“ („{word}“)?", []))
+            return
+        for owner in owners:
+            reason = "" if len(owners) == 1 else f"vlastník mezi {', '.join(n.label() for n in owners)} nejednoznačný"
+            st = Statement("", pred, "verb", grade=self.grade, prov=self.prov, sentence=self.out.sentence,  # type: ignore[arg-type]
+                           roles=[Role("kdo", [entity_id], "·", "structural"), Role("čí", [owner.id], "·", "structural")],
+                           defaults=[f"vztah z přístavku: „{word} {t.lemma}“ → {owner.label()}"],
+                           claim="SAFE" if len(owners) == 1 else "HYPOTHESIS", reason=reason)
+            self.m.attach(st)
+            self.out.statements.append(st)
+        if len(owners) > 1:
+            self._pending_open.append(("reference", word, f"Čí je „{t.lemma} {' '.join(t.name_lemmas)}“ („{word}“)? Kandidáti: " + ", ".join(n.label() for n in owners), [n.label() for n in owners]))
+
     def _resolve_possessed(self, t: TermSpec, group: Node, role: str) -> str | None:
         """„Filipovo auto“ / „jeho auto“ → auto, které Filip má (výrok `mít`),
         jinak nová instance s `mít`.
@@ -226,20 +275,11 @@ class Grounder:
         bezpečně vybrat, vznikne HYPOTHESIS `mít` na KAŽDÉHO kandidáta (ne
         jen na odhad) a otevřená položka — I‑3/I‑8 stejně důsledně jako
         u koreference."""
-        kind, word = t.possessor  # type: ignore[misc]
-        if kind == "adj":
-            stem = word
-            for suf in POSSESSIVE_SUFFIXES:
-                if word.endswith(suf):
-                    stem = word[: -len(suf)]
-                    break
-            raw = [n for n in self.m.nodes.values() if n.kind == "entity" and any(w.lower().startswith(stem.lower()) for name in n.names for w in name.split()) and len(stem) >= 3]
-        else:
-            raw = self.m.most_active(kinds=("entity",)) or ([self.m.nodes[self.topic]] if self.topic and self.topic in self.m.nodes else [])
-        if not raw:
+        _, word = t.possessor  # type: ignore[misc]
+        owners = self._owner_nodes(t)
+        if not owners:
             self._pending_open.append(("reference", word, f"Čí je „{t.lemma}“ („{word}“)?", []))
             return None
-        owners = self._owner_candidates(raw)
         # existující vlastnictví u KTERÉHOKOLI kandidáta je jistota, ne odhad — vyhrává nad hypotézou
         for cand in owners:
             for st in self.m.statements_about(cand.id):

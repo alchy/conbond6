@@ -751,6 +751,28 @@ class _Reader:
             return sorted(toks, key=lambda x: x.index)
         return None
 
+    def _relational_name(self, t: Token) -> list[Token] | None:
+        """G‑3 (krok 3): „Jeho bratr Josef Čapek“ — vztahové substantivo +
+        přivlastnění (zájmeno/přídavné jméno) + `flat` vlastní jméno. Na
+        rozdíl od `_title_of` (nmod v Nom, libovolná třída) je spouštěč užší
+        (jen `flat`, jen vztahová substantiva), ale svede se do TÉHOŽ tvaru
+        (`title` → entita + `cls`), protože je to strukturně stejná věc:
+        jméno v přístavku u obecného jména. Přivlastnění navíc zůstává na
+        `TermSpec.possessor` — `ground.py Grounder._relational_fact` z něj
+        udělá vztahový výrok (`bratr(kdo=Josef Čapek, čí=…)`), ne jen
+        typing (ten vznikne taky, z `cls`, beze změny)."""
+        if t.upos != "NOUN" or t.lemma not in D.RELATIONAL_NOUNS:
+            return None
+        has_poss = any(
+            (c.base_deprel == "det" and (c.lemma in D.POSSESSIVE or c.feat("Poss") == "Yes"))
+            or (c.base_deprel == "amod" and c.upos == "ADJ" and c.feat("Poss") == "Yes")
+            for c in self.p.children(t.index)
+        )
+        if not has_poss:
+            return None
+        flats = [f for f in self.p.children(t.index) if f.base_deprel == "flat" and f.upos == "PROPN"]
+        return flats or None
+
     def _is_relational_gen_arg(self, t: Token, c: Token, consumed: list[int]) -> bool:
         """Krok 3 (vztahová substantiva): je `c` prostý genitivní doplněk
         vztahového jména `t` („manžel dcery“)? Souřadění pod `c`
@@ -774,7 +796,7 @@ class _Reader:
         quant: Quant | None = None
         qauth = ""
         kind: Kind
-        title = self._title_of(t)
+        title = self._title_of(t) or self._relational_name(t)
         if title is not None:
             # nominativ jmenovací: „drama R.U.R.“ → entita R.U.R. ∈ drama (hlava je třída, ne jméno)
             forms, name_tokens, name_lemmas = [], [], []

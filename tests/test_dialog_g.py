@@ -48,7 +48,26 @@ def test_kdy_napsal_rur(sess):
 
 
 def test_byl_malir_je_nevim_ne_ano(sess):
-    assert sess.say("Byl Čapek malíř?").verdict.value == "NEVÍM"     # malíř je Josef
+    assert sess.say("Byl Čapek malíř?").verdict.value == "NEVÍM"     # malíř je Josef, holé „Čapek“ sedí na oba
+
+
+def test_g3_pristavek_je_vztah_ne_slepene_jmeno(sess):
+    """NÁLEZ G‑3 opraven (27. 9. 2026, krok 3): „Jeho bratr Josef Čapek“ dřív
+    slepilo přístavek do jednoho jména skupiny („bratr Josef Čapek“) — teď je
+    Josef Čapek SAMOSTATNÁ entita (⊆ bratr, „malíř“ visí na něm, ne na
+    Karlovi) a vzniká skutečný vztahový výrok `bratr(kdo=Josef Čapek,
+    čí=Karel Čapek)`, ne jen typing."""
+    m = sess.memory
+    josef = next(n for n in m.nodes.values() if n.kind == "entity" and "Josef Čapek" in n.names)
+    karel = next(n for n in m.nodes.values() if n.kind == "entity" and n.names and n.names[0] == "Karel Čapek")
+    assert josef.id != karel.id
+    bratr = next(st for st in m.statements.values() if st.pred == "bratr")
+    assert bratr.claim == "SAFE"
+    assert bratr.role("kdo") is not None and bratr.role("kdo").terms == [josef.id]  # type: ignore[union-attr]
+    assert bratr.role("čí") is not None and bratr.role("čí").terms == [karel.id]  # type: ignore[union-attr]
+    malir = next(st for st in m.statements.values() if st.pred == "být" and any(
+        m.nodes[c].lemma == "malíř" for r in st.roles if r.name == "co" for c in r.terms))
+    assert malir.role("kdo") is not None and malir.role("kdo").terms == [josef.id]  # type: ignore[union-attr]
 
 
 def test_sylogismus_pres_dialog(sess):

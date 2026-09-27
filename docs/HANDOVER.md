@@ -163,11 +163,29 @@ zahozená vedlejší predikace `nmod:Gen` (`Reader._is_relational_gen_arg`
 v `read.py`). Koordinovaný genitiv („manžela nebo manželky“) se
 NEpřebírá — zůstává staré cestě, disjunkce ji zamítne stejně jako dřív.
 Ověřeno na `vztahy_příbuzenské.txt`: 2/16 nedisjunktivních vět už nemá
-sesterský REJECTED výrok (`mereni/HYPOTEZY.md` 27. 9. 2026). **Chybí
-pořád:** samotný vztahový OPERÁTOR (inverze „zeť“↔„tchán“, skládání
-„otec otce“→„děd“) — tenhle krok jen čistí VSTUP (role `čí`), operátor
-nad ní ještě nestojí; a čtecí konstrukce pro G‑3 („Jeho bratr Josef
-Čapek“ → vztahový predikát z appozice se jménem, ne jen typing).
+sesterský REJECTED výrok (`mereni/HYPOTEZY.md` 27. 9. 2026).
+
+**G‑3 opraven** (27. 9. 2026, tentýž krok, pokračování): „Jeho bratr
+Josef Čapek byl malíř.“ dřív slepilo přístavek do jednoho jména skupiny
+(„bratr Josef Čapek“) — Josef Čapek jako entita nikdy nevznikl, „byl
+malíř“ viselo na neidentifikovatelné skupině. `Reader._relational_name`
+(nová „hlava“ pro `title` vedle `_title_of`): vztahové substantivum +
+přivlastnění (zájmeno/adj) + `flat` vlastní jméno → stejná cesta jako
+nominativ jmenovací (entita + `cls`). `Grounder._relational_fact`:
+entita s `cls` i `possessor` dostane navíc SKUTEČNÝ vztahový výrok
+(`bratr(kdo=Josef Čapek, čí=Karel Čapek)`, SAFE/HYPOTHESIS podle
+jednoznačnosti vlastníka — `_owner_nodes` sdíleno s `_resolve_
+possessed`). Ověřeno na 4 dalších reálných výskytech v korpusu (Hašek,
+Havlíček Borovský, Kundera, Bezruč), ne jen na 1 zaznamenané větě, jak
+HANDOVER dřív varoval. Nový test `tests/test_dialog_g.py::test_g3_
+pristavek_je_vztah_ne_slepene_jmeno`.
+
+**Chybí pořád (poslední kus kroku 3):** samotný vztahový OPERÁTOR
+(inverze „zeť“↔„tchán“, „bratr“↔„sourozenec“ s pohlavím, skládání
+„otec otce“→„děd“, 2 premisy → query-time join jako `překryv`, ne
+`derive()`) — role `čí` a predikáty vztahových substantiv se teď
+ZAPISUJÍ, ale nic je zatím nedotazuje („Kdo je čí tchán/vnuk?“ nemá
+odpověď).
 
 ## 6. Otevřené tahy (pořadí podle toho, co ukázal bench)
 
@@ -201,11 +219,11 @@ nad ní ještě nestojí; a čtecí konstrukce pro G‑3 („Jeho bratr Josef
 1. **Lidský audit** — J.: `python -m bench audit --dok alois_jirásek --rucne` (a druhý dokument), min. 30 výroků; pak zpráva hlásí shodu soudce/člověk a „nechápu z grafu“ %.
 2. **Ověření generovaných otázek** — `python -m bench gold-gen --dok karel_čapek --n 12` → `--overit` (kurátorované číslo 29/130 je malé a korpus 7/90 tvrdý).
 3. Zbývající chyby precision (z auditu): kvantifikátor ∀ z „všechna jeho dramata“ (∀ bez omezení přivlastněním), plošná koordinace (`kdo: Petr+Karel` i tam, kde jde o dvě klauze — „otcem byl Josef…, matkou Vincencie“), vztažné věty (`kdo:∀sousoší`), participia jako predikáty.
-4. Nálezy dialogu G: G‑1 otázka „Kdy napsal R.U.R.?“ čte R.U.R. jako podmět; G‑2 funkční role (narodit_se.kde/kdy) → hlásit konflikt; G‑3 „Jeho bratr Josef Čapek“ → přístavek přilepen ke jménu (rodinné vztahy tak v grafu nejsou); G‑4 `v Lidových novinách` není místo (učení role / instituce).
+4. Nálezy dialogu G: G‑1 otázka „Kdy napsal R.U.R.?“ čte R.U.R. jako podmět; G‑2 funkční role (narodit_se.kde/kdy) → hlásit konflikt; ~~G‑3 „Jeho bratr Josef Čapek“ → přístavek přilepen ke jménu (rodinné vztahy tak v grafu nejsou)~~ **OPRAVENO 27. 9. 2026** (§ 5 „Krok 3“, `mereni/HYPOTEZY.md`); G‑4 `v Lidových novinách` není místo (učení role / instituce).
 5. Prostor modelů pro disjunkci/ekvivalenci/kardinalitu (přenos `conBond3/cb_logic/models.py`) — dnes REJECTED s důvodem.
 6. Adaptéry conbond1/conbond4 pro zpětný běh QA (Task 12 — neproveden).
 7. Valence jako data (`valence.json` conbond1 / VALLEX), relativní čas (conbond1 chronos), nominalizace, rekurze v dotazu (jellyAI3 SubQuery) — každý jako měřený tah, až bench ukáže potřebu.
-8. **Znalostní vazby jako data** (návrh `2026-08-17-znalostni-vazby-design.md`): **krok 1 hotový** (synonyma se sílou, lexikon, materializace — viz § 5), **`podřazení` hotové** (výpis), **`překryv` hotový na logické vrstvě** (operátor + query-time join, viz § 5 „Krok 2 (částečně)“ a § 8/1) — **chybí jen čtení věty/otázky z reálného textu** (potřebuje UDPipe, žádná zdejší relace ho neměla). Dál po službách: napojit `překryv` do `read.py` (rozpoznat „Mohli se X a Y potkat?“ jako otázku s `modality=možnost`, „žil v letech…“ jako zdroj `žít.kdy`) a změřit na etalonu; **`porovnání` — primitiv hotový** (`cb6/quantity.py`: `Quantity`/`dimension_of`/`to_base`/`compare`, viz HYPOTEZY 27. 9. 2026), **operátor sám záměrně ne** — směr porovnání (`≤`/`≥`/`=`) ke kterému derivovanému predikátu čeká na reálnou větu, ne na dohad; pak veličiny do čtení ("vejde se", "Jaká je délka") → krok 3 příbuzenství (inverze/skládání, G‑3 — **pozor, potřebuje 3 premisy, viz § 8/1**). **Prerekvizita zjištěná 27. 9. 2026:** čtení dnes z „Jeho bratr Josef Čapek“ nevytáhne ŽÁDNÝ vztahový predikát (`bratr(Josef, Karel)`) — jen typování `∈ bratr` (nominativ jmenovací) + obecné `mít`; bez toho nemá `inverze`/`skládání` na čem pracovat. Jen JEDNA taková věta je zaznamenaná (`tests/data/parses.json`) — moc tenký vzorek na novou čtecí konstrukci bez druhého/třetího ověření skutečným textem. **Krok 3 = nejdřív tahle čtecí konstrukce (kinship nouns → relační predikát, ne jen typing), pak teprve operátory.** **Potvrzeno na reálném korpusu 27. 9. 2026** (`bench --parser spacy`, 28/65 dok., 4020 vět, `mereni/HYPOTEZY.md`): naivní „SAFE vedle REJECTED nmod“ je 83 % vět, ale to jen ukazuje, že `nmod` se právem zahazuje jako ozdoba skoro vždy — **jediná chybějící věc je seznam vztahových substantiv**, u nichž genitiv NENÍ ozdoba, ale určující argument (mimo `nmod`-obecnou heuristiku). Bez tohohle seznamu je jakákoli prevalence jen artefakt špatné metriky. **Seznam hotový** (`RELATIONAL_NOUNS`, § 5 „Krok 3 (částečně)“) — genitiv se teď adoptuje jako role `čí`, ověřeno na `vztahy_příbuzenské.txt`. **Zbývá:** vztahový OPERÁTOR nad rolí `čí` (inverze/skládání) a čtecí konstrukce pro G‑3 (appozice se jménem → predikát, ne jen typing) — teprve to dá skutečné odpovědi na „Kdo je čí tchán/vnuk“. → antonyma až na otázku → krok 5 `Memory.rules` (můstky) jako řádky `implikace` s mapou rolí. Zbývá sjednotit dvě dnešní místa (`Memory.rules`, `kind=rule`) s lexikonem.
+8. **Znalostní vazby jako data** (návrh `2026-08-17-znalostni-vazby-design.md`): **krok 1 hotový** (synonyma se sílou, lexikon, materializace — viz § 5), **`podřazení` hotové** (výpis), **`překryv` hotový na logické vrstvě** (operátor + query-time join, viz § 5 „Krok 2 (částečně)“ a § 8/1) — **chybí jen čtení věty/otázky z reálného textu** (potřebuje UDPipe, žádná zdejší relace ho neměla). Dál po službách: napojit `překryv` do `read.py` (rozpoznat „Mohli se X a Y potkat?“ jako otázku s `modality=možnost`, „žil v letech…“ jako zdroj `žít.kdy`) a změřit na etalonu; **`porovnání` — primitiv hotový** (`cb6/quantity.py`: `Quantity`/`dimension_of`/`to_base`/`compare`, viz HYPOTEZY 27. 9. 2026), **operátor sám záměrně ne** — směr porovnání (`≤`/`≥`/`=`) ke kterému derivovanému predikátu čeká na reálnou větu, ne na dohad; pak veličiny do čtení ("vejde se", "Jaká je délka") → krok 3 příbuzenství (inverze/skládání, G‑3 — **pozor, potřebuje 3 premisy, viz § 8/1**). **Prerekvizita zjištěná 27. 9. 2026:** čtení dnes z „Jeho bratr Josef Čapek“ nevytáhne ŽÁDNÝ vztahový predikát (`bratr(Josef, Karel)`) — jen typování `∈ bratr` (nominativ jmenovací) + obecné `mít`; bez toho nemá `inverze`/`skládání` na čem pracovat. Jen JEDNA taková věta je zaznamenaná (`tests/data/parses.json`) — moc tenký vzorek na novou čtecí konstrukci bez druhého/třetího ověření skutečným textem. **Krok 3 = nejdřív tahle čtecí konstrukce (kinship nouns → relační predikát, ne jen typing), pak teprve operátory.** **Potvrzeno na reálném korpusu 27. 9. 2026** (`bench --parser spacy`, 28/65 dok., 4020 vět, `mereni/HYPOTEZY.md`): naivní „SAFE vedle REJECTED nmod“ je 83 % vět, ale to jen ukazuje, že `nmod` se právem zahazuje jako ozdoba skoro vždy — **jediná chybějící věc je seznam vztahových substantiv**, u nichž genitiv NENÍ ozdoba, ale určující argument (mimo `nmod`-obecnou heuristiku). Bez tohohle seznamu je jakákoli prevalence jen artefakt špatné metriky. **Seznam hotový** (`RELATIONAL_NOUNS`, § 5 „Krok 3 (částečně)“) — genitiv se teď adoptuje jako role `čí`, ověřeno na `vztahy_příbuzenské.txt`. **G‑3 taky opraven** (27. 9. 2026, § 5): „Jeho bratr Josef Čapek“ dá entitu Josef Čapek + výrok `bratr(kdo=Josef Čapek, čí=Karel Čapek)`, ne slepené jméno skupiny — ověřeno na 4 dalších reálných výskytech v korpusu (`mereni/HYPOTEZY.md`), ne jen na 1 zaznamenané větě. **Zbývá jen:** vztahový OPERÁTOR nad rolí `čí` (inverze „bratr“↔„sourozenec“ s pohlavím, skládání „otec otce“→„děd“, 2 premisy → query-time join jako `překryv`) — role `čí` se teď ZAPISUJE, ale nic ji zatím nedotazuje („Kdo je čí tchán/vnuk?“ nemá odpověď). → antonyma až na otázku → krok 5 `Memory.rules` (můstky) jako řádky `implikace` s mapou rolí. Zbývá sjednotit dvě dnešní místa (`Memory.rules`, `kind=rule`) s lexikonem.
 9. **Výpis — zbytky z reálného textu:** typing z nadpisů/seznamů („Wikilivres: Josef Čapek: díla“ → Josef Čapek ∈ dílo — paskvil z appos), „Krakatit je román.“ čtené jako obecná věta (⊆ místo ∈; velké písmeno na začátku věty není důkaz jména), „R.U.R. (… 1920) –“ → `zemřít(R.U.R., 1920)` (životopisná závorka u díla); imperativ s vedlejší větou („Vyjmenuj, co napsal…“); ověření 9 gen otázek J.
 10. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
 
