@@ -41,6 +41,10 @@ class LanguageRules:
     role_by_case: dict[tuple[str, str], dict[str, str]]
     determiner_quant: dict[str, str]
     possessive: frozenset[str]
+    #: Přípony přivlastňovacích přídavných jmen ze jména („Jiráskova“ →
+    #: stonek „Jirásk“) — pořadí zachováno (první shoda vyhrává), i když se
+    #: dnes nepřekrývají. Odděleno od `possessive` (zájmena typu „jeho“).
+    possessive_suffixes: tuple[str, ...]
     particles: frozenset[str]
     sequence_adverbs: frozenset[str]
     modal_verbs: dict[str, str]
@@ -80,6 +84,7 @@ def load_language(code: str) -> LanguageRules:
         role_by_case=role_by_case,
         determiner_quant=dict(d["determiner_quant"]),
         possessive=frozenset(d["possessive"]),
+        possessive_suffixes=tuple(d["possessive_suffixes"]),
         particles=frozenset(d["particles"]),
         sequence_adverbs=frozenset(d["sequence_adverbs"]),
         modal_verbs=dict(d["modal_verbs"]),

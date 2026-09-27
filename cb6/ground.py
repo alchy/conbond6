@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from cb6.defaults import POSSESSIVE_SUFFIXES
 from cb6.discourse import Registry, ambiguous
 from cb6.memory import Memory, Node, OpenItem, Provenance, Role, Statement
 from cb6.read import Predication, Reading, TermSpec
@@ -228,7 +229,7 @@ class Grounder:
         kind, word = t.possessor  # type: ignore[misc]
         if kind == "adj":
             stem = word
-            for suf in ("ův", "ova", "ovo", "in", "ina", "ino"):
+            for suf in POSSESSIVE_SUFFIXES:
                 if word.endswith(suf):
                     stem = word[: -len(suf)]
                     break

@@ -478,3 +478,41 @@ přístup analogický `overlap_targets`, `Evaluator` query-time join
 analogický `overlap_verdict`) — čeká na konkrétní větu ze skutečného
 textu („Je Praha větší než Brno?“, „Věž je vysoká 100 metrů.“), ne na
 vymyšlený příklad.
+
+## 2026-09-27 · pokračování · krok 3 (příbuzenství) narazil na závislost; místo toho drobný úklid dat
+
+**Zjištění (ne tah):** zkusil jsem navázat na krok 3 (`inverze`/`skládání`,
+G‑3 „Jeho bratr Josef Čapek“) a narazil na skutečnou závislost: čtení
+dnes z téhle konstrukce nevytáhne žádný vztahový predikát (`bratr(Josef,
+Karel)`) — jen typování `Josef Čapek ∈ bratr` (nominativ jmenovací z
+kroku 1) a obecné `mít` z přivlastnění. Bez toho nemá `inverze`/`skládání`
+na čem pracovat. V `tests/data/parses.json` je navíc jen JEDNA taková věta
+(„Jeho bratr Josef Čapek byl malíř.“) — moc tenký vzorek na to stavět
+novou čtecí konstrukci a věřit jí bez druhého/třetího ověření. Rozhodnutí:
+neimplementovat teď (riziko dohadu na jednom vzorku), zapsat jako
+prerekvizitu kroku 3 v HANDOVER § 6.
+
+**Místo toho:** drobný, bezpečný úklid ze stejného kritického přezkumu
+(HANDOVER § 8/4a, poslední neopravená položka „malá“): `ground.py:232`
+mělo natvrdo českou příponovou tabulku přivlastňovacích přídavných jmen
+(`ův/ova/ovo/in/ina/ino`), zatímco `cb6/lang/cs.json` už podobnou vrstvu
+nese (`possessive` — jiná věc, zájmena). Přidán klíč `possessive_suffixes`
+(vlastní, ne splynutý s `possessive` — jsou to dva různé jevy: zájmena
+vs. derivační přípona ze jména), `cb6.lang.LanguageRules`/`defaults.
+POSSESSIVE_SUFFIXES`, `ground.py` re-exportovanou tabulku používá místo
+literálu.
+**Hypotéza:** beze změny chování (přesný přepis hodnot), pytest beze
+změny počtu (jen 2 nové asserce v existujících testech), mypy/pylint
+beze regrese.
+**Výsledek:** přesně tak — 196 passed + 2 xfailed (beze změny), mypy
+34 souborů čisté, `cb6/ground.py`/`cb6/defaults.py`/`cb6/lang` diff beze
+nového pylint nálezu (jen posun řádků).
+**Poučení:** subagentův nález 4a je teď z devíti položek `derived_from`
+(otevřeno), `Registry.candidates` okno (otevřeno, potřebuje reálný
+korpus na vyladění), `_resolve_possessed` (opraveno), `Session.topics`/
+`_last_said` souběh (otevřeno, potřebuje rozhodnutí o modelu souběhu),
+`render.py` literály (otevřeno, velký refaktor s nejistým přínosem bez
+2. jazyka), `ground.py` přípony (opraveno) — **2 ze 6 hotové bez služeb,
+zbytek buď potřebuje reálný text na vyladění, nebo je to větší
+architektonické rozhodnutí, které by J. měl chtít vidět, ne dostat
+hotové.**

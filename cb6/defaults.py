@@ -41,6 +41,9 @@ DETERMINER_QUANT: dict[str, str] = _L.determiner_quant
 #: Přivlastňovací determinátory a zájmena — odkaz na aktivní uzel.
 POSSESSIVE: frozenset[str] = _L.possessive
 
+#: Přípony přivlastňovacích přídavných jmen ze jména („Jiráskova“ → stonek).
+POSSESSIVE_SUFFIXES: tuple[str, ...] = _L.possessive_suffixes
+
 #: Částice a příslovce bez role: neztrácejí se (jsou „particle“), ale
 #: nemění strukturu. `ne` se čte jako negace, ne částice.
 PARTICLES: frozenset[str] = _L.particles

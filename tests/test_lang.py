@@ -13,6 +13,7 @@ def test_cesky_jazyk_se_nacte() -> None:
     assert lx.wh["kde"] == ("kde", "filler")
     assert lx.months["srpen"] == 8
     assert "pondělí" in lx.weekdays and "jaro" in lx.seasons
+    assert lx.possessive_suffixes == ("ův", "ova", "ovo", "in", "ina", "ino")
 
 
 def test_kesovano_je_tentyz_objekt() -> None:
@@ -37,6 +38,7 @@ def test_defaults_reexportuje_nactene_tabulky() -> None:
     assert defaults.WH == lx.wh
     assert defaults.LIST_VERBS == lx.list_verbs
     assert defaults.ATTITUDE_VERBS == lx.attitude_verbs
+    assert defaults.POSSESSIVE_SUFFIXES == lx.possessive_suffixes
     assert chronos.MONTHS == lx.months
     assert chronos.WEEKDAYS == lx.weekdays
     assert chronos.TIME_NOUNS >= lx.time_nouns_base

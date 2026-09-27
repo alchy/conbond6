@@ -51,6 +51,7 @@
     "mnohý": "∃", "několik": "∃", "málokterý": "∃"
   },
   "possessive": ["jeho", "její", "jejich", "můj", "tvůj", "náš", "váš", "svůj"],
+  "possessive_suffixes": ["ův", "ova", "ovo", "in", "ina", "ino"],
   "particles": [
     "také", "též", "taky", "i", "jen", "pouze", "už", "již", "ještě", "asi", "prý",
     "však", "ale", "tedy", "totiž", "například", "zejména", "hlavně", "především",
