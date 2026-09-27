@@ -6,6 +6,7 @@
     python -m bench diff mereni/A.json mereni/B.json
     python -m bench gold-filter              # přegeneruje bench/gold/otazky-filtr.json
     python -m bench audit --dok X --rucne    # Task 5
+    python -m bench vazby                    # pokročilost chápání vazeb podle mechanismu
 """
 
 from __future__ import annotations
@@ -139,6 +140,7 @@ def main(argv: list[str]) -> int:
     sub.add_parser("gold-filter", help="přegenerovat bench/gold/otazky-filtr.json")
     gg = sub.add_parser("gold-gen", help="LM‑generované ukotvené otázky (+ --overit lidské ověření)")
     gg.add_argument("rest", nargs=argparse.REMAINDER)
+    sub.add_parser("vazby", help="pokročilost chápání vazeb podle mechanismu (příkaz/věta/korekce/graf)")
     argv = list(argv)
     if not argv or argv[0].startswith("-"):
         argv = ["run"] + argv
@@ -157,6 +159,9 @@ def main(argv: list[str]) -> int:
     if args.cmd == "gold-gen":
         from bench.gold_gen import main as gg_main  # pylint: disable=import-outside-toplevel
         return gg_main(args.rest)
+    if args.cmd == "vazby":
+        from bench.vazby import main as vazby_main  # pylint: disable=import-outside-toplevel
+        return vazby_main([])
     ap.print_help()
     return 2
 

@@ -289,3 +289,43 @@ nenaučilo.
 totéž co Y“, „X a Y jsou synonyma“) mají jinou stromovou strukturu (kořen
 `znamenat`, ne kopula) — čekají na vlastní rozpoznávač a vlastní hypotézu;
 `podřazení`/`implikace`/`překryv` z promluvy (ne jen `třída`) taky.
+
+## 2026-09-27 · pokračování · `bench vazby` — měření pokročilosti chápání vazeb podle mechanismu
+
+**Podnět J.:** „nastav měření pro NN heuristiku, aby bylo možné měřit
+pokročilost strategie chápání vazeb z grafových dat a příkazů a cíleně
+určit směr rozvoje projektu.“ Bezprostředně předtím J. upřesnil: „příkazy
+učení nebo rozšiřování znalosti musí vycházet z kontextu věty nebo dialogu
+a nesmí to být klíčová slova“ — čímž retroaktivně řadí i právě dokončené
+„X je synonymum Y“ (klíčové slovo `synonymum`) jako MEZIKROK, ne cílový stav.
+
+**Změna:** `bench/vazby.py` (+ `python -m bench vazby`) — zlaté úlohy
+„naučit vazbu“ řazené podle MECHANISMU, ne jedno číslo:
+- `prikaz` — `!uč a = b` / `a => b` / `překryv a => b` (existuje od kroku 1/2);
+- `veta` — „X je synonymum Y“ (klíčové slovo, dokončeno dnes dřív, ale J.
+  ho teď explicitně řadí jako mezikrok);
+- `korekce` — oprava v dialogu má naučit vazbu mezi starým a novým
+  predikátem (**cíl, dnes 0**);
+- `graf` — parafráze ve dvou větách (stejné role/termy, jiný predikát) →
+  hypotéza vazby bez jakékoli věty o vazbě (**cíl, dnes 0**).
+
+Případy `veta`/`korekce`/`graf` běží na ručně sestavených rozborech (stejná
+poctivost jako `tests/test_lex_teach.py`); `korekce`/`graf` reuse skutečné
+recorded věty z `tests/data/parses.json` („Petr bydlí v Praze.“, „Karel
+Čapek napsal román Krakatit.“) + ručně sestavený protějšek s jiným
+slovesem, křížově ověřený proti skutečným tokenům.
+
+**Hypotéza:** `prikaz`/`veta` 5/5 (existující schopnost), `korekce`/`graf`
+0/2 (dosud neimplementováno — číslo má ukázat mezeru, ne selhat skrytě).
+Regresní test (`tests/test_bench_vazby.py`) zamkne přesně tenhle poměr, ať
+se příští session dozví hned, když se něco z tohohle tiše změní.
+**Výsledek:** přesně tak — `prikaz` 3/3, `veta` 2/2, `korekce` 0/1, `graf`
+0/1, celkem 5/7. Pytest 185+2xfail → 187+2xfail, mypy čisté, `bench/vazby.py`
+nový modul 10/10 (nulová regrese v `bench/__main__.py` — diff jen posun
+řádků, ověřeno).
+**Poučení:** měření podle mechanismu (ne jedno číslo „kolik vazeb systém
+zná“) je přesně to, co J. chtěl — dá se z něj přímo číst, kam příští tah
+cílit (§ 6 v HANDOVER, položka „‑1“: `korekce` a `graf`, oba 0/1, jsou teď
+nejvyšší priorita). Vedlejší poučení: „veta“ mechanismus (dokončený
+minulý tah) sám o sobě ještě nesplňuje „bez klíčových slov“ — bench to
+teď drží viditelné, aby se to nezapomnělo vydávat za hotovo.

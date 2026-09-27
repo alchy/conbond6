@@ -21,7 +21,8 @@
 | keš verdiktů soudce | `mereni/audit-cache.json` (klíč = otisk · soudce · verze promptu) |
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
 | jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` + `lang/` (jazyková pravidla jako data, `cb6/lang/cs.json`) |
-| bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff __main__` |
+| bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff vazby __main__` |
+| **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes 5/7 (`korekce`, `graf` = cíl vývoje, 0/1 každý) |
 | testy | `tests/` (167 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
 | paralelní větev | conbond5 (`~/Projects/conbond5`, jiné sezení, HEAD c503b68) — do něj nesahat |
@@ -130,7 +131,20 @@ lexikonový operátor `překryv` (protnutí dvou období na časové ose).
 
 ## 6. Otevřené tahy (pořadí podle toho, co ukázal bench)
 
-0. **(nové, 27. 9. 2026, priorita až budou služby) Multilingvnost + NN jako
+-1. **(nejvyšší priorita podle `bench vazby`) `korekce` a `graf` mechanismy
+   chápání vazeb — dnes 0/1 každý.** `korekce`: oprava v dialogu („Ne, X
+   místo Y“ o TÉMŽ predikátu/rolích) dnes jen odvolá starý výrok
+   (`Session._assert`, `cb6/dialog.py`), nenaučí vazbu mezi starým a novým
+   predikátem — potřebuje: při `p.correction`/`is_denial` porovnat predikát
+   odvolaného výroku s predikátem nového (stejné role/termy) a navrhnout
+   `Link` (jako `HYPOTHESIS`/otevřenou položku k potvrzení, ne rovnou
+   `said`/`read` — I‑3). `graf`: dvě věty se stejnými rolemi/termy a jiným
+   predikátem (parafráze, „napsal“/„vytvořil“ týž objekt) → hypotéza vazby
+   bez jakékoli věty o vazbě samotné — potřebuje průchod `Memory.knowledge()`
+   hledající páry výroků se shodnými termy v roli `kdo`/`co` a různým
+   predikátem. Obojí měřit přes `bench/vazby.py` (přidat úlohy, ne jen dvě
+   dnešní) před i po, přesně jak chce J.: „cíleně určit směr rozvoje“.
+0. **(priorita až budou služby) Multilingvnost + NN jako
    extraktor struktury** — J.: NN smí dělat skoro vše (parsing, extrakci,
    konverzaci, i pro víc jazyků), ale nikdy „znalost" — ta zůstává výhradně
    v grafu (I‑9 zobecněné). Krok 1 hotový (`cb6/lang/cs.json` — jazyk jako
@@ -168,6 +182,15 @@ lexikonový operátor `překryv` (protnutí dvou období na časové ose).
 - 17. 8. — Návrh conbond5 „Q(A,B) ⇐ TEST(…)“ přijat jako operátory `překryv`/`porovnání` v lexikonu vazeb; pravidlo je řádek dat s modalitou a proveniencí, materializovaný do grafu při použití; ne pátý slovník. Síla vazby `same/implies/related` (dnešní `SYNONYMS` je únik precision).
 - 17. 8. — conbond5 (paralelně) jde cestou šíře konstrukcí (ruční otázky 59/70); conbond6 cestou věrnosti; další tah conbond6 = přebírat konstrukce z conbond5 po jedné přes bránu benche.
 - 17. 8. (večer) — J.: chování jako „co znamená všechny — výpis děl“ má jít definovat měkce z konzole, ne kódem. Rozhodnutí: *znalost* (drama ⊆ dílo) je řádek lexikonu `!uč a < b` (operátor `podřazení`); *čtení* („která N“ = díra s omezením, rozkaz výpisu = otázka) zůstává kód a měří se — z konzole se parser vysvětlit nedá; „všechny“ samo nic nepotřebuje, `enumerate` vypíše všechny doložené výplně. Výpis podle tématu dokumentu je přiznaná výchozí volba (články díla jen vyjmenovávají), asociace jen přes výrok `kdo/co`, ne přes libovolný sdílený výrok (na reálném textu by „Josef Čapek“ byl dílem Karla).
+- 27. 9. 2026 — J. upřesnil: „příkazy učení nebo rozšiřování znalosti musí
+  vycházet z kontextu věty nebo dialogu a nesmí to být klíčová slova.“ Tím
+  padá i „X je synonymum Y“ jako cílový mechanismus — je to pořád klíčové
+  slovo (`synonymum`), jen bez `!`. Zavedený `bench vazby` (§ níže, nový
+  soubor `bench/vazby.py`) tohle měří: řadí zlaté úlohy podle mechanismu
+  (`prikaz`/`veta`/`korekce`/`graf`) a `veta` (klíčové slovo v běžné větě)
+  je označená jako mezikrok, ne cíl — cíl jsou `korekce` (oprava v dialogu
+  učí vazbu mezi starým a novým predikátem) a `graf` (parafráze ve dvou
+  větách bez jakékoli věty o vazbě) — obojí dnes 0/1, to je ukazatel směru.
 - 27. 9. 2026 — J.: systém má být multilingvní, jazyková pravidla oddělená per
   jazyk jako JSON; NN smí nést skoro celou strukturní/konverzační vrstvu
   (parsing, extrakci — i pro autonomní průběžné rozšiřování znalostní báze),
