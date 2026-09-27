@@ -449,3 +449,32 @@ jedno z nich to přiznávalo. Stojí za prověření, jestli podobný vzorec
 (nejednoznačnost → tichý `max()`/`[0]` bez HYPOTHESIS) není i jinde v
 `ground.py`/`discourse.py` — dnešní fix řešil jen ten jeden konkrétní
 nález, ne systematický audit všech míst, která by týž vzorec mohla mít.
+
+## 2026-09-27 · pokračování · `cb6/quantity.py` — primitiv pro `porovnání` (krok 2), operátor záměrně NE
+
+**Motivace:** další bod „krok 2“ (`překryv` hotový, `porovnání` chybí) je
+na roadmapě, ale plný operátor (spec: „délka(A) ≤ délka(B) ⇒ vejít_se“)
+má nejasnou otevřenou otázku — KTERÝ směr porovnání (`≤`/`≥`/`=`) patří
+ke kterému derivovanému predikátu — a to bez reálného textu na ověření
+nejde rozhodnout, jen uhodnout (přesně to, co §8/3 v HANDOVER varuje před
+lexikonem rostoucím dohadem, ne měřením). Proto jen primitiv, stejný krok
+jako `chronos.overlap` před plným `překryv` dřív v týhle relaci.
+
+**Změna:** `cb6/quantity.py` — `Quantity(hodnota, jednotka)`,
+`dimension_of`/`to_base`/`compare` (`<`/`=`/`>`, nebo `None` u různé
+dimenze či neznámé jednotky — „delší než těžší“ nesmí tiše porovnat čísla
+bez ohledu na jednotku). Jednotky (`UNITS`, dnes jen délka+hmotnost) jsou
+česká slova natvrdo — poznamenáno v docstringu, že se mají přesunout do
+`cb6/lang/cs.json` AŽ se operátor zapojí do čtení (přesun bez testu, který
+by ho ověřil, by byl práce navíc — stejná disciplína jako u `cb6/lang/`
+refaktoru, dělat datovou vrstvu, až ji něco skutečně používá).
+**Hypotéza:** pytest +5 (`tests/test_quantity.py`), mypy/pylint čisté
+(nový modul 10/10), žádné bench/QA číslo (primitiv se nikde nepoužívá).
+**Výsledek:** přesně tak — 191 → **196 passed** + 2 xfailed, mypy 34
+souborů čisté, `cb6/quantity.py` 10.00/10.
+**Otevřené (příští tah, ne teď):** lexikonový operátor `porovnání` sám
+(řádek s dimenzí + derivovaným predikátem + směrem porovnání, `Lexicon`
+přístup analogický `overlap_targets`, `Evaluator` query-time join
+analogický `overlap_verdict`) — čeká na konkrétní větu ze skutečného
+textu („Je Praha větší než Brno?“, „Věž je vysoká 100 metrů.“), ne na
+vymyšlený příklad.
