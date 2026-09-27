@@ -39,17 +39,21 @@ def _cmd_run(args: argparse.Namespace) -> int:
         from cb6.dialog import set_graf_suggestions_enabled  # pylint: disable=import-outside-toplevel
         set_graf_suggestions_enabled(False)
     report = run(sady, strop=args.strop, docs=args.dok, twice=args.dvakrat, with_auto=not args.bez_auto, cfg=cfg, verbose=args.vypis,
-                 judge=judge, audit_n=audit_n, audit_docs=args.audit_doky)
+                 judge=judge, audit_n=audit_n, audit_docs=args.audit_doky, parser=args.parser)
     if args.label:
         report["label"] = args.label
     if args.bez_lexikonu:
         report["label"] = (report.get("label", "") + "-bez-lexikonu").lstrip("-")
     if args.bez_graf:
         report["label"] = (report.get("label", "") + "-bez-graf").lstrip("-")
+    if args.parser != "udpipe":
+        report["label"] = (report.get("label", "") + f"-{args.parser}").lstrip("-")
     mereni = ROOT / cfg["mereni"]
-    prev = _previous_report(mereni, args.proti)
+    prev = _previous_report(mereni, args.proti) if args.parser == "udpipe" else None
     if prev is not None:
         report["diff_md"] = render_diff(diff_reports(prev, report))
+    elif args.parser != "udpipe":
+        print(f"bench: parser={args.parser} — diff proti historii přeskočen (jiná provenience, I-12)", file=sys.stderr)
     j, m = write_report(report, mereni)
     print(render_report(report))
     print(f"zpráva: {m} · {j}", file=sys.stderr)
@@ -131,6 +135,8 @@ def main(argv: list[str]) -> int:
     r.add_argument("--bez-auto", action="store_true", help="bez automatické (filtrované) sady otázek")
     r.add_argument("--bez-lexikonu", action="store_true", help="ablace: bez seed vrstvy lexikonu (cb6/lexikon/*.jsonl)")
     r.add_argument("--bez-graf", action="store_true", help="ablace: bez mechanismu `graf` (Session._suggest_link_from_graph)")
+    r.add_argument("--parser", choices=["udpipe", "spacy"], default="udpipe",
+                    help="`spacy` = náhradní NN cesta bez UDPipe/LINDAT (27. 9. 2026) — NENÍ srovnatelné s UDPipe2 čísly")
     r.add_argument("--vypis", action="store_true", help="vypsat každou otázku")
     r.add_argument("--proti", help="JSON zprávy pro diff (jinak poslední v mereni/)")
     r.add_argument("--label", help="přípona jména zprávy")

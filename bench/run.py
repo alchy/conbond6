@@ -22,7 +22,7 @@ from typing import Any
 
 from cb6.dialog import Session
 from cb6.memory import Memory
-from cb6.oracle import CachedOracle, OracleUnavailable, UDPipeOracle
+from cb6.oracle import CachedOracle, OracleUnavailable, SpacyOracle, UDPipeOracle
 from cb6.render import describe_node
 
 from bench.audit import run_audit
@@ -44,8 +44,17 @@ def git_info() -> tuple[str, str, bool]:
         return "0000-00-00", "nogit", True
 
 
-def make_oracle(cfg: dict[str, Any]) -> CachedOracle:
-    """UDPipe s keší na disku; bez služby jede jen z keše (a hlásí to)."""
+def make_oracle(cfg: dict[str, Any], *, parser: str = "udpipe") -> CachedOracle:
+    """Orákulum s keší na disku; bez služby jede jen z keše (a hlásí to).
+
+    `parser="spacy"` (27. 9. 2026, prostředí bez `127.0.0.1:42200`/LINDAT):
+    **NN, ne LLM**, ale NENÍ UDPipe2 (`cb6.oracle.SpacyOracle` docstring —
+    50,8 % vět / 83,1 % tokenů shoda) — vlastní keš (`cache_spacy`), nikdy
+    sdílená s `cache` (UDPipe2), aby se provenience nikdy nesmísila v jednom
+    souboru. Volající (report) musí `parser` nést v labelu/proveniencí —
+    tahle funkce sama nic neoznačuje navenek."""
+    if parser == "spacy":
+        return CachedOracle(SpacyOracle(), ROOT / cfg.get("cache_spacy", "data/cache/parses-spacy.json"))
     cache = ROOT / cfg["cache"]
     try:
         return CachedOracle(UDPipeOracle(), cache)
@@ -260,15 +269,19 @@ def _sum_dicts(ds: Any) -> dict[str, int]:
 
 def run(sady: list[str], *, strop: int = 0, docs: list[str] | None = None, twice: bool = False,
         with_auto: bool = True, cfg: dict[str, Any] | None = None, verbose: bool = False,
-        judge: Judge | None = None, audit_n: int = 0, audit_docs: int = 0) -> dict[str, Any]:
+        judge: Judge | None = None, audit_n: int = 0, audit_docs: int = 0, parser: str = "udpipe") -> dict[str, Any]:
     """Běh nad sadami; vrací zprávu (bez `session` objektů — ty jdou volajícímu
     v `rows_live` pro audity).
 
+    `parser="spacy"` (27. 9. 2026): náhradní NN cesta bez UDPipe/LINDAT —
+    `report["parser"]` to musí nést, aby se číslo nikdy nečetlo jako
+    srovnatelné s UDPipe2 historií (I‑12 provenience na úrovni zprávy).
+
     Returns:
-        `{"commit","date","dirty","data_fingerprint","sady","strop","rows","totals","rows_live"}`
+        `{"commit","date","dirty","data_fingerprint","sady","strop","parser","rows","totals","rows_live"}`
     """
     cfg = cfg or load_config()
-    oracle = make_oracle(cfg)
+    oracle = make_oracle(cfg, parser=parser)
     all_docs: list[Doc] = []
     for s in sady:
         all_docs.extend(load_sada(s, cfg, only=docs, with_auto=with_auto))
@@ -299,7 +312,7 @@ def run(sady: list[str], *, strop: int = 0, docs: list[str] | None = None, twice
                 print(f"  {mark} [{r['sada']}] {r['q']}  →  {r.get('fillers')}  (čekáno {r['expect']}) {r.get('why', '')} dosah={r.get('reach')}")
     report = {
         "commit": h, "date": date, "dirty": dirty, "data_fingerprint": data_fingerprint(all_docs),
-        "sady": sady, "strop": strop, "with_auto": with_auto,
+        "sady": sady, "strop": strop, "with_auto": with_auto, "parser": parser, "oracle_provenance": oracle.provenance,
         "rows": [{k: v for k, v in r.items() if k != "session"} for r in rows],
         "totals": totals(rows),
         "rows_live": rows,
@@ -312,6 +325,9 @@ def render_report(report: dict[str, Any]) -> str:
     t = report["totals"]
     head = (f"# bench {report['date']} · {report['commit']}{' (dirty)' if report.get('dirty') else ''} · sady {', '.join(report['sady'])}"
             f" · strop {report['strop'] or '—'} · data {report['data_fingerprint']}\n\n")
+    if report.get("parser", "udpipe") != "udpipe":
+        head += (f"**⚠ parser = `{report['parser']}`** ({report.get('oracle_provenance', '?')}) — "
+                  "NENÍ UDPipe2, čísla NESROVNÁVAT s historickými zprávami (jiná provenience rozboru, I‑12).\n\n")
     cols = "| dokument | vět | slov | yield hl./vše | SAFE | HYP | REJ | zbytek % | open/větu | otázek | správně | kurát. | pokrytí | dosah 0 / 1‑3 / 4‑10 / >10 / jiný seg. | unsupp. | graf |"
     sep = "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|"
     lines = [head, cols, sep]

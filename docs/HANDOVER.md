@@ -38,19 +38,26 @@
   ověřit `pytest -q`, a v HYPOTEZY/HANDOVER napsat, že měření tahu je jen
   pytest/mypy/pylint (ne QA/unsupported) — dokud služby nejsou po ruce.
   Síťová politika kontejneru zamítá `lindat.mff.cuni.cz` (veřejný UDPipe) i
-  `huggingface.co`; `pypi.org`/`files.pythonhosted.org` a `github.com` (jen
-  přes `add_repo`, ne libovolné repo/release asset) fungují. **Nález:** `pip
-  install cs_core_news_sm` (spaCy, čistě z PyPI) dá český UD parser bez sítě
-  na LINDAT — ale změřená shoda se skutečným UDPipe2 na 177 zaznamenaných
-  větách je jen 50,8 % vět přesně / 83,1 % tokenů (`mereni/HYPOTEZY.md`
-  2026‑09‑27) → **nepoužívat na historická čísla** (smísilo by dva parsery
-  v jednom srovnání); použitelné jen pro zcela nové věty s ručním ověřením
-  (tak použito pro `tests/test_lex_teach.py`). **`cb6/oracle.py SpacyOracle`**
-  (NN, ne LLM — J.: „systém by však měl pracovat bez external LLM“) teď
-  funguje a je otestovaný (`tests/test_spacy_oracle.py`, volitelný extra
-  `spacy-cs`) — opraveny dvě chyby (kořen věty `t.head == t`, ne `is`;
-  vlastní věta-splitting regexem, `doc.sents` u tohohle modelu nespolehlivě
-  dělí věty na tečce). Pořád NEnasazeno na historická čísla.
+  `huggingface.co`; `pypi.org`/`files.pythonhosted.org` fungují a **`github.com`
+  jde naklonovat přímo** (`git clone https://github.com/...`, anonymní čtení
+  veřejných repozitářů přes proxy — funguje i bez `add_repo`; release assety
+  a API zůstávají přes `add_repo`). **Nález:** `pip install cs_core_news_sm`
+  (spaCy, čistě z PyPI) dá český UD parser bez sítě na LINDAT — ale změřená
+  shoda se skutečným UDPipe2 na 177 zaznamenaných větách je jen 50,8 % vět
+  přesně / 83,1 % tokenů (`mereni/HYPOTEZY.md` 2026‑09‑27) →
+  **nepoužívat na historická čísla** (smísilo by dva parsery v jednom
+  srovnání). **`cb6/oracle.py SpacyOracle`** (NN, ne LLM — J.: „systém by
+  však měl pracovat bez external LLM“) funguje a je otestovaný (`tests/
+  test_spacy_oracle.py`, volitelný extra `spacy-cs`).
+  **`bench run --sada wiki --parser spacy` teď FUNGUJE end‑to‑end na
+  reálném korpusu** (`data/corpus/conBond2` se v cloudu naklonuje samo —
+  `bench/data.py ensure_wiki_corpus` používá plain `git clone`, stejná
+  cesta) — vlastní keš (`cache_spacy`), nikdy sdílená s UDPipe2, zpráva má
+  nepřehlédnutelné varování v hlavičce a diff proti historii se přeskočí
+  (I‑12). Smoke test (2 dok., strop 15): yield 79,64/90,31, audit grafu 0,
+  determinismus ano. Použití: nové věty i **skutečné korpusové dokumenty**
+  k ověření hypotéz (viz nález níže), pořád NE k nahrazení historických
+  UDPipe2 čísel.
 - Python 3.11, `.venv` (`pip install -e '.[dev]'`), závislost jen `networkx` (+ dev pytest/mypy/pylint; viewbase editable z `~/Projects/viewBase2/python`).
 - **UDPipe** služba z conBond3 na `127.0.0.1:42200` (model `cs_all-ud-2.17-251125`) — jen pro nové rozbory a bench; testy jedou z keše.
 - **Ollama** `gemma4:latest` na `127.0.0.1:11434` — soudce auditu a `gold-gen` (27B qwen se do 24 GiB nevejde vedle UDPipe). **Od 27. 9. 2026 výchozí soudce v `bench/config.json` je `claude-cli`/`haiku`** (`bench/judge.py ClaudeCliJudge`, headless `claude -p` — J.: „Ollamu může zastoupit nižší model Claude“), protože cloudová sezení Ollamu nemají; staré nastavení je zachované v config klíči `_ollama_puvodni`, kdyby J. chtěl Ollamu zpátky na svém stroji.
@@ -180,7 +187,7 @@ lexikonový operátor `překryv` (protnutí dvou období na časové ose).
 5. Prostor modelů pro disjunkci/ekvivalenci/kardinalitu (přenos `conBond3/cb_logic/models.py`) — dnes REJECTED s důvodem.
 6. Adaptéry conbond1/conbond4 pro zpětný běh QA (Task 12 — neproveden).
 7. Valence jako data (`valence.json` conbond1 / VALLEX), relativní čas (conbond1 chronos), nominalizace, rekurze v dotazu (jellyAI3 SubQuery) — každý jako měřený tah, až bench ukáže potřebu.
-8. **Znalostní vazby jako data** (návrh `2026-08-17-znalostni-vazby-design.md`): **krok 1 hotový** (synonyma se sílou, lexikon, materializace — viz § 5), **`podřazení` hotové** (výpis), **`překryv` hotový na logické vrstvě** (operátor + query-time join, viz § 5 „Krok 2 (částečně)“ a § 8/1) — **chybí jen čtení věty/otázky z reálného textu** (potřebuje UDPipe, žádná zdejší relace ho neměla). Dál po službách: napojit `překryv` do `read.py` (rozpoznat „Mohli se X a Y potkat?“ jako otázku s `modality=možnost`, „žil v letech…“ jako zdroj `žít.kdy`) a změřit na etalonu; **`porovnání` — primitiv hotový** (`cb6/quantity.py`: `Quantity`/`dimension_of`/`to_base`/`compare`, viz HYPOTEZY 27. 9. 2026), **operátor sám záměrně ne** — směr porovnání (`≤`/`≥`/`=`) ke kterému derivovanému predikátu čeká na reálnou větu, ne na dohad; pak veličiny do čtení ("vejde se", "Jaká je délka") → krok 3 příbuzenství (inverze/skládání, G‑3 — **pozor, potřebuje 3 premisy, viz § 8/1**). **Prerekvizita zjištěná 27. 9. 2026:** čtení dnes z „Jeho bratr Josef Čapek“ nevytáhne ŽÁDNÝ vztahový predikát (`bratr(Josef, Karel)`) — jen typování `∈ bratr` (nominativ jmenovací) + obecné `mít`; bez toho nemá `inverze`/`skládání` na čem pracovat. Jen JEDNA taková věta je zaznamenaná (`tests/data/parses.json`) — moc tenký vzorek na novou čtecí konstrukci bez druhého/třetího ověření skutečným textem. **Krok 3 = nejdřív tahle čtecí konstrukce (kinship nouns → relační predikát, ne jen typing), pak teprve operátory.** → antonyma až na otázku → krok 5 `Memory.rules` (můstky) jako řádky `implikace` s mapou rolí. Zbývá sjednotit dvě dnešní místa (`Memory.rules`, `kind=rule`) s lexikonem.
+8. **Znalostní vazby jako data** (návrh `2026-08-17-znalostni-vazby-design.md`): **krok 1 hotový** (synonyma se sílou, lexikon, materializace — viz § 5), **`podřazení` hotové** (výpis), **`překryv` hotový na logické vrstvě** (operátor + query-time join, viz § 5 „Krok 2 (částečně)“ a § 8/1) — **chybí jen čtení věty/otázky z reálného textu** (potřebuje UDPipe, žádná zdejší relace ho neměla). Dál po službách: napojit `překryv` do `read.py` (rozpoznat „Mohli se X a Y potkat?“ jako otázku s `modality=možnost`, „žil v letech…“ jako zdroj `žít.kdy`) a změřit na etalonu; **`porovnání` — primitiv hotový** (`cb6/quantity.py`: `Quantity`/`dimension_of`/`to_base`/`compare`, viz HYPOTEZY 27. 9. 2026), **operátor sám záměrně ne** — směr porovnání (`≤`/`≥`/`=`) ke kterému derivovanému predikátu čeká na reálnou větu, ne na dohad; pak veličiny do čtení ("vejde se", "Jaká je délka") → krok 3 příbuzenství (inverze/skládání, G‑3 — **pozor, potřebuje 3 premisy, viz § 8/1**). **Prerekvizita zjištěná 27. 9. 2026:** čtení dnes z „Jeho bratr Josef Čapek“ nevytáhne ŽÁDNÝ vztahový predikát (`bratr(Josef, Karel)`) — jen typování `∈ bratr` (nominativ jmenovací) + obecné `mít`; bez toho nemá `inverze`/`skládání` na čem pracovat. Jen JEDNA taková věta je zaznamenaná (`tests/data/parses.json`) — moc tenký vzorek na novou čtecí konstrukci bez druhého/třetího ověření skutečným textem. **Krok 3 = nejdřív tahle čtecí konstrukce (kinship nouns → relační predikát, ne jen typing), pak teprve operátory.** **Potvrzeno na reálném korpusu 27. 9. 2026** (`bench --parser spacy`, 28/65 dok., 4020 vět, `mereni/HYPOTEZY.md`): naivní „SAFE vedle REJECTED nmod“ je 83 % vět, ale to jen ukazuje, že `nmod` se právem zahazuje jako ozdoba skoro vždy — **jediná chybějící věc je seznam vztahových substantiv**, u nichž genitiv NENÍ ozdoba, ale určující argument (mimo `nmod`-obecnou heuristiku). Bez tohohle seznamu je jakákoli prevalence jen artefakt špatné metriky. → antonyma až na otázku → krok 5 `Memory.rules` (můstky) jako řádky `implikace` s mapou rolí. Zbývá sjednotit dvě dnešní místa (`Memory.rules`, `kind=rule`) s lexikonem.
 9. **Výpis — zbytky z reálného textu:** typing z nadpisů/seznamů („Wikilivres: Josef Čapek: díla“ → Josef Čapek ∈ dílo — paskvil z appos), „Krakatit je román.“ čtené jako obecná věta (⊆ místo ∈; velké písmeno na začátku věty není důkaz jména), „R.U.R. (… 1920) –“ → `zemřít(R.U.R., 1920)` (životopisná závorka u díla); imperativ s vedlejší větou („Vyjmenuj, co napsal…“); ověření 9 gen otázek J.
 10. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
 

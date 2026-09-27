@@ -607,3 +607,75 @@ s ručním ověřením neobvyklé stavby, ne naslepo. Otevřené: zapojit jako
 volitelné orákulum do `cb6.record`/`bench` s explicitním `--parser spacy`
 přepínačem (nikdy jako tichý fallback za UDPipe), až bude jasné, na
 kterou konkrétní novou konstrukci se má použít.
+
+## 2026-09-27 · pokračování · reálný korpus JDE naklonovat (git proxy) + `bench run --parser spacy` funguje end-to-end
+
+**Zásadní zjištění (odpověď na „jak dále při současných omezeních“):**
+`git clone https://github.com/alchy/conBond2.git` prošel bez problémů —
+proxy servíruje anonymní čtení veřejných GitHub repozitářů (jiná cesta
+než blokovaná `lindat.mff.cuni.cz` REST API). `bench/data.py
+ensure_wiki_corpus` dělá přesně tohle automaticky, takže stačilo spustit
+`bench run` — korpus (66 dokumentů, `data/corpus/conBond2/`) se naklonoval
+sám. UDPipe (parser) zůstává blokovaný (jiná síťová cesta), ale **skutečný
+text + `SpacyOracle` (NN, ne LLM)** dohromady poprvé umožňují spustit
+plný bench pipeline (ingest → QA → audit grafu) na reálných datech
+v týhle relaci.
+
+**Změna:** `bench/run.py make_oracle(cfg, parser=...)` — `parser="spacy"`
+staví `CachedOracle(SpacyOracle(), cache_spacy)`, **vlastní keš**
+(`bench/config.json cache_spacy`), nikdy sdílená s UDPipe2 keší (I‑12
+provenience na úrovni souboru, ne jen řetězce). `run()`/`report` nesou
+`parser`/`oracle_provenance`; `render_report` dá **nepřehlédnutelné
+varování** do hlavičky zprávy, když `parser≠udpipe`. `bench/__main__.py
+--parser {udpipe,spacy}`; diff proti historii se s `--parser spacy`
+**přeskočí úplně** (ne jen potichu srovná nesrovnatelné) — vypíše proč.
+**Hypotéza:** mechanické — pytest beze změny počtu (jen wiring, žádná
+nová testovaná jednotka logiky), mypy/pylint beze regrese; ŽÁDNÉ QA/
+unsupported číslo z tohohle wiringu samotného (to je věc SAMOTNÉHO běhu,
+ne kódu).
+**Výsledek (smoke test, `--strop 15 --dok alois_jirásek karel_čapek`):**
+funguje — yield 79,64/90,31 na 1000 slov (řádově blízko historickému
+76,8/89,7 z UDPipe2, i když nesrovnatelné napřímo), QA 9/25, **audit
+grafu 0 porušení**, determinismus ano. pytest 209 beze změny, mypy čisté,
+`bench/run.py`/`bench/__main__.py`/`cb6/oracle.py` diff beze nového
+pylint nálezu.
+
+**Vedlejší nález (na `vztahy_příbuzenské.txt`, real text, ne fragment):**
+zkoušel jsem tenhle dokument (definice typu „Tchán je otec manžela nebo
+manželky.“) jako test krok‑3 prerekvizity. Skutečný nález je JINÝ, než
+jsem čekal a PŘESNĚJŠÍ: 14/16 vět má „X nebo Y“ (disjunkce) → **správně**
+REJECTED s důvodem „disjunkce bez prostoru modelů“ (už known limitation,
+HANDOVER § 6 bod 5, ne nová chyba). Ale bez disjunkce („Zeť je manžel
+dcery.“, „Snacha je manželka syna.“) je nález skutečný:
+`být(kdo:∀zeť, co:∃manžel) ⟨subset⟩` je **SAFE** (zeť ⊆ manžel), zatímco
+sesterský `nmod:Gen` „dcery“ (KDO je manžel, ne jen manžel obecně) je
+REJECTED „vedlejší vztah bez sémantiky“ — **hlavní tvrzení SAFE, i když
+podstatná část věty (čí manžel) se zahodila.** Soudce by tohle pravděpodobně
+označil „částečně“, ne „tvrdí“. **Hypotéza pro prevalenci:** změřit napříč
+korpusem podíl vět, kde SAFE hlavní výrok sdílí uzel se sesterským
+REJECTED `nmod` výrokem — čekal jsem menšinový jev (řádově desítky
+procent unsupported), který by odůvodnil cílenou opravu.
+
+**Výsledek (skript `prevalence_scan.py`, `--parser spacy`, strop 60
+řádků/dok., 28/65 dokumentů než škrtnut časem, 4020 vět):** naivní proxy
+(„SAFE + REJECTED na stejné entitě, libovolný `nmod`“) je **83 % vět**
+(3340/4020) — ale to je špatná otázka, ne nález o kinship‑vazbě.
+Přečtení vzorku důvodů ukázalo, že drtivá většina jsou `nmod` PRÁVEM
+zahozené jako vedlejší (`nmod:na+Loc`, `nmod:o+`, časová určení…) — to
+je systém, jak má fungovat, ne díra. Skutečný nález z `vztahy_
+příbuzenské.txt` je užší a specifičtější: ne „SAFE vedle REJECTED
+existuje“, ale konkrétně **`nmod:Gen` u vztahového substantiva
+(manžel/otec/dcera…), kde genitiv NENÍ ozdoba, ale určující argument**
+(„manžel **dcery**“ ≠ „manžel“) — tohle číslo vyžaduje rozlišit
+vztahová substantiva od ostatních, ne jen počítat souběh SAFE/REJECTED.
+**Poučení:** naivní prevalence je zavádějící metrika (měřila by 83 %
+„problém“ tam, kde 82 z 83 procentních bodů je správné chování) —
+skutečný krok 3 potřebuje napřed seznam vztahových substantiv (lexikon,
+ne heuristiku nad `nmod`), teprve pak má smysl počítat prevalenci JEN
+nad touhle podmnožinou. Neimplementoval jsem opravu bez tohohle rozlišení
+— riziko falešné jistoty vyšší než přínos. Plný 65/65 běh jsem zastavil
+(dával by jen přesnější číslo špatné metriky, ne odpověď na otázku).
+**Další krok (krok 3, upřesněno):** lexikon vztahových substantiv
+(`!uč vztah manžel(X, Y)` nebo podobně) + operátor, který genitivní
+doplněk vztahového substantiva ADOPTUJE do role, místo aby ho zahodil
+jako `nmod`; teprve pak měřit prevalenci a případně inverzi/skládání.

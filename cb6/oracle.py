@@ -370,7 +370,7 @@ class CachedOracle:
     provenience zůstává u každého rozboru, takže drift modelu je vidět.
     """
 
-    def __init__(self, inner: UDPipeOracle | None, path: Path) -> None:
+    def __init__(self, inner: "UDPipeOracle | SpacyOracle | None", path: Path) -> None:
         self.inner = inner
         self.path = Path(path)
         self._data: dict[str, dict[str, object]] = {}
