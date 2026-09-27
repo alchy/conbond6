@@ -194,6 +194,7 @@ def run_probe(examples: list[Example], *, min_support: int = 60, test_size: floa
     from sklearn.linear_model import LogisticRegression  # pylint: disable=import-outside-toplevel
     from sklearn.metrics import balanced_accuracy_score, classification_report  # pylint: disable=import-outside-toplevel
     from sklearn.model_selection import train_test_split  # pylint: disable=import-outside-toplevel
+    from sklearn.preprocessing import StandardScaler  # pylint: disable=import-outside-toplevel
 
     counts = Counter(e.label for e in examples)
     kept_labels = {lab for lab, n in counts.items() if n >= min_support}
@@ -207,11 +208,17 @@ def run_probe(examples: list[Example], *, min_support: int = 60, test_size: floa
     deprel_vocab = sorted({examples[i].deprel for i in idx_tr})
     xtr = _feature_matrix(examples, idx_tr, features, deprel_vocab)
     xte = _feature_matrix(examples, idx_te, features, deprel_vocab)
+    # standardizace (jen z tréninku — únik informace z testu by číslo zkreslil):
+    # `lbfgs` bez ní konverguje řádově pomaleji na smíšeném vstupu (embedding
+    # + one-hot deprelu mají jinou škálu) — změřeno 27. 9. 2026 (mereni/
+    # HYPOTEZY.md): 84,9 s → 17,5 s, PŘESNOST beze ztráty (spíš lehce nahoru).
+    scaler = StandardScaler().fit(xtr)
+    xtr, xte = scaler.transform(xtr), scaler.transform(xte)
     baseline = Counter(yte).most_common(1)[0][1] / len(yte)
-    plain = LogisticRegression(max_iter=2000)
+    plain = LogisticRegression(max_iter=1000)
     plain.fit(xtr, ytr)
     acc_plain = plain.score(xte, yte)
-    balanced = LogisticRegression(max_iter=2000, class_weight="balanced")
+    balanced = LogisticRegression(max_iter=1000, class_weight="balanced")
     balanced.fit(xtr, ytr)
     acc_balanced = balanced.score(xte, yte)
     bal_acc = balanced_accuracy_score(yte, balanced.predict(xte))

@@ -917,3 +917,51 @@ když vidí hranu). Otevřené: potvrdit na plném vzorku (potřebuje rychlejš�
 trénink, ne víc dat) a zkusit ještě bohatší hranu (prarodič ve stromu,
 sourozenci — `read.py` sám na některých místech kouká i tam, např.
 `_title_of`/`_relational_name` na `flat` sourozence hlavy).
+
+## 2026-09-27 · pokračování · rychlejší solver (standardizace) + potvrzeno na plném vzorku
+
+**Zadání J.:** „zkus rychlejší solver, potvrď na plném vzorku“.
+**Zjištění (proč to bylo pomalé — ne solver, ale škála vstupu):**
+`lbfgs` na SMÍŠENÉM vstupu (embedding ~N(0,1) + one-hot 0/1) konverguje
+řádově pomaleji, protože Hessián je špatně podmíněný. Změřeno na 5 dok.
+(26 349 tokenů, `edge`, `class_weight=balanced`): `lbfgs` bez
+standardizace **84,9 s**, se standardizací (`StandardScaler`, fit jen na
+trénink — bez úniku z testu) **17,5 s** (4,8×) — a přesnost STEJNÁ nebo
+o chlup lepší (0,712 vs 0,707). `liblinear` na 16+ tříd rovnou spadl
+(neumí multiclass bez `OneVsRestClassifier`) — nezkoušeno dál, scaling
+sám stačil.
+**Změna:** `run_probe` teď standardizuje `xtr`/`xte` (`StandardScaler`
+fit na `xtr`) před `LogisticRegression`, `max_iter` sníženo 2000→1000
+(se standardizací zbytečné víc).
+**Výsledek (potvrzeno na PLNÉM vzorku — 10 dok., 56 243 tokenů, 42 182
+trénink/14 061 test, `--features compare`, doběhlo v řádu minut, ne
+přes 10):**
+- **token, obyčejná LR: 70,6 %** (základna 52,0 %).
+- **edge, obyčejná LR: 76,4 % (+5,8 b.b. proti token)** — potvrzeno,
+  o něco silněji než na malém vzorku (+3,3/+3,0 b.b.).
+- **token, balanced: 50,0 % / balanced accuracy 48,4 %.**
+- **edge, balanced: 63,8 % (+13,8 b.b.!) / balanced accuracy 50,2 %
+  (jen +1,8 b.b.)** — rozpor mezi těma dvěma čísly je sám o sobě nález:
+  `accuracy_balanced` vyskočilo hodně, ale `balanced_accuracy` (makro
+  průměr recall přes VŠECH 30+ tříd) sotva — protože zisk se soustředí
+  do dvou nejfrekventovanějších tříd a v makro průměru přes tři desítky
+  tříd se to rozředí.
+- **Přesně tam, kde to mělo pomoct, to pomohlo nejvíc — `kdo`/`co`**
+  (`balanced` model, recall): **`co` 0,08 → 0,37 (+29 b.b.)**, **`kdo`
+  0,29 → 0,46 (+17 b.b.)**. To jsou dva nejdůležitější obsahové role
+  (nejvíc příkladů, nejvíc otázek na nich stojí) a přesně ty, co token
+  sám (bez rodiče/deprelu) nedokázal rozlišit — teď ANO.
+- Dlouhý ocas řídkých rolí (15–40 příkladů) je smíšený, ne jednoznačně
+  lepší: `jak`/`kdy`/`jaký`/`z+Gen`/`kam` zlepšené (+5 až +23 b.b.
+  recall), ale `jak_dlouho`/`o_čem`/`za_Acc`/`podle+Gen` se zhoršily
+  (šum na pár desítkách příkladů, ne systematický regres).
+**Poučení:** conditioning na hraně přesně cílí na to, co token sám
+neuměl (structural role disambiguation u `kdo`/`co`), a makro-průměrovaná
+metrika (`balanced_accuracy`) tenhle konkrétní, nejdůležitější zisk
+schovává — na příště: hlásit recall jmenovitě u `kdo`/`co`/`čí`, ne jen
+jedno souhrnné číslo přes všechny role stejně važně. Odpověď J. je teď
+úplná: read.py se dá ČÁSTEČNĚ nahradit i lineárním modelem, když vstup
+nese hranu — u `kdo`/`co` už docela dobře (0,46/0,37 recall, ne dokonalé,
+ale ne náhoda), u zbytku pořád slabě. Krok, který by dal víc, je bohatší
+hrana (sourozenci, prarodič), ne jiný model.
+pytest 214 passed + 2 xfailed beze změny, mypy/pylint čisté.
