@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cb6.chronos import TimeSpec, before, is_time_noun, time_from_tokens, within, year_of
+from cb6.chronos import TimeSpec, before, is_time_noun, overlap, time_from_tokens, within, year_of
 from cb6.oracle import RecordedOracle, Token
 
 DATA = Path(__file__).parent / "data" / "parses.json"
@@ -59,6 +59,25 @@ def test_before_within() -> None:
     assert before(TimeSpec("name", "pondělí"), TimeSpec("name", "úterý")) is True
     assert before(TimeSpec("name", "včera"), y) is None
     assert year_of(a) == 1851
+
+
+def test_overlap() -> None:
+    """`overlap` — pro operátor `překryv` (lexikon krok 2): protnou se dvě
+    období na časové ose? Jirásek (1851–1930) × Čapek (1890–1938) ano;
+    Jirásek × Němcová (1820–1862) ano (1851–1862 se kryje); Jirásek × osoba
+    narozená 1935 ne."""
+    jirasek = time_from_tokens([T("1851"), T("–", "–", "PUNCT"), T("1930")])
+    capek = time_from_tokens([T("1890"), T("–", "–", "PUNCT"), T("1938")])
+    nemcova = time_from_tokens([T("1820"), T("–", "–", "PUNCT"), T("1862")])
+    pozdejsi = time_from_tokens([T("1935")])
+    assert jirasek and capek and nemcova and pozdejsi
+    assert overlap(jirasek, capek) is True and overlap(capek, jirasek) is True  # symetrické
+    assert overlap(jirasek, nemcova) is True
+    assert overlap(jirasek, pozdejsi) is False
+    assert overlap(TimeSpec("name", "pondělí"), TimeSpec("name", "úterý")) is None
+    assert overlap(TimeSpec("name", "včera"), jirasek) is None
+    bod_uvnitr = time_from_tokens([T("1900")])
+    assert bod_uvnitr and overlap(bod_uvnitr, jirasek) is True  # bod uvnitř intervalu
 
 
 def test_time_nouns() -> None:

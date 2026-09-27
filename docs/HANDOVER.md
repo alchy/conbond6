@@ -1,6 +1,6 @@
 # conbond6 — handover (živý)
 
-*Aktualizuje se po každém významnějším tahu. Poslední aktualizace: 18. 8. 2026 (ráno).*
+*Aktualizuje se po každém významnějším tahu. Poslední aktualizace: 27. 9. 2026.*
 
 ## 1. Kde co je
 
@@ -20,7 +20,7 @@
 | lidské odpovědi auditu | `mereni/audit-<dokument>.json` (otisk → [verdikt, pozn, chápu‑z‑grafu a/n]) |
 | keš verdiktů soudce | `mereni/audit-cache.json` (klíč = otisk · soudce · verze promptu) |
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
-| jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` |
+| jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` + `lang/` (jazyková pravidla jako data, `cb6/lang/cs.json`) |
 | bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff __main__` |
 | testy | `tests/` (167 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
@@ -29,6 +29,13 @@
 
 ## 2. Prostředí a služby
 
+- **Pozor (27. 9. 2026):** cloudové sezení (claude.ai/code) dostane repo bez
+  `.venv`, bez UDPipe, bez Ollama a bez `data/corpus`/`data/cache` (gitignored,
+  žijí jen na stroji J.) — `bench`, `audit`, `gold-gen`, `cb6.record` (nové
+  rozbory) tam nejdou spustit, jen `pytest` hermeticky z `tests/data/parses.json`.
+  Nové sezení v cloudu: `python3.11 -m venv .venv && .venv/bin/pip install -e '.[dev]'`,
+  ověřit `pytest -q`, a v HYPOTEZY/HANDOVER napsat, že měření tahu je jen
+  pytest/mypy/pylint (ne QA/unsupported) — dokud služby nejsou po ruce.
 - Python 3.11, `.venv` (`pip install -e '.[dev]'`), závislost jen `networkx` (+ dev pytest/mypy/pylint; viewbase editable z `~/Projects/viewBase2/python`).
 - **UDPipe** služba z conBond3 na `127.0.0.1:42200` (model `cs_all-ud-2.17-251125`) — jen pro nové rozbory a bench; testy jedou z keše.
 - **Ollama** `gemma4:latest` na `127.0.0.1:11434` — soudce auditu a `gold-gen` (27B qwen se do 24 GiB nevejde vedle UDPipe).
@@ -74,8 +81,32 @@ Paměť v2 (`claim`, `mood`, `parent`, `rule`, `alternatives`; JSON v2 čte v1) 
 
 Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná závorka jen u osob s tvarem „A – B“ bez slovesa; přivlastnění → `mít` jako HYPOTHESIS; částečná shoda jména jen s příjmením; tvary jmen jako jedno jméno; výčet „děti: Helena, Josef…“ = member, ne same_as; typing není odpověď; otázky nezanechávají osiřelé uzly.
 
+**Jazyk jako data** (27. 9. 2026, `cb6/lang/`): čtecí tabulky (`ROLE_BY_CASE`,
+`DETERMINER_QUANT`, `PARTICLES`, `WH`, `LIST_VERBS`, `PLACE_NOUNS`,
+`CONDITIONAL_MARKERS`, `ATTITUDE_VERBS`… + chronosu `MONTHS`/`WEEKDAYS`/
+`SEASONS`/`RELATIVE_DAYS`/`TIME_NOUNS`) přesunuty z Python literálů do
+`cb6/lang/cs.json`; `load_language(code)` (kešované, `FileNotFoundError` na
+neznámý jazyk), `defaults.py`/`chronos.py` jen re‑exportují pod starými jmény
+→ `read.py`/`triage.py`/`logic.py`/`memory.py` beze změny. Vnitřní klíče rolí
+(`kde`, `kdo`, `co`…) zůstávají opaque symboly grafu; jazykové je jen čtení
+z povrchového tvaru. `cb6/chronos.overlap(a, b)` — primitiv pro budoucí
+lexikonový operátor `překryv` (protnutí dvou období na časové ose).
+
 ## 6. Otevřené tahy (pořadí podle toho, co ukázal bench)
 
+0. **(nové, 27. 9. 2026, priorita až budou služby) Multilingvnost + NN jako
+   extraktor struktury** — J.: NN smí dělat skoro vše (parsing, extrakci,
+   konverzaci, i pro víc jazyků), ale nikdy „znalost" — ta zůstává výhradně
+   v grafu (I‑9 zobecněné). Krok 1 hotový (`cb6/lang/cs.json` — jazyk jako
+   data, viz § 5, § 7). Zbývá: (a) druhý jazyk (`cb6/lang/en.json`) + ověřit,
+   že `read.py`/`triage.py` fakt nemají nic natvrdo českého mimo `D.*`/
+   `chronos.*` (dnešní průchod 28+7 míst to potvrdil, ale nový jazyk je
+   opravdový test); (b) NN‑extraktor: buď UDPipe model pro druhý jazyk (stejná
+   architektura čtení), nebo LLM extrakce do stejného schématu `Predication`
+   (větší krok — potřebuje bench na obou jazycích, aby šlo měřit, že LLM
+   extrakce nepřidává nepodložené výroky víc než UDPipe cesta). Blokováno tuhle
+   relaci chybějícími službami (UDPipe/Ollama/korpus) — čeká na sezení se
+   službami.
 1. **Lidský audit** — J.: `python -m bench audit --dok alois_jirásek --rucne` (a druhý dokument), min. 30 výroků; pak zpráva hlásí shodu soudce/člověk a „nechápu z grafu“ %.
 2. **Ověření generovaných otázek** — `python -m bench gold-gen --dok karel_čapek --n 12` → `--overit` (kurátorované číslo 29/130 je malé a korpus 7/90 tvrdý).
 3. Zbývající chyby precision (z auditu): kvantifikátor ∀ z „všechna jeho dramata“ (∀ bez omezení přivlastněním), plošná koordinace (`kdo: Petr+Karel` i tam, kde jde o dvě klauze — „otcem byl Josef…, matkou Vincencie“), vztažné věty (`kdo:∀sousoší`), participia jako predikáty.
@@ -101,6 +132,16 @@ Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná z
 - 17. 8. — Návrh conbond5 „Q(A,B) ⇐ TEST(…)“ přijat jako operátory `překryv`/`porovnání` v lexikonu vazeb; pravidlo je řádek dat s modalitou a proveniencí, materializovaný do grafu při použití; ne pátý slovník. Síla vazby `same/implies/related` (dnešní `SYNONYMS` je únik precision).
 - 17. 8. — conbond5 (paralelně) jde cestou šíře konstrukcí (ruční otázky 59/70); conbond6 cestou věrnosti; další tah conbond6 = přebírat konstrukce z conbond5 po jedné přes bránu benche.
 - 17. 8. (večer) — J.: chování jako „co znamená všechny — výpis děl“ má jít definovat měkce z konzole, ne kódem. Rozhodnutí: *znalost* (drama ⊆ dílo) je řádek lexikonu `!uč a < b` (operátor `podřazení`); *čtení* („která N“ = díra s omezením, rozkaz výpisu = otázka) zůstává kód a měří se — z konzole se parser vysvětlit nedá; „všechny“ samo nic nepotřebuje, `enumerate` vypíše všechny doložené výplně. Výpis podle tématu dokumentu je přiznaná výchozí volba (články díla jen vyjmenovávají), asociace jen přes výrok `kdo/co`, ne přes libovolný sdílený výrok (na reálném textu by „Josef Čapek“ byl dílem Karla).
+- 27. 9. 2026 — J.: systém má být multilingvní, jazyková pravidla oddělená per
+  jazyk jako JSON; NN smí nést skoro celou strukturní/konverzační vrstvu
+  (parsing, extrakci — i pro autonomní průběžné rozšiřování znalostní báze),
+  ale nikdy „znalost" — ta zůstává výhradně v grafu. Rozhodnutí Claude: vnitřní
+  klíče rolí (`kde`, `kdo`, `co`…) a schéma grafu zůstávají opaque symboly, ne
+  „čeština" — neměnit je (obří, invazivní refaktor bez jasného přínosu); mění
+  se jen ČTECÍ tabulky (`defaults.py`, `chronos.py`), přesně stylem, jaký už
+  platil pro `cb6/lexicon.py` (vazby jako data). Sezení bez UDPipe/Ollama/
+  korpusu (cloud) → hotov jen krok 1 (`cb6/lang/`), beze změny chování,
+  měřeno pytestem/mypy/pylint, ne bench číslem (viz HYPOTEZY 2026‑09‑27).
 - 17. 8. — Lexikon krok 1: síla vazby se rozhoduje podle významu páru, ne podle počtu zásahů (např. `pracovat ~ působit` same — životopisné „působil v/jako“; jiné významy chrání rámec rolí; `absolvovat`, `vyhrát`, `uvést`, `dostat`… zváženy jednotlivě, viz `pozn` v seedu). Shoda přes `implies` snižuje stupeň důkazu na `derived` (je to odvození, ne záměna). Otázka je vždy první argument shody (`same_pred(dotaz, výrok)`); u můstkových pravidel se pořadí opravilo (`dst_pred` je výrok). Použitý řádek se materializuje i při dotazu (uzel `vazba` v exportu) — jinak by krok `lex` nebyl z grafu doložitelný; nepoužité seed řádky graf nezatěžují.
 
 ## 8. Jak předat dál (checklist pro nové sezení)

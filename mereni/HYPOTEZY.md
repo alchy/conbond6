@@ -61,3 +61,62 @@ Yield hl./vše 160/298 na 1 000 slov; QA 12/17 (kurátorované 3/3); graf 0 poru
 **Změna:** `docs/UVOD.md` (orientace: cesta věty grafem, pojmy, znalost jako data, audit, bench, příkazy, symboly), `bench/ukazky.py` → `docs/UKAZKY.md` (12 scén ze živého běhu, přegenerovat po tahu). Ukázky odhalily: (a) popisek názvu z nominativu jmenovacího zůstal malým písmem, když entitu založila sonda před zápisem („krakatit“) → přesun povrchového tvaru dopředu bez podmínky `new`; (b) „Kdo napsal Krakatit?“ NEVÍM — holé obecné jméno v otázce (parser NOUN) se zakotvilo jako skupina, i když entita toho jména existuje → `ground`: holý term bez přívlastků/počtu/přivlastnění, jehož lemma/tvar je jménem právě jedné entity, je ta entita (přiznaná volba „jméno známé entity“).
 **Hypotéza:** QA ±1 (otázky s názvem díla jako předmětem), unsupported beze změny (mění se zakotvení jmen, ne čtení tvrzení), graf 0, determinismus ano. Rychlá smyčka 2 dok.: 13/25, 16,0 %, graf 0 — beze změny.
 **Výsledek (3cd63e4, plný běh):** QA 184/343 beze změny (žádná otázka se neotočila), unsupported **30,5 → 30,1 %** [25,7–34,7] (hlavní 31 → 30 % — pár tvrzení s názvem se zakotvilo na známou entitu místo nové skupiny), yield/SAFE beze změny, audit grafu 0, determinismus ano. Zpráva `mereni/2026-08-18-3cd63e4.md`.
+
+## 2026-09-27 · nové sezení (cloud, bez služeb) — prostředí + jazyk jako data + `chronos.overlap`
+
+**Nález o prostředí:** tohle sezení běží v jednorázovém cloudovém kontejneru bez
+`.venv` (vytvořen znovu), bez UDPipe (`127.0.0.1:42200`), bez Ollama
+(`127.0.0.1:11434`) a bez `data/corpus`/`data/cache` (gitignored, jsou jen na
+stroji J.). **Bench, audit, `gold-gen`, `cb6.record` (nové rozbory) tedy tuhle
+relaci neběží** — jen `pytest` hermeticky z `tests/data/parses.json` (168 + 2
+xfail, zeleno). Nejde tedy udělat „plný bench po“ na krok, který mění čtení
+reálných vět; níže je proto jen refaktor beze změny chování (měřeno pytestem,
+ne QA/unsupported číslem) a čistě výpočetní přírůstek (`overlap`).
+
+**Podnět J. (mid-session):** systém má být multilingvní — jazyková pravidla
+oddělená per jazyk jako JSON; NN (parser/LLM) smí dělat „skoro vše“ — strukturu,
+extrakci, konverzaci, i pro víc jazyků — ale nikdy „znalost“: ta zůstává
+výhradně v grafu (rozšíření I‑9: LM/NN „jen soudce auditu a generátor otázek“
+→ „NN jen struktura, nikdy fakt“, teď bez ohledu na jazyk). Cíl: systém, co si
+touhle cestou umí průběžně/autonomně rozšiřovat znalostní bázi (extrakce grafu
+z libovolného textu), a pořád platí I‑11/I‑12 (rekonstrukce jen z exportu).
+
+**Změna (refaktor, beze změny chování):**
+1. `cb6/lang/` — nový modul: `LanguageRules` (dataclass), `load_language(code)`
+   (kešované, `FileNotFoundError` na neznámý jazyk — žádný tichý fallback),
+   `available_languages()`. `cb6/lang/cs.json` — doslovný přepis dosavadních
+   tabulek `defaults.py` (`ROLE_BY_CASE`, `DETERMINER_QUANT`, `PARTICLES`, `WH`,
+   `LIST_VERBS`, `PLACE_NOUNS`, `CONDITIONAL_MARKERS`, `ATTITUDE_VERBS`… — 18
+   tabulek) a `chronos.py` (`MONTHS`, `WEEKDAYS`, `SEASONS`, `RELATIVE_DAYS`,
+   `TIME_NOUNS` základ) do JSON, žádná hodnota se nezměnila.
+2. `defaults.py`/`chronos.py` teď jen `load_language("cs")` a re‑exportují
+   tabulky pod stejnými jmény → **žádný spotřebitel** (`read.py` 28 míst,
+   `triage.py` 7, `logic.py`, `memory.py`) se nemusel měnit. Vnitřní klíče rolí
+   (`kde`, `kdo`, `co`…) zůstávají opaque symboly grafu, ne „čeština“ — mění se
+   jen ČTENÍ z povrchového tvaru. Operátory a schéma grafu beze změny.
+3. `cb6/chronos.overlap(a, b) -> bool | None` — protnou se dva časové
+   body/intervaly? Primitiv pro budoucí lexikonový operátor `překryv`
+   (`žít.kdy × žít.kdy ⇒ potkat_se`, spec krok 2, `možnost`); vlastní funkce,
+   ne `not before(a,b) and not before(b,a)` (dvojitá negace by tiše změnila
+   „nevím“ na „ano“ u nesrovnatelných párů).
+4. `pyproject.toml`: `cb6.lang` mezi packages, `*.json` do package-data.
+
+**Hypotéza:** čistý refaktor — pytest beze změny počtu **kromě** nových testů
+(`tests/test_lang.py` 5, `tests/test_chronos.py::test_overlap` 1 → **168+2xfail
+→ 174+2xfail**), mypy/pylint čisté (`cb6/lang` nový modul 10/10), **žádné
+QA/unsupported číslo se nehýbe** (nejde bez korpusu/UDPipe měřit — a stejně by
+se nemělo, je to jen přesun dat, čtení se nezměnilo).
+**Výsledek:** přesně tak — 174 passed + 2 xfailed (bylo 168+2), mypy 32
+souborů čisté, `cb6/lang` pylint 10.00/10, `chronos.py` 9.66/10 (beze
+regrese — 4 nálezy byly už v baseline, nová funkce nepřidala žádný). Žádná
+existující tabulka nezměnila hodnotu (`test_defaults_reexportuje_nactene_tabulky`
+porovnává `defaults.*`/`chronos.*` s načteným jazykem 1:1).
+**Poučení / co zůstává otevřené:** (a) skutečné wiring „NN → extrakce grafu“
+a druhý jazyk potřebují UDPipe/Ollama a bench — příští sezení se službami má
+navázat přímo na krok 2 spec (`překryv`+`porovnání`+veličiny, `cb6/lexicon.py`
+teď má `overlap` primitiv připravený) a na multilingvní krok 2 (anglická
+`cb6/lang/en.json` + ověření, že `read.py` neobsahuje nic natvrdo českého mimo
+`D.*`/`chronos.*` — dnešní průchod všech 28+7 míst v `read.py`/`triage.py`
+potvrdil, že jsou); (b) `docs/HANDOVER.md` a spec dostaly zápis rozhodnutí, ale
+krok 2 samotný (operátory `překryv`/`porovnání` v `lexicon.py`, čtení „Jaká je
+délka…“/„Mohli se potkat?“) **není hotový** — jen jeho časový primitiv.

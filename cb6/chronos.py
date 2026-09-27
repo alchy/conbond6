@@ -15,25 +15,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal, Sequence
 
+from cb6.lang import load_language
 from cb6.oracle import Token
 
 Date = tuple[int, int, int]  # (rok, měsíc, den); 0 = neurčeno
 
-MONTHS: dict[str, int] = {
-    "leden": 1, "únor": 2, "březen": 3, "duben": 4, "květen": 5, "červen": 6,
-    "červenec": 7, "srpen": 8, "září": 9, "říjen": 10, "listopad": 11, "prosinec": 12,
-}
-WEEKDAYS = ("pondělí", "úterý", "středa", "čtvrtek", "pátek", "sobota", "neděle")
-SEASONS = ("jaro", "léto", "podzim", "zima")
-RELATIVE_DAYS = ("dnes", "včera", "zítra", "předevčírem", "pozítří", "letos", "loni", "vloni")
+#: Jazykové tabulky (měsíce, dny, roční doby…) žijí jako data v `cb6/lang/cs.json`
+#: (rozhodnutí J. 27. 9. 2026 — viz `cb6/defaults.py`); tenhle modul jen re‑exportuje.
+_L = load_language("cs")
+MONTHS: dict[str, int] = _L.months
+WEEKDAYS = _L.weekdays
+SEASONS = _L.seasons
+RELATIVE_DAYS = _L.relative_days
 #: Substantiva, jejichž výplň v roli `v+Loc` apod. znamená ČAS, ne místo.
-TIME_NOUNS = frozenset(
-    {"rok", "léta", "století", "tisíciletí", "den", "měsíc", "týden", "hodina", "minuta",
-     "doba", "období", "věk", "éra", "epocha", "dekáda", "desetiletí", "sezóna", "noc",
-     "ráno", "večer", "poledne", "půlnoc", "začátek", "konec", "polovina", "závěr", "průběh",
-     "dětství", "mládí", "stáří", "život", "válka", "středověk", "starověk", "novověk"}
-    | set(MONTHS) | set(WEEKDAYS) | set(SEASONS)
-)
+TIME_NOUNS = _L.time_nouns_base | set(MONTHS) | set(WEEKDAYS) | set(SEASONS)
 
 Kind = Literal["point", "year", "interval", "name", "century"]
 
@@ -184,6 +179,23 @@ def within(a: TimeSpec, b: TimeSpec) -> bool | None:
     if a.start[0] == 0 or b.start[0] == 0:
         return None
     return _key(b.start) <= _key(a.start) and _key_end(a.end) <= _key_end(b.end)
+
+
+def overlap(a: TimeSpec, b: TimeSpec) -> bool | None:
+    """Sdílejí `a` a `b` (body nebo intervaly) na téže ose aspoň jeden bod?
+
+    Proč vlastní primitiv, ne `not before(a,b) and not before(b,a)`: `before`
+    vrací `False` i pro nesrovnatelné páry přes hraniční `None`‑řetězení
+    (`a and b` zkracuje), takže dvojitá negace by tiše změnila „nevím“ na
+    „ano“. `overlap` je pro operátor `překryv` v lexikonu (`žít.kdy × žít.kdy
+    ⇒ potkat_se`, spec krok 2) — dvě žitá období se protnou, mohli se potkat.
+    Jména (`kind="name"`) nejsou na ose srovnatelná stejně jako u `before`/`within`.
+    Vstup: dva `TimeSpec`. Výstup: `bool`, nebo `None` (nesrovnatelné — chybí rok)."""
+    if a.kind == "name" or b.kind == "name" or not (a.start and a.end and b.start and b.end):
+        return None
+    if a.start[0] == 0 or b.start[0] == 0:
+        return None
+    return _key(a.start) <= _key_end(b.end) and _key(b.start) <= _key_end(a.end)
 
 
 def same(a: TimeSpec, b: TimeSpec) -> bool:

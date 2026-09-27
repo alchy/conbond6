@@ -1,0 +1,126 @@
+{
+  "role_by_case": [
+    {"prep": "v", "case": "Loc", "roles": {"place": "kde", "time": "kdy", "duration": "kdy", "*": "v+Loc"}},
+    {"prep": "v", "case": "Acc", "roles": {"time": "kdy", "*": "v+Acc"}},
+    {"prep": "na", "case": "Loc", "roles": {"place": "kde", "time": "kdy", "*": "na+Loc"}},
+    {"prep": "na", "case": "Acc", "roles": {"place": "kam", "*": "na+Acc"}},
+    {"prep": "do", "case": "Gen", "roles": {"place": "kam", "time": "do_kdy", "*": "do+Gen"}},
+    {"prep": "z", "case": "Gen", "roles": {"place": "odkud", "time": "od_kdy", "*": "z+Gen"}},
+    {"prep": "od", "case": "Gen", "roles": {"place": "odkud", "time": "od_kdy", "*": "od+Gen"}},
+    {"prep": "k", "case": "Dat", "roles": {"place": "kam", "*": "k+Dat"}},
+    {"prep": "u", "case": "Gen", "roles": {"place": "kde", "*": "u+Gen"}},
+    {"prep": "s", "case": "Ins", "roles": {"*": "s_kým"}},
+    {"prep": "o", "case": "Loc", "roles": {"*": "o_čem"}},
+    {"prep": "o", "case": "Acc", "roles": {"*": "o+Acc"}},
+    {"prep": "po", "case": "Loc", "roles": {"place": "kudy", "time": "po_kdy", "*": "po+Loc"}},
+    {"prep": "před", "case": "Ins", "roles": {"place": "kde", "time": "před_kdy", "*": "před+Ins"}},
+    {"prep": "za", "case": "Gen", "roles": {"time": "kdy", "*": "za+Gen"}},
+    {"prep": "za", "case": "Ins", "roles": {"place": "kde", "*": "za+Ins"}},
+    {"prep": "během", "case": "Gen", "roles": {"time": "kdy", "duration": "kdy", "*": "během+Gen"}},
+    {"prep": "po", "case": "Acc", "roles": {"duration": "jak_dlouho", "time": "jak_dlouho", "*": "po+Acc"}},
+    {"prep": "za", "case": "Acc", "roles": {"time": "kdy", "duration": "jak_dlouho", "*": "za+Acc"}},
+    {"prep": "mezi", "case": "Ins", "roles": {"place": "kde", "time": "kdy", "*": "mezi+Ins"}},
+    {"prep": "přes", "case": "Acc", "roles": {"place": "kudy", "*": "přes+Acc"}},
+    {"prep": "kolem", "case": "Gen", "roles": {"time": "kdy", "place": "kde", "*": "kolem+Gen"}},
+    {"prep": "okolo", "case": "Gen", "roles": {"time": "kdy", "place": "kde", "*": "okolo+Gen"}},
+    {"prep": "při", "case": "Loc", "roles": {"time": "kdy", "*": "při+Loc"}},
+    {"prep": "nad", "case": "Ins", "roles": {"place": "kde", "*": "nad+Ins"}},
+    {"prep": "pod", "case": "Ins", "roles": {"place": "kde", "*": "pod+Ins"}},
+    {"prep": "vedle", "case": "Gen", "roles": {"place": "kde", "*": "vedle+Gen"}},
+    {"prep": "uvnitř", "case": "Gen", "roles": {"place": "kde", "*": "uvnitř+Gen"}},
+    {"prep": "blízko", "case": "Gen", "roles": {"place": "kde", "*": "blízko+Gen"}},
+    {"prep": "pro", "case": "Acc", "roles": {"*": "pro_koho"}},
+    {"prep": "bez", "case": "Gen", "roles": {"*": "bez+Gen"}},
+    {"prep": "podle", "case": "Gen", "roles": {"*": "podle+Gen"}},
+    {"prep": "proti", "case": "Dat", "roles": {"*": "proti+Dat"}},
+    {"prep": "díky", "case": "Dat", "roles": {"*": "díky+Dat"}},
+    {"prep": "kvůli", "case": "Dat", "roles": {"*": "kvůli+Dat"}},
+    {"prep": "jako", "case": "", "roles": {"*": "jako"}},
+    {"prep": "", "case": "Ins", "roles": {"*": "čím"}},
+    {"prep": "", "case": "Dat", "roles": {"*": "komu"}},
+    {"prep": "", "case": "Gen", "roles": {"time": "kdy", "duration": "jak_dlouho", "*": "čeho"}},
+    {"prep": "", "case": "Acc", "roles": {"time": "kdy", "duration": "jak_dlouho", "*": "obl:Acc"}},
+    {"prep": "", "case": "Loc", "roles": {"place": "kde", "time": "kdy", "*": "obl:Loc"}},
+    {"prep": "", "case": "Nom", "roles": {"*": "obl:Nom"}}
+  ],
+  "determiner_quant": {
+    "každý": "∀", "všechen": "∀", "všechno": "∀", "veškerý": "∀", "kterýkoli": "∀",
+    "žádný": "∀neg", "nikdo": "∀neg", "nic": "∀neg",
+    "ten": "·", "tento": "·", "tenhle": "·", "onen": "·", "tamten": "·",
+    "nějaký": "∃", "některý": "∃", "jeden": "∃", "jistý": "∃", "leckterý": "∃",
+    "mnohý": "∃", "několik": "∃", "málokterý": "∃"
+  },
+  "possessive": ["jeho", "její", "jejich", "můj", "tvůj", "náš", "váš", "svůj"],
+  "particles": [
+    "také", "též", "taky", "i", "jen", "pouze", "už", "již", "ještě", "asi", "prý",
+    "však", "ale", "tedy", "totiž", "například", "zejména", "hlavně", "především",
+    "přece", "snad", "přitom", "vůbec", "právě", "zase", "opět", "spíše", "spíš",
+    "dokonce", "možná", "vlastně", "prostě", "ovšem", "sice", "zřejmě", "patrně",
+    "pravděpodobně", "často", "obvykle", "většinou", "zpravidla", "někdy", "vždy",
+    "nikdy", "stále", "pořád", "dále", "dál", "tak", "ano", "ne", "nikoli", "nikoliv"
+  ],
+  "sequence_adverbs": [
+    "nejprve", "nejdřív", "nejdříve", "poté", "pak", "potom", "později", "nakonec",
+    "tehdy", "kdysi", "dříve", "dřív", "následně", "posléze", "mezitím", "současně",
+    "zároveň", "brzy", "záhy", "hned", "ihned", "okamžitě", "nedávno", "dosud", "doposud"
+  ],
+  "modal_verbs": {
+    "moci": "možnost", "smět": "možnost", "lze": "možnost", "dokázat": "možnost",
+    "umět": "možnost", "muset": "nutnost", "mít": "povinnost", "chtít": "vůle",
+    "hodlat": "vůle", "začít": "fáze", "začínat": "fáze", "přestat": "fáze",
+    "pokračovat": "fáze", "snažit_se": "vůle", "pokusit_se": "vůle"
+  },
+  "wh": {
+    "kde": ["kde", "filler"], "kam": ["kam", "filler"], "odkud": ["odkud", "filler"],
+    "kudy": ["kudy", "filler"], "kdy": ["kdy", "filler"], "odkdy": ["od_kdy", "filler"],
+    "dokdy": ["do_kdy", "filler"], "kdo": ["kdo", "filler"], "co": ["co", "filler"],
+    "koho": ["co", "filler"], "komu": ["komu", "filler"], "čím": ["čím", "filler"],
+    "kolik": ["count", "count"], "jaký": ["jaký", "attr"], "který": ["který", "attr"],
+    "proč": ["advcl:protože", "filler"], "čí": ["čí", "filler"], "jak": ["jak", "filler"],
+    "jak_dlouho": ["jak_dlouho", "filler"]
+  },
+  "list_verbs": ["vyjmenovat", "vypsat", "uvést", "jmenovat", "vypisovat", "vyjmenovávat"],
+  "place_nouns": [
+    "město", "vesnice", "ves", "obec", "země", "stát", "říše", "království", "kraj",
+    "oblast", "region", "provincie", "okres", "čtvrť", "ulice", "náměstí", "řeka",
+    "hora", "pohoří", "ostrov", "moře", "oceán", "jezero", "les", "pole", "louka",
+    "škola", "gymnázium", "univerzita", "fakulta", "akademie", "ústav", "institut",
+    "kavárna", "hospoda", "dům", "byt", "vila", "zámek", "hrad", "klášter", "kostel",
+    "divadlo", "nemocnice", "továrna", "závod", "podnik", "kancelář", "redakce",
+    "dálnice", "silnice", "cesta", "most", "nádraží", "letiště", "přístav", "vězení",
+    "tábor", "fronta", "kontinent", "světadíl", "svět", "vesmír", "domov", "exil",
+    "emigrace", "zahraničí", "venkov", "centrum", "střed", "okraj", "sever", "jih",
+    "východ", "západ", "Evropa", "Amerika", "Asie", "Afrika"
+  ],
+  "place_preps": ["v", "do", "z", "u", "na", "k", "od", "přes", "po", "za", "mezi", "nad", "pod", "vedle", "před", "kolem", "okolo"],
+  "personal_pronouns": ["on", "ona", "ono", "oni", "ony", "já", "ty", "my", "vy", "sebe"],
+  "conditional_markers": {
+    "pokud": "if", "jestliže": "if", "li": "if", "-li": "if", "kdyby": "if", "pakliže": "if", "když": "if_or_when"
+  },
+  "only_if_adverbs": ["jen", "pouze", "jenom"],
+  "iff_adverbs": ["právě"],
+  "purpose_marks": ["aby", "ať", "kéž"],
+  "attitude_verbs": [
+    "říci", "říkat", "tvrdit", "prohlásit", "prohlašovat", "myslet", "myslit", "věřit", "doufat", "domnívat_se",
+    "předpokládat", "slíbit", "slibovat", "napsat", "psát", "uvést", "uvádět", "oznámit", "oznamovat", "sdělit",
+    "vysvětlit", "vysvětlovat", "dodat", "odpovědět", "zeptat_se", "ptát_se", "tvrdívat", "soudit", "cítit",
+    "chtít", "přát_si", "obávat_se", "bát_se", "očekávat", "navrhnout", "navrhovat", "žádat", "požadovat",
+    "rozhodnout", "rozhodnout_se", "znemožnit", "umožnit", "dovolit", "zakázat", "nařídit", "doporučit",
+    "plánovat", "hodlat", "snažit_se", "pokusit_se", "zdát_se", "vypadat", "považovat", "pokládat"
+  ],
+  "disjunction_cc": ["nebo", "anebo", "či", "buď"],
+  "cardinality_adverbs": ["aspoň", "alespoň", "nejvýše", "nanejvýš", "nejméně", "minimálně", "maximálně", "přinejmenším"],
+  "months": {
+    "leden": 1, "únor": 2, "březen": 3, "duben": 4, "květen": 5, "červen": 6,
+    "červenec": 7, "srpen": 8, "září": 9, "říjen": 10, "listopad": 11, "prosinec": 12
+  },
+  "weekdays": ["pondělí", "úterý", "středa", "čtvrtek", "pátek", "sobota", "neděle"],
+  "seasons": ["jaro", "léto", "podzim", "zima"],
+  "relative_days": ["dnes", "včera", "zítra", "předevčírem", "pozítří", "letos", "loni", "vloni"],
+  "time_nouns_base": [
+    "rok", "léta", "století", "tisíciletí", "den", "měsíc", "týden", "hodina", "minuta",
+    "doba", "období", "věk", "éra", "epocha", "dekáda", "desetiletí", "sezóna", "noc",
+    "ráno", "večer", "poledne", "půlnoc", "začátek", "konec", "polovina", "závěr", "průběh",
+    "dětství", "mládí", "stáří", "život", "válka", "středověk", "starověk", "novověk"
+  ]
+}

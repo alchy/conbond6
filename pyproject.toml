@@ -9,10 +9,11 @@ dependencies = ["networkx>=3.0"]
 dev = ["pytest>=8.0", "mypy>=1.8"]
 
 [tool.setuptools]
-packages = ["cb6", "bench"]
+packages = ["cb6", "cb6.lang", "bench"]
 
 [tool.setuptools.package-data]
 cb6 = ["lexikon/*.jsonl"]
+"cb6.lang" = ["*.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
