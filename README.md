@@ -20,9 +20,15 @@ derived`, výchozími volbami) → logika (ANO / NE / NEVÍM s důkazem, jen nad
 
 ## Běh za 5 minut
 
-Předpoklad: služba UDPipe z conBond3 na `127.0.0.1:42200` (jen pro nové
-rozbory a bench; testy jedou z nahraných rozborů) a pro precision audit
-Ollama s modelem `gemma4:latest` (viz `bench/config.json`).
+Předpoklad pro plné rozbory: služba UDPipe z conBond3 na `127.0.0.1:42200`
+(jen pro nové rozbory a bench; testy jedou z nahraných rozborů) a pro
+precision audit Ollama s modelem `gemma4:latest`, nebo `claude-cli`/`haiku`
+jako soudce bez Ollamy (viz `bench/config.json`). **Bez těchhle služeb**
+(např. cloudové sezení): `pytest -q` běží vždy hermeticky; `bench run
+--parser spacy` (`pip install cs_core_news_sm`) dá náhradní český NN
+parser, funkční i bez sítě na LINDAT/UDPipe — čísla s ním NEJSOU
+srovnatelná s UDPipe2 (jiná provenience, I‑12), ale stačí na fragmentové
+a real-corpus hypotézy, viz `docs/HANDOVER.md` § 2.
 
 ```bash
 python3.11 -m venv .venv && .venv/bin/pip install -e '.[dev]'
@@ -33,6 +39,9 @@ python3.11 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 .venv/bin/python -m bench audit --dok alois_jirásek --rucne                          # lidský vzorek (I‑12 otázka)
 .venv/bin/python -m bench diff mereni/A.json mereni/B.json
 .venv/bin/python -m bench gold-filter               # přegenerovat vyfiltrované automatické otázky
+.venv/bin/python -m bench vazby                     # pokročilost "chápání vazeb" podle mechanismu (příkaz/věta/korekce/graf)
+.venv/bin/python -m bench graf-audit --strop 60      # mechanismus `graf` na reálném korpusu, k ručnímu posouzení
+.venv/bin/python -m bench probe --features edge      # lineární sonda: role z read.py ← NN embedding (bez tréninku)
 ```
 
 ## Co bench měří (spec § 5)
@@ -70,15 +79,33 @@ vykazují zvlášť; automatické mají i chybné odpovědi (nález), do hlavní
 ## Kde co je
 
 ```
-cb6/       oracle chronos defaults read triage discourse memory ground logic recall render dialog cli viewbase_app
-bench/     data gold qa metrics run graphcheck audit judge diff __main__ · gold/ (zlaté otázky) · config.json
+cb6/       oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli
+           viewbase_app · lang/ (jazyková pravidla jako data, cb6/lang/cs.json)
+bench/     data gold gold_gen qa metrics run graphcheck audit judge diff vazby distill probe graf_audit __main__
+           · gold/ (zlaté otázky) · config.json
 tests/     hermetické (nahrané rozbory v tests/data/parses.json; nové věty: sentences.txt + python -m cb6.record)
 mereni/    HYPOTEZY.md · zprávy · audit-<doc>.json (lidské odpovědi) · audit-cache.json (soudce)
 ```
 
-## Stav (17. 8. 2026, dva dokumenty, strop 40 řádků, vzorek 100 výroků)
+## Znalost jako data (lexikon vazeb)
 
-conbond5 výchozí: unsupported **76,5 %**, yield 160/298 · po triáži, opravách
-čtení a registru referentů: unsupported **23,0 %** [15,8–32,1], yield **89/94**,
-QA 12/17 beze změny, graf 0 porušení, determinismus ano. Plný běh a lidský
-audit: `mereni/`.
+Vazby mezi predikáty (synonyma, implikace, podřazení, překryv, inverze
+příbuzenství, můstková pravidla) nejsou natvrdo v kódu ani ve slovníku typu
+`SYNONYMS` — jsou to řádky dat (`cb6/lexicon.py`: `{id, op, args, síla,
+autorita, zdroj}`, seed `cb6/lexikon/*.jsonl`), materializované do grafu
+jen když se použijí (uzel `vazba`, tvrdý krok `lex` v důkazu — audit grafu
+je ověří). `!uč a = b | a => b | a ~ b | a < b | překryv a => b | inverze
+a => b` je explicitní/debug kanál; věta typu „Bydlet je synonymum žít.“
+totéž naučí bez příkazu. `python -m bench vazby` měří, ODKUD se poznatek
+vzal (příkaz / věta / oprava v dialogu / parafráze v grafu), ne jedním
+číslem. Podrobně `docs/superpowers/specs/2026-08-17-znalostni-vazby-design.md`,
+stav a čísla `docs/HANDOVER.md` § 5.
+
+## Stav
+
+Poslední plný běh se stabilním vzorkem (8 dok., UDPipe2): unsupported
+**30,1 %** [25,7–34,7], yield 76,8/89,7 na 1000 slov, QA 184/343, audit
+grafu 0 porušení, determinismus ano (baseline conbond5 na dvou dokumentech:
+unsupported 76,5 % → 23,0 %). Aktuální čísla, otevřené tahy a deník
+rozhodnutí jsou v `docs/HANDOVER.md` (živý dokument — čti ten, ne tohle
+README, pro stav "teď").

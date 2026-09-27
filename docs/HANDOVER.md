@@ -21,7 +21,7 @@
 | keš verdiktů soudce | `mereni/audit-cache.json` (klíč = otisk · soudce · verze promptu) |
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
 | jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` + `lang/` (jazyková pravidla jako data, `cb6/lang/cs.json`) |
-| bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff vazby __main__` |
+| bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff vazby distill probe graf_audit __main__` |
 | **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes **7/7** (všechny čtyři mechanismy hotové; `graf` validováno na reálném korpusu 27. 9. 2026 — 80/80 návrhů byl šum, proto VYPNUT ve výchozím stavu, `bench run --se-grafem` ho zapne, viz § 6 „‑1“) |
 | testy | `tests/` (228 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
@@ -272,7 +272,7 @@ otázky (od J. nebo nález v korpusu), ne na dohad.
 1. **Lidský audit** — J.: `python -m bench audit --dok alois_jirásek --rucne` (a druhý dokument), min. 30 výroků; pak zpráva hlásí shodu soudce/člověk a „nechápu z grafu“ %.
 2. **Ověření generovaných otázek** — `python -m bench gold-gen --dok karel_čapek --n 12` → `--overit` (kurátorované číslo 29/130 je malé a korpus 7/90 tvrdý).
 3. Zbývající chyby precision (z auditu): kvantifikátor ∀ z „všechna jeho dramata“ (∀ bez omezení přivlastněním), plošná koordinace (`kdo: Petr+Karel` i tam, kde jde o dvě klauze — „otcem byl Josef…, matkou Vincencie“), vztažné věty (`kdo:∀sousoší`), participia jako predikáty.
-4. Nálezy dialogu G: G‑1 otázka „Kdy napsal R.U.R.?“ čte R.U.R. jako podmět; G‑2 funkční role (narodit_se.kde/kdy) → hlásit konflikt; ~~G‑3 „Jeho bratr Josef Čapek“ → přístavek přilepen ke jménu (rodinné vztahy tak v grafu nejsou)~~ **OPRAVENO 27. 9. 2026** (§ 5 „Krok 3“, `mereni/HYPOTEZY.md`); G‑4 `v Lidových novinách` není místo (učení role / instituce); ~~G‑5 „Kdo byla matka Karla Čapka?“ — cop-swap vzal definiční mechanismus na identifikační otázku, `kdo` bez díry~~ **OPRAVENO 27. 9. 2026** (§ 5 „Krok 9“, `mereni/HYPOTEZY.md`).
+4. Nálezy dialogu G: G‑1 otázka „Kdy napsal R.U.R.?“ čte R.U.R. jako podmět; G‑2 funkční role (narodit_se.kde/kdy) → hlásit konflikt; ~~G‑3 „Jeho bratr Josef Čapek“ → přístavek přilepen ke jménu (rodinné vztahy tak v grafu nejsou)~~ **OPRAVENO 27. 9. 2026** (§ 5 „Krok 3“, `mereni/HYPOTEZY.md`); G‑4 `v Lidových novinách` není místo (učení role / instituce); ~~G‑5 „Kdo byla matka Karla Čapka?“ — cop-swap vzal definiční mechanismus na identifikační otázku, `kdo` bez díry~~ **OPRAVENO 27. 9. 2026** (§ 5 „Oprava G‑5“, `mereni/HYPOTEZY.md`).
 5. Prostor modelů pro disjunkci/ekvivalenci/kardinalitu (přenos `conBond3/cb_logic/models.py`) — dnes REJECTED s důvodem.
 6. Adaptéry conbond1/conbond4 pro zpětný běh QA (Task 12 — neproveden).
 7. Valence jako data (`valence.json` conbond1 / VALLEX), relativní čas (conbond1 chronos), nominalizace, rekurze v dotazu (jellyAI3 SubQuery) — každý jako měřený tah, až bench ukáže potřebu.
@@ -362,8 +362,9 @@ slepene_jmeno` a `::test_relational_gen_arg_koordinovany_popis_jedne_osoby`
 **226+2xfail**, mypy/pylint beze regrese (jen posun řádků + kategorie už
 použité jinde v souboru). Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
 
-**Krok 9 hotový — G‑5: cop-swap identifikace vs. definice** (27. 9. 2026,
-vlastní nález ze živé ukázky): `_copula`'s cop-swap („Co je jezevčík?“ —
+**Oprava G‑5 hotová — cop-swap identifikace vs. definice** (mimo číslovanou
+řadu „krok" znalostních vazeb výše — jiná, nesouvisející věc, viz § 6
+bod 4; 27. 9. 2026, vlastní nález ze živé ukázky): `_copula`'s cop-swap („Co je jezevčík?“ —
 tázací podmět + nominál v kořeni → definice pojmu) firoval stejně na
 „Kdo byla matka Karla Čapka?“/„Kdo byl prezident republiky?“, kde jde o
 OPAK — identifikace konkrétní osoby, ne definice slova. Rozlišovač: kořen
@@ -437,8 +438,8 @@ mypy/pylint beze regrese. Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
 - 27. 9. 2026 (pokračování) — Vedlejší nález z validace `graf`: `_prodrop`
   (`cb6/read.py`) nechytil neosobní `_se` konstrukce v přítomném čase
   (čeština v přítomném čase neznačí rod, podmínka žádala `Gender=="Neut"`)
-  — `kdo` se tak defaultoval na téma dokumentu i tam, kde věta (\"jedná
-  se o…\", \"vyskytuje se…\") nemá logický podmět vůbec. Oprava:
+  — `kdo` se tak defaultoval na téma dokumentu i tam, kde věta („jedná
+  se o…“, „vyskytuje se…“) nemá logický podmět vůbec. Oprava:
   `gender in (None, "Neut")`, bezpečné díky UD `expl:pv` (vždy neosobní
   značka, ne skutečný zvratný předmět). Viz § 5 „Krok 7“, HYPOTEZY.
 - 27. 9. 2026 (pokračování) — Mechanismus `graf` (§ 6 „‑1“) změřen na celém
