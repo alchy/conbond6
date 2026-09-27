@@ -784,3 +784,90 @@ je sourozenec X“, pozor na pohlaví), skládání („otec otce“ → „děd
 potřebuje 2 statementy → `derive()` nejde, query-time join jako
 `překryv`). Zatím žádná otázka typu „Kdo je čí tchán?“ nemá odpověď —
 vztah SE ZAPÍŠE, ale nic ho zatím nedotazuje.
+
+## 2026-09-27 · pokračování · lze `read.py` nahradit vztahovou NN? — destilační dataset + lineární sonda
+
+**Zadání J.:** „lze read.py nahradit vztahovou NN? na základě poznatku v
+read py už trénovat NN, pak read.py konzervovat a učit další vztahy
+přes NN“, upřesněno: „jde mi o embeding read vztahu do nn“ — ne
+trénovat transformer od nuly, ale zjistit, jestli jsou vztahy, které
+`read.py` počítá pravidly, PŘÍTOMNÉ v embeddingu, který NN parser
+(spaCy `cs_core_news_sm`) už dnes počítá.
+
+**Zjištění prostředí (rozhoduje, co je vůbec realistické):** žádný
+`torch`/`transformers`/GPU v tomhle kontejneru; `sklearn` jde
+nainstalovat (síť na PyPI funguje). `cs_core_news_sm` ale MÁ vlastní
+kontextový embedding zadarmo (`tok2vec`, 96 dimenzí/token,
+`vocab.vectors` prázdné — `token.vector` je interní `tok2vec` výstup,
+ne statický slovníkový vektor) — přesně to, co jde sondovat, bez
+tréninku čehokoli nového.
+
+**Změna:** dva nové bench nástroje (`python -m bench distill`,
+`python -m bench probe`):
+- `bench/distill.py` — pro každou větu reálného korpusu uloží (UD parse,
+  `Predication` z `read.py` přes `dataclasses.asdict`, kvalita: residuum/
+  otevřené položky/claim). `read()` je čistá funkce (parse → struktura,
+  žádná paměť) — přesně jednotka „NN dělá strukturu“ (I‑9 zobecněné).
+  Dataset jde do `data/distill/` (negitováno jako `data/cache`/`data/
+  corpus` — regenerovatelné z korpusu, ne ruční značení).
+- `bench/probe.py` — lineární sonda (`LogisticRegression`): štítek =
+  jméno role, kterou `read.py` tokenu přiřadil (`_token_labels`, včetně
+  role `čí` z genitivu — dřív zapadlá uvnitř `term.rel_owner`, teď
+  zvlášť), příznak = `tok2vec` embedding TÉHOŽ tokenu.
+**Hypotéza:** sonda ukáže přesnost výrazně nad většinovou základnou u
+frekventovaných rolí (kdo/co/kde/kdy), slabě nebo vůbec u řídkých
+(čí, dlouhý ocas povrchových předložkových rolí) — čistě informační
+číslo, žádná změna běhového systému.
+
+**Výsledek** (10 reálných dokumentů, `--parser spacy`, bez stropu,
+56 243 tokenů, 42 182 trénink / 14 061 test):
+- **Pokrytí (`distill`, 5 dok., strop 60, 905 vět):** 7,4 % tokenů
+  residuum, **7,5 % vět „čistých“** (bez residua, bez otevřených
+  položek, hlavní výrok SAFE, ne fragment) — z toho `verb` 58/638 (9 %),
+  `copula` 10/92 (11 %), `fragment` 0/175 (logicky — fragment ZNAMENÁ,
+  že `read.py` se vzdal). Číslo je nižší, než by čekal někdo, kdo zná
+  jen „yield“ (77–90/1000 slov) — protože „čistá VĚTA“ (žádná vedlejší
+  věta, žádná závorka, žádné otevřené položky) je přísnější měřítko než
+  „aspoň nějaký SAFE výrok z věty“. Horní mez pro čisté napodobování je
+  tedy jednotky procent vět, ne desítky.
+- **Sonda (`probe`, main run, `min_support=60`, 30 tříd + O + jiné):**
+  většinová základna (jen O) **52,0 %**; obyčejná LR **70,5 %** — tedy
+  **+18,5 p.b. nad základnou, reálný signál, ne šum**; `class_weight=
+  balanced` varianta 49,9 % (POD základnou — cíleně obětuje přesnost na
+  O za recall na řídkých třídách), balanced accuracy 48,2 %. Podle role
+  (recall, `balanced` model): `jak` 0,83, `pořadí` 0,76, `kdy` 0,75,
+  `komu` 0,68, `od_kdy` 0,76, `s_kým` 0,58, `téma` 0,55, `v+Loc` 0,54 —
+  **slušný lineární signál**; `kdo` (nejfrekventovanější obsahová role)
+  jen 0,29 recall, **`co` jen 0,09 recall i přes 2594 příkladů** — embedding
+  jednoho tokenu bez okolí (lineárně) `co` skoro neodliší od zbytku.
+  Macro F1 jen 0,21 — většina tříd (dlouhý ocas povrchových
+  předložkových rolí, `do+Gen`, `na+Loc`, `z+Gen`…) má F1 pod 0,15.
+- **Role `čí` (krok 3, tenhle týden):** **45 výskytů z 56 243 tokenů**
+  (0,08 %) — reálná, ale u téhle velikosti korpusu příliš řídká na
+  vlastní třídu (pod `min_support=60`, spadla do `jiné`). Zvláštní běh s
+  `min_support=30` jsem po ~16 min CPU (mnohem víc tříd, pomalá
+  konvergence `lbfgs`) zabil — číslo pro `čí` samotnou čeká na víc dat
+  nebo cílenou nadvzorku, ne na další čekání na týž běh.
+**Poučení (odpověď J.):** ANO, relace JSOU částečně v embeddingu — lineární
+sonda dá +18,5 b.b. nad základnou, což NENÍ nula, ale je to jen ČÁST
+`read.py`. Silný signál je hlavně u méně frekventovaných, „ostřejších“
+rolí (jak/pořadí/kdy/komu) — token sám o sobě je zřejmě dost
+charakteristický (lemma/POS/pád, což `tok2vec` vidí). Slabý signál u
+nejdůležitějších rolí (`kdo`, `co`) — to jsou přesně případy, kde
+rozhoduje STRUKTURA (kdo je podmět vs. předmět stejného slovesa), ne
+jen token sám — LINEÁRNÍ sonda nad jedním tokenem tohle principiálně
+nemůže zachytit (chybí kontext role souseda/závislosti). Závěr: `read.py`
+NELZE dnes nahradit prostou linear-probe klasifikací nad izolovaným
+tokenem — embedding nese ČÁST signálu (potvrzeno číslem, ne dohadem),
+ale chybí strukturální kontext (hrany stromu, ne jen uzly). Další krok,
+POKUD se půjde dál: featurizovat (embedding hlavy + embedding rodiče +
+deprel) místo holého tokenu — to je malý krok (numpy/sklearn stačí), ne
+architektura navíc. `čí` samotná potřebuje buď víc korpusu, nebo se
+prostě NEUČÍ (zůstává na `read.py` pravidle, protože 45 příkladů na
+trénink nestačí, ať je architektura jakákoli).
+Vedlejší oprava: `_token_labels` zprvu roli `čí` nepočítala (ležela jen
+uvnitř `TermSpec.rel_owner`, ne jako vlastní `RoleFill`) — opraveno,
+otestováno (`tests/test_probe.py`, ruční UD fixtura jako
+`test_relational_nouns.py`).
+pytest **214 passed** + 2 xfailed (+2 nové), mypy 36 souborů čisté,
+pylint nových modulů 10/10.

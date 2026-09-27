@@ -215,7 +215,21 @@ odpověď).
    (větší krok — potřebuje bench na obou jazycích, aby šlo měřit, že LLM
    extrakce nepřidává nepodložené výroky víc než UDPipe cesta). Blokováno tuhle
    relaci chybějícími službami (UDPipe/Ollama/korpus) — čeká na sezení se
-   službami.
+   službami. **Dílčí odpověď 27. 9. 2026** (J.: „lze read.py nahradit
+   vztahovou NN? jde mi o embeding read vztahů do nn“): `bench distill`
+   (destilační dataset parse→`Predication`, `read.py` jako učitel) +
+   `bench probe` (lineární sonda: role z `read.py` ← `tok2vec` embedding
+   spaCy parseru, bez tréninku čehokoli nového). Výsledek na 56 243
+   tokenech (10 dok.): sonda +18,5 b.b. nad základnou (70,5 % vs. 52,0 %)
+   — signál JE v embeddingu, ale jen ČÁSTEČNĚ: silný u „ostřejších“ rolí
+   (jak/pořadí/kdy/komu), slabý u nejdůležitějších (`kdo` recall 0,29,
+   `co` recall jen 0,09) — lineární sonda nad IZOLOVANÝM tokenem nevidí
+   strukturu (kdo je podmět vs. předmět), jen token sám. **Závěr:
+   `read.py` se dnes nedá nahradit prostou lineární klasifikací nad
+   tokenem** — další krok by featurizoval hranu (embedding + rodič +
+   deprel), ne architekturu navíc. Role `čí` (krok 3) má jen 45 příkladů
+   v tomhle vzorku — na učení zatím nestačí, zůstává na pravidle.
+   Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
 1. **Lidský audit** — J.: `python -m bench audit --dok alois_jirásek --rucne` (a druhý dokument), min. 30 výroků; pak zpráva hlásí shodu soudce/člověk a „nechápu z grafu“ %.
 2. **Ověření generovaných otázek** — `python -m bench gold-gen --dok karel_čapek --n 12` → `--overit` (kurátorované číslo 29/130 je malé a korpus 7/90 tvrdý).
 3. Zbývající chyby precision (z auditu): kvantifikátor ∀ z „všechna jeho dramata“ (∀ bez omezení přivlastněním), plošná koordinace (`kdo: Petr+Karel` i tam, kde jde o dvě klauze — „otcem byl Josef…, matkou Vincencie“), vztažné věty (`kdo:∀sousoší`), participia jako predikáty.

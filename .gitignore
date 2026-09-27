@@ -5,6 +5,7 @@ __pycache__/
 .mypy_cache/
 data/corpus/
 data/cache/
+data/distill/
 *.egg-info/
 mereni/*-strop*
 mereni/*-dirty*

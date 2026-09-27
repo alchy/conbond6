@@ -7,6 +7,8 @@
     python -m bench gold-filter              # přegeneruje bench/gold/otazky-filtr.json
     python -m bench audit --dok X --rucne    # Task 5
     python -m bench vazby                    # pokročilost chápání vazeb podle mechanismu
+    python -m bench distill --strop 40       # destilační dataset (read.py jako učitel) + pokrytí
+    python -m bench probe --dok X Y          # lineární sonda: role z read.py ← embedding NN parseru
 """
 
 from __future__ import annotations
@@ -155,9 +157,20 @@ def main(argv: list[str]) -> int:
     gg = sub.add_parser("gold-gen", help="LM‑generované ukotvené otázky (+ --overit lidské ověření)")
     gg.add_argument("rest", nargs=argparse.REMAINDER)
     sub.add_parser("vazby", help="pokročilost chápání vazeb podle mechanismu (příkaz/věta/korekce/graf)")
+    sub.add_parser("distill", help="destilační dataset (parse→Predication) z read.py jako učitele + pokrytí")
+    sub.add_parser("probe", help="lineární sonda: role z read.py ← embedding NN parseru")
     argv = list(argv)
     if not argv or argv[0].startswith("-"):
         argv = ["run"] + argv
+    # `distill`/`probe` mají vlastní argparse (bench/distill.py, bench/probe.py) —
+    # `nargs=REMAINDER` na podparseru je s `add_subparsers` nespolehlivé (stejný
+    # nález platí i pro `gold-gen`), takže zbytek argv jde rovnou beze sdíleného `ap`.
+    if argv and argv[0] in ("distill", "probe"):
+        if argv[0] == "distill":
+            from bench.distill import main as distill_main  # pylint: disable=import-outside-toplevel
+            return distill_main(argv[1:])
+        from bench.probe import main as probe_main  # pylint: disable=import-outside-toplevel
+        return probe_main(argv[1:])
     args = ap.parse_args(argv)
     if args.cmd == "ukazky":
         from bench.ukazky import main as ukazky_main  # pylint: disable=import-outside-toplevel
