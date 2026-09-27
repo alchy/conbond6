@@ -1003,6 +1003,15 @@ class _Reader:
                 return "třída", (s.lemma, t.lemma), "same"
         return None
 
+    def _has_gen_complement(self, t: Token) -> bool:
+        """Má `t` holý genitivní doplněk bez předložky („autor Krakatitu“,
+        „matka Karla Čapka“)? Signál, že `t` popisuje KONKRÉTNÍ věc/osobu
+        (odkazuje k jedné entitě), ne obecnou třídu — `_copula`'s cop-swap
+        na tomhle rozlišuje definiční otázku („Co je jezevčík?“) od
+        identifikační („Kdo byla matka Karla Čapka?“, 27. 9. 2026)."""
+        return any(c.feat("Case") == "Gen" and c.upos in ("NOUN", "PROPN") and not self.case_of(c.index)
+                   for c in self.p.children(t.index))
+
     def _copula(self, root: Token, cop: Token | None, *, shared_subject: RoleFill | None = None) -> Predication:
         p = Predication(pred="být", kind="copula", head=root.index)
         p.tense = cop.feat("Tense") if cop else None
@@ -1041,8 +1050,14 @@ class _Reader:
         else:
             pred_role = RoleFill("co", "cop", self._term_group(root), "structural")
         # podmět
-        if subj and self._wh_of(subj[0]) is not None and root.upos in ("NOUN", "PROPN", "ADJ") and wh is None:
-            # „Co je jezevčík?“ — tázací podmět, nominál v kořeni: ptá se na definici kořene
+        if (subj and self._wh_of(subj[0]) is not None and root.upos in ("NOUN", "PROPN", "ADJ") and wh is None
+                and not self._has_gen_complement(root)):
+            # „Co je jezevčík?“ — tázací podmět, nominál v kořeni: ptá se na definici kořene.
+            # NE ale „Kdo byla matka Karla Čapka?“/„Kdo byl autor Krakatitu?“ — root má
+            # holý genitivní doplněk (`_has_gen_complement`), takže popisuje KONKRÉTNÍ
+            # věc/osobu, ne obecnou třídu; tázací podmět zůstává dírou v roli `kdo`
+            # (nález 27. 9. 2026, živá ukázka pro J. — dřív bralo `matka` jako definiční
+            # kořen a odpověď „Kdo byla matka Karla Čapka?“ vždy skončila NEVÍM).
             s = subj[0]
             name, kind = self._wh_of(s) or ("co", "filler")
             self.mark(s.index, f"role:{name}")

@@ -1469,3 +1469,50 @@ zapsané, ale NEprovedené — #2 čeká na příští operátor/konstrukci, co 
 stejnou mez narazí (bezpečnější než jeden velký refaktor srdce čtení bez
 konkrétního nového případu, co ho vyžaduje), #3 na třetí výskyt (dnes jen
 2, „pravidlo tří" ještě nesplněno).
+
+## 2026-09-27 · pokračování · cop-swap: definiční otázka vs. identifikační otázka s genitivem
+
+**Podnět:** vlastní otevřený nález ze živé ukázky (dřívější tah): „Kdo
+byla matka Karla Čapka?“ dávalo NEVÍM, přestože fakt v paměti byl a role
+`čí` na uloženém výroku správně ukazovala na Karla Čapka — problém byl
+na straně ČTENÍ OTÁZKY, ne zápisu. Slíbil jsem J. zapsat to jako další
+nález; než jsem se ale posunul jinam, doříešil jsem ho rovnou (je to
+malý, izolovaný, dobře diagnostikovaný kus).
+
+**Rozbor:** `_copula`'s „cop-swap“ (`cb6/read.py`, mechanismus pro „Co je
+jezevčík?“ — tázací podmět + nominál v kořeni → kořen definuje POJEM,
+podmět „Co“ je jen strukturní zástupce) firuje na STEJNÉ syntaktické
+kostře i u „Kdo byla matka Karla Čapka?“ a „Kdo byl autor Krakatitu?“ —
+ale sémanticky jde o OPAK: neptáme se, co znamená slovo „matka“/„autor“,
+ptáme se, KDO je ta konkrétní osoba. Rozlišovací signál: kořen v druhém
+případě má HOLÝ GENITIVNÍ DOPLNĚK („Karla Čapka“, „Krakatitu“ — bez
+předložky) — to je přesně situace, kdy `_is_relational_gen_arg`/`_title_of`
+jinde v týhle třídě už dávno vědí, že jde o KONKRÉTNÍ referenci, ne o
+obecnou třídu.
+
+**Hypotéza:** nový `_has_gen_complement(t)` (holý genitiv bez předložky
+na přímém dítěti — stejný test jako jinde v souboru) jako DALŠÍ podmínka
+cop-swapu (`not self._has_gen_complement(root)`). Pytest beze regrese
+(+2 nové testy: identifikační otázka teď má `kdo` jako díru, definiční
+zůstává beze změny), mypy/pylint beze nového nálezu.
+
+**Výsledek:** přesně tak. „Kdo byla matka Karla Čapka?“ → `kdo` je teď
+díra (WH), `co` nese `matka` s `rel_owner=Karel Čapek` (jde dohledat).
+„Kdo byl prezident republiky?“/„Kdo byl ředitel školy?“ (obecné, ne
+vztahové substantivum, ověřeno navíc — signál je obecný, ne jen pro
+`RELATIONAL_NOUNS“) — stejně opraveno. „Kdo byl autor Krakatitu?“
+zůstává NEopraveno, ale jen kvůli chybě spaCy modelu (označil „Krakatitu“
+Case=Nom místo Gen, NameType=Geo místo díla — potvrzeno přímým rozborem)
+— logika je správná, jen substitutní parser nedodal správný vstup; s
+UDPipe by fungovalo taky (I‑12 caveat, ne nový nález o logice). „Co je
+jezevčík?“ (definiční, beze změny) — nový test to hlídá explicitně.
+Pytest 226 → **228 passed + 2 xfailed**, mypy čisté (stejná jediná
+předexistující chyba jen posunutá), pylint diff jen posun řádků + dvě
+`import-outside-toplevel` stejné kategorie jako zbytek souboru.
+
+**Poučení:** stejná lekce jako u kroku 8 (vztahová substantiva) — mez
+napsaná pro JEDEN konkrétní vzor věty („Co je jezevčík?“) mlčky selhala
+na syntakticky identickém, sémanticky opačném sousedním vzoru. Rozlišovač
+byl znovu STRUKTURNÍ (holý genitiv), ne heuristika podle slova — přesně
+ten typ signálu, co se dá bezpečně zobecnit napříč slovníkem, ne jen
+opravit pro „matka“.

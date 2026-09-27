@@ -23,7 +23,7 @@
 | jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` + `lang/` (jazyková pravidla jako data, `cb6/lang/cs.json`) |
 | bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff vazby __main__` |
 | **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes **7/7** (všechny čtyři mechanismy hotové; `graf` validováno na reálném korpusu 27. 9. 2026 — 80/80 návrhů byl šum, proto VYPNUT ve výchozím stavu, `bench run --se-grafem` ho zapne, viz § 6 „‑1“) |
-| testy | `tests/` (226 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
+| testy | `tests/` (228 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
 | paralelní větev | conbond5 (`~/Projects/conbond5`, jiné sezení, HEAD c503b68) — do něj nesahat |
 | související | inventura conbond0–4: artefakt „Inventura conBond 0–5“ (Claude artifacts, 17. 8.) |
@@ -272,7 +272,7 @@ otázky (od J. nebo nález v korpusu), ne na dohad.
 1. **Lidský audit** — J.: `python -m bench audit --dok alois_jirásek --rucne` (a druhý dokument), min. 30 výroků; pak zpráva hlásí shodu soudce/člověk a „nechápu z grafu“ %.
 2. **Ověření generovaných otázek** — `python -m bench gold-gen --dok karel_čapek --n 12` → `--overit` (kurátorované číslo 29/130 je malé a korpus 7/90 tvrdý).
 3. Zbývající chyby precision (z auditu): kvantifikátor ∀ z „všechna jeho dramata“ (∀ bez omezení přivlastněním), plošná koordinace (`kdo: Petr+Karel` i tam, kde jde o dvě klauze — „otcem byl Josef…, matkou Vincencie“), vztažné věty (`kdo:∀sousoší`), participia jako predikáty.
-4. Nálezy dialogu G: G‑1 otázka „Kdy napsal R.U.R.?“ čte R.U.R. jako podmět; G‑2 funkční role (narodit_se.kde/kdy) → hlásit konflikt; ~~G‑3 „Jeho bratr Josef Čapek“ → přístavek přilepen ke jménu (rodinné vztahy tak v grafu nejsou)~~ **OPRAVENO 27. 9. 2026** (§ 5 „Krok 3“, `mereni/HYPOTEZY.md`); G‑4 `v Lidových novinách` není místo (učení role / instituce).
+4. Nálezy dialogu G: G‑1 otázka „Kdy napsal R.U.R.?“ čte R.U.R. jako podmět; G‑2 funkční role (narodit_se.kde/kdy) → hlásit konflikt; ~~G‑3 „Jeho bratr Josef Čapek“ → přístavek přilepen ke jménu (rodinné vztahy tak v grafu nejsou)~~ **OPRAVENO 27. 9. 2026** (§ 5 „Krok 3“, `mereni/HYPOTEZY.md`); G‑4 `v Lidových novinách` není místo (učení role / instituce); ~~G‑5 „Kdo byla matka Karla Čapka?“ — cop-swap vzal definiční mechanismus na identifikační otázku, `kdo` bez díry~~ **OPRAVENO 27. 9. 2026** (§ 5 „Krok 9“, `mereni/HYPOTEZY.md`).
 5. Prostor modelů pro disjunkci/ekvivalenci/kardinalitu (přenos `conBond3/cb_logic/models.py`) — dnes REJECTED s důvodem.
 6. Adaptéry conbond1/conbond4 pro zpětný běh QA (Task 12 — neproveden).
 7. Valence jako data (`valence.json` conbond1 / VALLEX), relativní čas (conbond1 chronos), nominalizace, rekurze v dotazu (jellyAI3 SubQuery) — každý jako měřený tah, až bench ukáže potřebu.
@@ -361,6 +361,20 @@ slepene_jmeno` a `::test_relational_gen_arg_koordinovany_popis_jedne_osoby`
 (ruční UD, ověřeno křížově proti `SpacyOracle`). Pytest 224+2xfail →
 **226+2xfail**, mypy/pylint beze regrese (jen posun řádků + kategorie už
 použité jinde v souboru). Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
+
+**Krok 9 hotový — G‑5: cop-swap identifikace vs. definice** (27. 9. 2026,
+vlastní nález ze živé ukázky): `_copula`'s cop-swap („Co je jezevčík?“ —
+tázací podmět + nominál v kořeni → definice pojmu) firoval stejně na
+„Kdo byla matka Karla Čapka?“/„Kdo byl prezident republiky?“, kde jde o
+OPAK — identifikace konkrétní osoby, ne definice slova. Rozlišovač: kořen
+s HOLÝM GENITIVNÍM DOPLŇKEM (`_has_gen_complement`, nová metoda) je vždy
+konkrétní reference, ne obecná třída — cop-swap se teď u něj nespustí,
+`kdo` zůstává díra. Obecné (nejen `RELATIONAL_NOUNS`), ověřeno na
+`ředitel školy`/`prezident republiky` navíc k `matka`. Nové testy
+`tests/test_read.py::test_cop_swap_nemate_definici_kdyz_korenu_ma_
+genitiv` + `::test_cop_swap_definice_bez_genitivu_beze_zmeny` (kontrola,
+že „Co je jezevčík?“ beze změny). Pytest 226+2xfail → **228+2xfail**,
+mypy/pylint beze regrese. Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
 9. **Výpis — zbytky z reálného textu:** typing z nadpisů/seznamů („Wikilivres: Josef Čapek: díla“ → Josef Čapek ∈ dílo — paskvil z appos), „Krakatit je román.“ čtené jako obecná věta (⊆ místo ∈; velké písmeno na začátku věty není důkaz jména), „R.U.R. (… 1920) –“ → `zemřít(R.U.R., 1920)` (životopisná závorka u díla); imperativ s vedlejší větou („Vyjmenuj, co napsal…“); ověření 9 gen otázek J.
 10. **Převzít z conbond5 po jedné konstrukci** (srovnávací slova, veličiny s jednotkami, definice/vztahová jména z textu, meta‑otázky, obnova diakritiky, elipsa přísudku) — každou s číslem před/po na stabilním vzorku; etalon 14/32 vs conbond5 24/32 je přesně tento rozdíl.
 11. **(housekeeping, čeká na službu) `docs/UKAZKY.md` regenerovat** (`python -m bench ukazky`) — spadne na `segmentace … není v data/cache/parses.json` (scény potřebují přesné věty z živého UDPipe/keše, které tahle relace nemá). Až bude UDPipe po ruce: přegenerovat, ověřit, že „krok 6“ (§ 5) je v ukázkách vidět (kratší NEVÍM sekce, bez zdroje u „vím:“).

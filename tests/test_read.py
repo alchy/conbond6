@@ -229,6 +229,48 @@ def test_copula_question_with_nmod_wobble(oracle: RecordedOracle) -> None:
     assert terms(m, "kdo") == ["jezevčík"] and terms(m, "co") == ["pes"]
 
 
+def test_cop_swap_nemate_definici_kdyz_korenu_ma_genitiv() -> None:
+    """„Kdo byla matka Karla Čapka?“ (živá ukázka 27. 9. 2026, J.): tázací
+    podmět + nominál v kořeni vypadá strukturně jako „Co je jezevčík?“
+    (definiční otázka, cop-swap dá `kdo` z kořene, `co` je díra) — ale
+    „matka Karla Čapka“ NENÍ definice pojmu „matka“, je to popis KONKRÉTNÍ
+    osoby (kořen má holý genitivní doplněk, `_has_gen_complement`). Dřív
+    cop-swap nerozlišoval a otázka vždy skončila NEVÍM (`kdo` bylo bez
+    díry, `co` byla díra, kterou nic nevyplní). Ruční UD (ověřeno křížově
+    proti SpacyOracle), ne živý UDPipe."""
+    from cb6.oracle import Parse, Token
+    p = Parse("Kdo byla matka Karla Čapka?", (
+        Token(1, "Kdo", "kdo", "PRON", 3, "nsubj", (("Animacy", "Anim"), ("Case", "Nom"), ("PronType", "Int,Rel"))),
+        Token(2, "byla", "být", "AUX", 3, "cop", (("Aspect", "Imp"), ("Gender", "Fem,Neut"), ("Number", "Plur,Sing"), ("Polarity", "Pos"), ("Tense", "Past"), ("VerbForm", "Part"), ("Voice", "Act"))),
+        Token(3, "matka", "matka", "NOUN", 0, "root", (("Case", "Nom"), ("Gender", "Fem"), ("Number", "Sing"))),
+        Token(4, "Karla", "Karel", "PROPN", 3, "nmod", (("Animacy", "Anim"), ("Case", "Gen"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(5, "Čapka", "Čapek", "PROPN", 4, "flat", (("Animacy", "Anim"), ("Case", "Gen"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(6, "?", "?", "PUNCT", 3, "punct", ()),
+    ), "ruční UD (ověřeno křížově proti SpacyOracle) — test, ne živý UDPipe")
+    m = read(p).main
+    kdo, co = m.role("kdo"), m.role("co")
+    assert kdo is not None and kdo.wh and not kdo.terms
+    assert co is not None and not co.wh
+    assert co.terms[0].lemma == "matka" and co.terms[0].rel_owner is not None
+    assert co.terms[0].rel_owner.name_lemmas == ("Karel", "Čapek")
+
+
+def test_cop_swap_definice_bez_genitivu_beze_zmeny() -> None:
+    """Kontrola, že oprava výše nezasáhla „Co je jezevčík?“ (definiční
+    otázka, kořen bez genitivního doplňku) — cop-swap dál funguje."""
+    from cb6.oracle import Parse, Token
+    p = Parse("Co je jezevčík?", (
+        Token(1, "Co", "co", "PRON", 3, "nsubj", (("Animacy", "Inan"), ("Case", "Nom"), ("PronType", "Int,Rel"))),
+        Token(2, "je", "být", "AUX", 3, "cop", (("Aspect", "Imp"), ("Mood", "Ind"), ("Number", "Sing"), ("Person", "3"), ("Polarity", "Pos"), ("Tense", "Pres"), ("VerbForm", "Fin"), ("Voice", "Act"))),
+        Token(3, "jezevčík", "jezevčík", "NOUN", 0, "root", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(4, "?", "?", "PUNCT", 3, "punct", ()),
+    ), "ruční UD (ověřeno, zkopírováno z tests/data/parses.json) — test, ne živý UDPipe")
+    m = read(p).main
+    kdo, co = m.role("kdo"), m.role("co")
+    assert kdo is not None and not kdo.wh and kdo.terms and kdo.terms[0].lemma == "jezevčík"
+    assert co is not None and co.wh
+
+
 def test_copula_determiners(oracle: RecordedOracle) -> None:
     m = R(oracle, "Každý spisovatel je člověk.").main
     kdo = m.role("kdo")
