@@ -77,6 +77,12 @@ def weakest(a: str, b: str) -> Grade:
     return a if GRADE_RANK[a] <= GRADE_RANK[b] else b  # type: ignore[return-value]
 
 
+def _is_single_term_role(r: Role | None) -> bool:
+    """Role s přesně jedním termem, ne dírou (`inverze_verdict` — všechny tři
+    role dotazu musí být jednoznačně dané, ne otázka na výplň)."""
+    return r is not None and not r.wh and len(r.terms) == 1
+
+
 def _same_pred(a: str | None, b: str | None, lexicon: Lexicon) -> LexMatch | None:
     """Shoda predikátu dotazu/vzoru `a` s predikátem výroku `b`: přesná, nebo
     přes lexikon (třída synonym / řetěz implikací — viz `Lexicon.match`).
@@ -351,6 +357,41 @@ class Evaluator:
             return Verdict("ANO", [proof]) if ov else Verdict("NE", [], [proof])
         return None
 
+    # ---- inverze (krok 3): obrácený vztah příbuzenství -----------------------
+
+    def inverze_verdict(self, q: Statement) -> Verdict | None:
+        """Otázka „Je X <vztah> Y?“ (operátor `inverze`, krok 3 příbuzenství):
+        existuje-li výrok `zdroj(kdo=Y, čí=X)` pro nějaký zdrojový vztah, jehož
+        `inverze` cíl je lemma role `co`, je odpověď ANO — X je Y `<cíl>`
+        (obrácený vztah). Query-time join (dvě role dotazu spojené přes
+        lexikon), ne `derive()` — stejná architektura jako `overlap_verdict`.
+        Jen ANO: chybějící fakt neznamená NE (nevíme, ne popřeno).
+        Vstup: dotaz s rolemi `kdo` (1 term), `co` (1 term, skupina se jménem
+        cíle), `čí` (1 term). Výstup: `Verdict`, nebo `None` (nesedí/chybí)."""
+        kdo, co, ci = q.role("kdo"), q.role("co"), q.role("čí")
+        if not _is_single_term_role(kdo) or not _is_single_term_role(co) or not _is_single_term_role(ci):
+            return None
+        assert kdo is not None and co is not None and ci is not None  # pro mypy — už ověřeno výše
+        x, y = kdo.terms[0], ci.terms[0]
+        target = self.m.nodes.get(co.terms[0])
+        if target is None:
+            return None
+        for link in self.lex.inverze_rules_by_target(target.lemma):
+            src = link.args[0]
+            for f in self.m.knowledge():
+                if f.neg or self.same_pred(src, f.pred) is None:
+                    continue
+                fkdo, fci = f.role("kdo"), f.role("čí")
+                if not fkdo or not fci or y not in fkdo.terms or x not in fci.terms:
+                    continue
+                proof = Proof([f.id], [f"{self.m.node(y).label()} {src} {self.m.node(x).label()} ⇒ "
+                                        f"{self.m.node(x).label()} {target.lemma} {self.m.node(y).label()} (inverze)"],
+                              grade="derived", hard=[("role:kdo", f.id, y), ("role:čí", f.id, x), ("lex", src, target.lemma)])
+                self.m.use_links((link,))
+                proof.links.append(link.id)
+                return Verdict("ANO", [proof])
+        return None
+
     # ---- ano/ne --------------------------------------------------------------
 
     def evaluate(self, q: Statement, *, depth: int = 0) -> Verdict:
@@ -372,6 +413,9 @@ class Evaluator:
             if ov.value == "ANO":
                 return ov
             neg.extend(ov.counter)
+        iv = self.inverze_verdict(q)
+        if iv is not None:
+            return iv
         candidates = [f for f in m.knowledge() if self.same_pred(q.pred, f.pred) is not None]
         for f in candidates:
             p = self.match(q, f, depth=depth)

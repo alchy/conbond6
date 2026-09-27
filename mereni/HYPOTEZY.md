@@ -965,3 +965,63 @@ nese hranu — u `kdo`/`co` už docela dobře (0,46/0,37 recall, ne dokonalé,
 ale ne náhoda), u zbytku pořád slabě. Krok, který by dal víc, je bohatší
 hrana (sourozenci, prarodič), ne jiný model.
 pytest 214 passed + 2 xfailed beze změny, mypy/pylint čisté.
+
+## 2026-09-27 · pokračování · krok 3 (poslední kus): operátor `inverze`
+
+**Zadání J.:** „pokracuj sam dal, krok 3 vztahový operátor inverze“ —
+výslovné pokračování i přes dřívější poznámku „vědomě NEimplementováno,
+chybí reálné otázky“ (HANDOVER § 6/8, tentýž den). Vyřešeno stejně jako
+`překryv` (krok 2): logická vrstva se dá poctivě otestovat na ručně
+sestavené paměti (fragmenty, ne fiktivní věty prezentované jako reálné),
+čtecí strana (rozpoznat otázku „Je X sourozenec Y?“ z textu) zůstává
+otevřená — čeká na reálné otázky, ne na dohad.
+**Změna:**
+- `cb6/lexicon.py`: `inverze` dostal kód — validace (2 argy, síla jen
+  `implies` — směrové pravidlo, ne nápověda), `Lexicon._inverze`
+  (zdrojový vztah → řádky), `inverze_rules_by_target(lemma)` (dotaz zná
+  cíl) / `inverze_targets(pred)` (zrcadlo, zná zdroj) — přesně souměrné
+  s `overlap_*` u `překryv`.
+- `cb6/lexikon/inverze.jsonl` (12 řádků): `bratr`/`sestra`→`sourozenec`,
+  `otec`/`matka`→`dítě`, `syn`/`dcera`→`rodič`, `děd`/`bába`→`vnouče`,
+  `vnuk`/`vnučka`→`prarodič` (cíl rodově NEUTRÁLNÍ — zdroj neurčuje rod
+  DRUHÉ strany vztahu, konkrétní rod bez dokladu by byl tichý odhad,
+  I‑3), `manžel`↔`manželka` (přesný pár, oba směry, rod obou stran daný
+  už zdrojem).
+- `cb6/lang/cs.json relational_nouns`: přidány cílové neutrální výrazy
+  (`sourozenec`, `dítě`, `rodič`, `vnouče`) — připraveno na budoucí
+  čtení genitivu u těchhle jmen stejnou cestou jako u `manžel dcery`.
+- `cb6/logic.py Evaluator.inverze_verdict(q)`: query-time join (dvě role
+  dotazu — `kdo`, `co`, `čí` — spojené přes lexikon, ne `derive()`,
+  stejná architektura jako `overlap_verdict`). Existuje-li výrok
+  `zdroj(kdo=Y, čí=X)` pro zdroj, jehož `inverze` cíl je lemma role
+  `co`, dotaz „Je X <cíl> Y?“ dá ANO. Jen ANO — chybějící fakt je NEVÍM,
+  ne NE (nevíme, nepopřeli jsme). Wired do `evaluate()` hned za
+  `overlap_verdict`.
+- `bench/graphcheck.py`: `lex_path` chodí i po `inverze` (implies
+  jednosměrně, jako `překryv`); nový obecný hard krok `role:<jméno>`
+  (`a`=výrok, `b`=term — přímá kontrola hrany `role:<jméno>` z exportu,
+  ne odvozená cesta jako `member`/`subset` — ověřuje PŘESNÉ svázání
+  faktu s argumenty, ne jen že nějaký fakt daného predikátu existuje).
+- `cb6/dialog.py`: `!uč inverze bratr => sourozenec` (vlastní slovo v
+  příkazu jako `překryv` — jinak by `=>` padlo na `implikace`, jinou
+  sémantiku).
+- `tests/test_inverze.py` (4 testy, ruční `Statement`/`Memory` — stejný
+  žánr jako `test_prekryv.py`): `bratr(Josef,čí=Karel)` → ANO na „Je
+  Karel sourozenec Josefa?“ (i doloženo z grafu, i bez materializace
+  řádku `inverze` selže rekonstrukce — I‑12); `manžel`/`manželka` přesný
+  pár; chybějící fakt → NEVÍM; ŠPATNÝ SMĚR (Josef sourozenec Karla, ne
+  obráceně) → NEVÍM, ne falešné ANO.
+**Hypotéza:** pytest +4, mypy/pylint beze regrese, real-corpus smoke
+(`--parser spacy`, `alois_jirásek`+`karel_čapek`) beze pádu a beze
+změny QA (operátor se v těhle dvou dokumentech nepoužije — čtecí strana
+není zapojená).
+**Výsledek:** přesně tak. pytest **218 passed** (+4) + 2 xfailed, mypy
+36 souborů čisté, pylint diff beze nového nálezu (jen posun řádků —
+ověřeno `git stash` diffem). Smoke test QA 9/25 beze změny, audit grafu
+0, determinismus ano.
+**Poučení:** krok 3 návrhu je teď HOTOVÝ na logické vrstvě (lexikon +
+query-time join + graphcheck), stejně jako krok 2 (`překryv`) — obě dvě
+čekají na stejnou věc: reálný text/otázky, ne na další kód. Role `čí` a
+predikáty vztahových substantiv se teď ZAPISUJÍ (dnešní ráno) i
+DOTAZUJÍ (teď) — jen čtecí strana otázky („Je X sourozenec Y?“ z
+reálné věty) chybí, a to záměrně, dokud nebude co číst.

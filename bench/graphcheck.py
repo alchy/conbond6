@@ -128,7 +128,7 @@ def lex_path(g: nx.MultiDiGraph, fact_pred: str, query_pred: str, limit: int = 4
         return []
     adj: dict[str, list[tuple[str, str]]] = {}
     for n, d in g.nodes(data=True):
-        if d.get("kind") != "vazba" or d.get("op") not in ("třída", "implikace", "podřazení", "překryv"):
+        if d.get("kind") != "vazba" or d.get("op") not in ("třída", "implikace", "podřazení", "překryv", "inverze"):
             continue
         args = list(d.get("args", []))
         if len(args) != 2:
@@ -297,6 +297,11 @@ def check_answer(g: nx.MultiDiGraph, proof_statement_ids: list[str], hard_steps:
             ok = _time_overlap(g, a, b)
         elif kernel == "no_overlap":
             ok = not _time_overlap(g, a, b)
+        elif kernel.startswith("role:"):
+            # `inverze` (krok 3): `a` je výrok, `b` term — přímá hrana role
+            # z exportu (`Memory.graph()` píše `type=f"role:{jméno}"`), ne
+            # odvozená cesta — ověřuje přesné svázání (ne jen že fakt existuje).
+            ok = any(d.get("type") == kernel for _, v, d in g.out_edges(a, data=True) if v == b)
         if not ok:
             out.append(Violation("rekonstrukce", a, f"krok {kernel}({a}, {b}) není v grafu"))
     return out

@@ -9,12 +9,15 @@ množina funkcí v kódu; použitý řádek se **líně materializuje do grafu**
 uzel `kind="vazba"` (I‑11/I‑12 — odpověď je rekonstruovatelná z exportu).
 
 Dnes v kódu: `třída` (ekvivalence — symetrická, tranzitivní), `implikace`
-(jednosměrná: `p ⇒ q`; fakt `p` odpovídá na otázku `q`, ne naopak) a
+(jednosměrná: `p ⇒ q`; fakt `p` odpovídá na otázku `q`, ne naopak),
 `podřazení` (`x ⊆ y` nad lemmaty skupin: kdo je *drama*, je *dílo*; orientované,
 tranzitivní — technicky implikace nad třídami, zvlášť jen kvůli čitelnosti
-řádku a grafu). Ostatní operátory (`protiklad`, `inverze`, `skládání`,
-`překryv`, `porovnání`) jsou vyjmenované, ale zatím bez kódu — řádek s nimi se
-načte a hlídá, jen se neuplatní.
+řádku a grafu), `překryv` (protnutí dvou období ⇒ *možnost* setkání — query-time
+join, `cb6.logic.Evaluator.overlap_verdict`) a `inverze` (jednosměrný obrácený
+vztah: `bratr(kdo=X, čí=Y) ⇒ sourozenec(kdo=Y, čí=X)` — query-time join,
+`cb6.logic.Evaluator.inverze_verdict`, krok 3 příbuzenství). Ostatní operátory
+(`protiklad`, `skládání`, `porovnání`) jsou vyjmenované, ale zatím bez kódu —
+řádek s nimi se načte a hlídá, jen se neuplatní.
 
 Síla: `same` (zaměnitelné ve verdiktu), `implies` (jednosměrné, ve verdiktu
 jako odvození), `related` (jen pro recall / nápovědu — **nikdy ve verdiktu**).
@@ -122,12 +125,14 @@ class Link:
             raise ValueError(f"{self.id}: neznámá autorita {self.authority!r}")
         if not self.source:
             raise ValueError(f"{self.id}: řádek bez zdroje")
-        if self.op in ("třída", "implikace", "podřazení") and len(self.args) != 2:
+        if self.op in ("třída", "implikace", "podřazení", "inverze") and len(self.args) != 2:
             raise ValueError(f"{self.id}: {self.op} chce dva argumenty, má {len(self.args)}")
         if self.op == "třída" and self.strength == "implies":
             raise ValueError(f"{self.id}: třída nemůže mít sílu implies (použij implikace)")
-        if self.op in ("implikace", "podřazení") and self.strength == "same":
+        if self.op in ("implikace", "podřazení", "inverze") and self.strength == "same":
             raise ValueError(f"{self.id}: {self.op} nemůže mít sílu same (použij třída)")
+        if self.op == "inverze" and self.strength == "related":
+            raise ValueError(f"{self.id}: inverze nemůže mít sílu related (je to směrové pravidlo, ne nápověda)")
         if self.op == "překryv":
             if len(self.args) != 2:
                 raise ValueError(f"{self.id}: překryv chce dva argumenty (predikát, cíl), má {len(self.args)}")
@@ -192,6 +197,8 @@ class Lexicon:
         self._loose: dict[str, set[str]] = {}
         #: `překryv`: zdrojový predikát → řádky (cíl v `link.args[1]`, viz `overlap_targets`).
         self._overlap: dict[str, list[Link]] = {}
+        #: `inverze`: zdrojový vztah → řádky (cíl v `link.args[1]`, viz `inverze_rules_by_target`).
+        self._inverze: dict[str, list[Link]] = {}
         self._parent: dict[str, str] = {}
         self._memo: dict[tuple[str, str], LexMatch | None] = {}
         for link in rows:
@@ -201,6 +208,9 @@ class Lexicon:
             self.rows[link.id] = link
             if link.op == "překryv":
                 self._overlap.setdefault(link.args[0], []).append(link)
+                continue
+            if link.op == "inverze":
+                self._inverze.setdefault(link.args[0], []).append(link)
                 continue
             if link.op not in ("třída", "implikace", "podřazení"):
                 continue  # rezervované operátory: řádek držíme, kód zatím nemá
@@ -220,6 +230,8 @@ class Lexicon:
             lst.sort(key=lambda x: (x[1].id, x[0]))  # determinismus cest
         for ov in self._overlap.values():
             ov.sort(key=lambda l: l.id)
+        for inv in self._inverze.values():
+            inv.sort(key=lambda l: l.id)
 
     # ---- stavba -----------------------------------------------------------------
 
@@ -340,6 +352,20 @@ class Lexicon:
         Vstup: zdrojový predikát (`link.args[0]`, např. `"žít"`). Výstup:
         n‑tice řádků `překryv` (deterministicky seřazená podle id)."""
         return tuple(self._overlap.get(pred, ()))
+
+    def inverze_rules_by_target(self, lemma: str) -> tuple[Link, ...]:
+        """Řádky `inverze`, jejichž cíl (`link.args[1]`) je tohle lemma —
+        dotaz zná cíl (jméno role `co`, např. „sourozenec“), ne zdroj
+        (krok 3: „Je X sourozenec Y?“ hledá zdrojový vztah `bratr`/`sestra`).
+        Vstup: cílové lemma. Výstup: n‑tice řádků (deterministicky podle id)."""
+        return tuple(l for l in self.rows.values() if l.op == "inverze" and l.args[1] == lemma)
+
+    def inverze_targets(self, pred: str) -> tuple[Link, ...]:
+        """Řádky `inverze` s tímto zdrojovým vztahem (`link.args[0]`) —
+        opačný směr než `inverze_rules_by_target` (znáš zdroj, ne cíl).
+        Vstup: zdrojový vztah (`link.args[0]`, např. `"bratr"`). Výstup:
+        n‑tice řádků (deterministicky seřazená podle id)."""
+        return tuple(self._inverze.get(pred, ()))
 
 
 _TEACH = re.compile(r"^(\S+)\s*(=>|=|~|<)\s*(\S+)$")

@@ -473,9 +473,16 @@ class Session:
                 a, b = mt.groups()
                 link = m.add_link("překryv", (a, b), "implies", "said", f"dialog tah {self.turn_no}", modality="možnost")
                 return f"naučeno {link.id}: {link.label()} (překryv, možnost)"
+            # `inverze` (krok 3) má taky vlastní slovo — jinak by `=>` padlo na
+            # `implikace` (řetězec predikátů), ne na query-time roli-swap join.
+            mt_inv = re.match(r"^inverze\s+(\S+)\s*=>\s*(\S+)$", arg.strip())
+            if mt_inv:
+                a, b = mt_inv.groups()
+                link = m.add_link("inverze", (a, b), "implies", "said", f"dialog tah {self.turn_no}")
+                return f"naučeno {link.id}: {link.label()} (inverze)"
             parsed = parse_teach(arg)
             if parsed is None:
-                return "užití: !uč kázat = hlásat · !uč bydlet => žít · !uč vydat ~ napsat · !uč drama < dílo · !uč překryv žít => potkat_se"
+                return "užití: !uč kázat = hlásat · !uč bydlet => žít · !uč vydat ~ napsat · !uč drama < dílo · !uč překryv žít => potkat_se · !uč inverze bratr => sourozenec"
             op, args, strength = parsed
             link = m.add_link(op, args, strength, "said", f"dialog tah {self.turn_no}")
             return f"naučeno {link.id}: {link.label()} ({op}, {strength})"
@@ -584,7 +591,7 @@ class Session:
     @staticmethod
     def _help() -> str:
         return (
-            "příkazy: !zapomeň s0001 · !role v+Loc = kde · !uč kázat = hlásat | bydlet => žít | vydat ~ napsat | drama < dílo | překryv žít => potkat_se · "
+            "příkazy: !zapomeň s0001 · !role v+Loc = kde · !uč kázat = hlásat | bydlet => žít | vydat ~ napsat | drama < dílo | překryv žít => potkat_se | inverze bratr => sourozenec · "
             "!pravidlo jet(kam:X) => být(kde:X) · !výjimka létat pták tučňák · !otevřené · "
             "!odpověz o0001 kde · !program · !popiš Jirásek · !ukaž s0042 · !hypotéza s0042 potvrď · !statusy · "
             "!ulož p.json · !načti p.json · !graf g.json"

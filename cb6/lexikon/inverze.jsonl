@@ -1,0 +1,21 @@
+# Inverze (spec krok 3, příbuzenství): fakt zdroj(kdo=X, čí=Y) ⇒ cíl(kdo=Y, čí=X)
+# — obrácený směr téhož vztahu. op inverze, args [zdrojový vztah, cílový vztah],
+# síla vždy implies (je to směrové pravidlo — Y je X CÍL jen když X je Y ZDROJ,
+# ne naopak; opačný směr je vlastní řádek, viz manžel/manželka níže).
+# Cíl je většinou rodově neutrální (sourozenec/dítě/rodič/vnouče), protože zdroj
+# neurčuje rod DRUHÉ strany vztahu (bratr(X,Y) říká, že X je muž, ne jaký je Y) —
+# volba konkrétního rodu bez znalosti Y by byl tichý odhad (I‑3). Join dělá
+# volající (cb6/logic.py Evaluator.inverze_verdict) — dvě role dotazu, ne jedna
+# premisa, stejná mez jako u `překryv` (Statement.derived_from je jednorodičovské).
+{"id": "lex:inverze:0001", "op": "inverze", "args": ["bratr", "sourozenec"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#12", "pozn": "bratr(X,čí=Y) ⇒ sourozenec(Y,čí=X) — rod Y neznámý"}
+{"id": "lex:inverze:0002", "op": "inverze", "args": ["sestra", "sourozenec"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#13", "pozn": "sestra(X,čí=Y) ⇒ sourozenec(Y,čí=X) — rod Y neznámý"}
+{"id": "lex:inverze:0003", "op": "inverze", "args": ["otec", "dítě"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#14", "pozn": "otec(X,čí=Y) ⇒ dítě(Y,čí=X)"}
+{"id": "lex:inverze:0004", "op": "inverze", "args": ["matka", "dítě"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#15", "pozn": "matka(X,čí=Y) ⇒ dítě(Y,čí=X)"}
+{"id": "lex:inverze:0005", "op": "inverze", "args": ["syn", "rodič"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#16", "pozn": "syn(X,čí=Y) ⇒ rodič(Y,čí=X)"}
+{"id": "lex:inverze:0006", "op": "inverze", "args": ["dcera", "rodič"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#17", "pozn": "dcera(X,čí=Y) ⇒ rodič(Y,čí=X)"}
+{"id": "lex:inverze:0007", "op": "inverze", "args": ["děd", "vnouče"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#18", "pozn": "děd(X,čí=Y) ⇒ vnouče(Y,čí=X)"}
+{"id": "lex:inverze:0008", "op": "inverze", "args": ["bába", "vnouče"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#19", "pozn": "bába(X,čí=Y) ⇒ vnouče(Y,čí=X)"}
+{"id": "lex:inverze:0009", "op": "inverze", "args": ["vnuk", "prarodič"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#20", "pozn": "vnuk(X,čí=Y) ⇒ prarodič(Y,čí=X)"}
+{"id": "lex:inverze:0010", "op": "inverze", "args": ["vnučka", "prarodič"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#21", "pozn": "vnučka(X,čí=Y) ⇒ prarodič(Y,čí=X)"}
+{"id": "lex:inverze:0011", "op": "inverze", "args": ["manžel", "manželka"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#22", "pozn": "manžel(X,čí=Y) ⇒ manželka(Y,čí=X) — přesný pár, rod obou stran daný"}
+{"id": "lex:inverze:0012", "op": "inverze", "args": ["manželka", "manžel"], "síla": "implies", "autorita": "seed", "zdroj": "cb6/lexikon/inverze.jsonl#23", "pozn": "manželka(X,čí=Y) ⇒ manžel(Y,čí=X) — přesný pár, rod obou stran daný"}

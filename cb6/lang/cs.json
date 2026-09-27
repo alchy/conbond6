@@ -130,6 +130,7 @@
     "děd", "dědeček", "bába", "babička", "vnuk", "vnučka",
     "strýc", "teta", "synovec", "neteř", "bratranec", "sestřenice",
     "pravnuk", "pravnučka", "prababička", "praděd", "prarodič",
-    "kmotr", "kmotra", "nevlastní_otec", "nevlastní_matka"
+    "kmotr", "kmotra", "nevlastní_otec", "nevlastní_matka",
+    "sourozenec", "dítě", "rodič", "vnouče"
   ]
 }
