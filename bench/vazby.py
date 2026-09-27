@@ -154,8 +154,8 @@ CASES: tuple[VazbaCase, ...] = (
               _run_veta("Vydat není synonymum napsat."), None),
     VazbaCase("korekce:oprava_predikatu", "korekce",
               "„Petr bydlí v Praze.“ + „Ne, Petr žil v Praze.“ — oprava STEJNÉ role jiným predikátem "
-              "má naučit bydlet~žít; dnes jen odvolá starý výrok, vazbu nenaučí",
-              _run_veta("Petr bydlí v Praze.", "Ne, Petr žil v Praze."), ("třída", ("bydlet", "žít"), "same")),
+              "učí bydlet~žít (síla `related` — opatrně, jedna oprava nestačí na `same`/`implies`)",
+              _run_veta("Petr bydlí v Praze.", "Ne, Petr žil v Praze."), ("třída", ("bydlet", "žít"), "related")),
     VazbaCase("graf:parafraze", "graf",
               "„Karel Čapek napsal román Krakatit.“ + „…vytvořil román Krakatit.“ — stejné role/termy, "
               "jiný predikát → hypotéza vazby bez věty o vazbě samotné; dnes se nic nenaučí",

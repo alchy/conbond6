@@ -22,7 +22,7 @@
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
 | jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` + `lang/` (jazyková pravidla jako data, `cb6/lang/cs.json`) |
 | bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff vazby __main__` |
-| **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes 5/7 (`korekce`, `graf` = cíl vývoje, 0/1 každý) |
+| **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes **6/7** (`korekce` hotovo, `graf` = jediný zbývající cíl, 0/1) |
 | testy | `tests/` (167 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
 | paralelní větev | conbond5 (`~/Projects/conbond5`, jiné sezení, HEAD c503b68) — do něj nesahat |
@@ -98,8 +98,18 @@ kroku 1) místo běžného výroku; `cb6/ground.py` zapíše řádek lexikonu a
 vrátí placeholder výrok `mood="pattern"` (source pro I‑12, mimo `knowledge()`).
 Záporná věta se nenaučí nic. `!uč`/`!role`/`!pravidlo` zůstávají jako
 explicitní/debug kanál. Test `tests/test_lex_teach.py` (rozbor ručně
-sestavený — viz § 2 poznámka o spaCy). Otevřené: jiné formulace („znamená
-totéž co“, výčtová „X a Y jsou synonyma“), ostatní operátory z promluvy.
+sestavený — viz § 2 poznámka o spaCy). **Pozor:** J. tohle vzápětí upřesnil —
+„synonymum“ je pořád KLÍČOVÉ SLOVO, jen bez `!`; `bench vazby` ho proto řadí
+jako mezikrok (`veta`), ne jako cíl (§ 6 položka „‑1“, § 7 deník).
+
+**Pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`,
+27. 9. 2026): `bench/vazby.py` řadí zlaté úlohy „naučit vazbu“ podle ODKUD
+se poznatek vzal (`prikaz`/`veta`/`korekce`/`graf`), ne jedním číslem —
+ukazuje přímo, kam vývoj cílit. **`korekce` hotovo** (`cb6/dialog.py
+Session._learn_from_correction`): oprava „Ne, X namísto Y“ o TÉMŽ podmětu
+(a beze změny ostatních sdílených rolí) učí vazbu mezi starým a novým
+predikátem, síla **`related`** (opatrně — jedna oprava nestačí na
+`same`/`implies`, I‑3). Dnes **6/7** (`graf` jediný zbývající cíl).
 
 **Krok 2 (částečně): operátor `překryv`** (27. 9. 2026, fragmenty bez UDPipe):
 `cb6/lexicon.py` — `Link.modality` (JSON `modalita`), validace `překryv`
@@ -131,19 +141,19 @@ lexikonový operátor `překryv` (protnutí dvou období na časové ose).
 
 ## 6. Otevřené tahy (pořadí podle toho, co ukázal bench)
 
--1. **(nejvyšší priorita podle `bench vazby`) `korekce` a `graf` mechanismy
-   chápání vazeb — dnes 0/1 každý.** `korekce`: oprava v dialogu („Ne, X
-   místo Y“ o TÉMŽ predikátu/rolích) dnes jen odvolá starý výrok
-   (`Session._assert`, `cb6/dialog.py`), nenaučí vazbu mezi starým a novým
-   predikátem — potřebuje: při `p.correction`/`is_denial` porovnat predikát
-   odvolaného výroku s predikátem nového (stejné role/termy) a navrhnout
-   `Link` (jako `HYPOTHESIS`/otevřenou položku k potvrzení, ne rovnou
-   `said`/`read` — I‑3). `graf`: dvě věty se stejnými rolemi/termy a jiným
-   predikátem (parafráze, „napsal“/„vytvořil“ týž objekt) → hypotéza vazby
-   bez jakékoli věty o vazbě samotné — potřebuje průchod `Memory.knowledge()`
-   hledající páry výroků se shodnými termy v roli `kdo`/`co` a různým
-   predikátem. Obojí měřit přes `bench/vazby.py` (přidat úlohy, ne jen dvě
-   dnešní) před i po, přesně jak chce J.: „cíleně určit směr rozvoje“.
+-1. **(nejvyšší priorita podle `bench vazby`, 6/7) `graf` mechanismus —
+   jediný zbývající cíl, dnes 0/1.** `korekce` hotovo (27. 9. 2026,
+   `Session._learn_from_correction`, síla `related` — viz § 7 deník a
+   HYPOTEZY). `graf`: dvě věty se stejnými rolemi/termy a jiným predikátem
+   (parafráze, „napsal“/„vytvořil“ týž objekt), BEZ jakékoli opravné věty
+   v dialogu (na rozdíl od `korekce` tu není signál „tohle je oprava“) →
+   hypotéza vazby jen z toho, že se predikáty takhle „potkávají“ v grafu.
+   Potřebuje průchod `Memory.knowledge()` hledající páry výroků se shodnými
+   termy v roli `kdo`/`co` a různým predikátem — systematicky náročnější
+   (potenciálně O(n²) přes paměť) a riziko falešných párů na reálném textu
+   je vyšší než u `korekce` (žádný dialogový signál, který by omezil, kdy
+   se má hledat) — vlastní hypotéza o výkonu i precision, ne jen kopie
+   `korekce` postupu. Měřit přes `bench/vazby.py`.
 0. **(priorita až budou služby) Multilingvnost + NN jako
    extraktor struktury** — J.: NN smí dělat skoro vše (parsing, extrakci,
    konverzaci, i pro víc jazyků), ale nikdy „znalost" — ta zůstává výhradně

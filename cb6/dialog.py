@@ -230,7 +230,9 @@ class Session:
         # oprava: „To není pravda.“ / „Ne.“ / „Ne, …“
         is_denial = main.kind == "copula" and main.neg and any(
             t.lemma == "pravda" for r in main.roles for t in r.terms) or reading.parse.text.strip(".! ").lower() in ("ne", "to ne", "špatně")
+        corrected: list[Statement] = []
         if is_denial or main.correction:
+            corrected = [m.statements[sid] for sid in self._last_said if sid in m.statements]
             for sid in self._last_said:
                 revoked.extend(m.revoke(sid, f"oprava (tah {self.turn_no}): {reading.parse.text}"))
             if revoked:
@@ -254,6 +256,9 @@ class Session:
                 if (v.value == "NE" and not probe_neg) or (v.value == "ANO" and probe_neg) or v.value == "KONFLIKT":
                     conflict = v
         g = ground(reading, m, prov, "said", topic=self.topics.get(doc))
+        if main.correction and g.main is not None:
+            for old in corrected:
+                self._learn_from_correction(old, g.main)
         self._update_topic(doc, g)
         derived = derive(m)
         m.tick()
@@ -280,6 +285,33 @@ class Session:
                         lines.append(f"   ↳ {step}")
             lines.append("   (nechávám obojí; otázky na to budou hlásit KONFLIKT — oprav `!zapomeň s…`, nebo zúž `!výjimka <predikát> <skupina> <výjimka>`)")
         return Answer("\n".join(lines), statements=[s.id for s in g.statements], revoked=revoked, open=g.open, conflict=conflict, reading=str(main))
+
+    def _learn_from_correction(self, old: Statement, new: Statement) -> None:
+        """Oprava v dialogu („Ne, X namísto Y“ o TÉMŽ predikátu/rolích) je
+        kontextový důkaz vztahu mezi starým a novým predikátem — bez
+        klíčového slova, bez příkazu (J. 27. 9. 2026: „vše z kontextu věty
+        nebo dialogu, nesmí to být klíčová slova“; `bench/vazby.py`
+        mechanismus `korekce`).
+
+        Opatrně: síla `related` (jen nápověda/recall, nikdy ve verdiktu,
+        I‑3) — jedna oprava stejně dobře může znamenat aktualizovaný fakt
+        („Ne, bydlí už jinde“) jako parafrázi stejné události; k `same`/
+        `implies` by bylo třeba víc dokladů, ne domněnku z jednoho tahu.
+        Vstup: odvolaný a nový výrok. Výstup: nic (řádek se zapíše, jen
+        když se role beze zbytku shodují a jen predikát je jiný)."""
+        if old.pred is None or new.pred is None or old.pred == new.pred:
+            return
+        anchor, new_anchor = old.role("kdo"), new.role("kdo")
+        if not anchor or not new_anchor or not anchor.terms or set(anchor.terms) != set(new_anchor.terms):
+            return
+        for r in old.roles:
+            if r.name == "kdo" or r.wh:
+                continue
+            nr = new.role(r.name)
+            if nr is not None and set(nr.terms) != set(r.terms):
+                return  # jiná role se taky změnila — nejde jen o predikát
+        self.memory.add_link("třída", (old.pred, new.pred), "related", "read",
+                              f"korekce (tah {self.turn_no}): „{old.pred}“ → „{new.pred}“, stejné role")
 
     def _fix_quantifier(self, reading: Reading, doc: str) -> Answer:
         m = self.memory

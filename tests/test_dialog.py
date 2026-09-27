@@ -35,6 +35,37 @@ def test_unknown_stays_unknown_and_correction(s: Session) -> None:
     assert c.revoked == ["s0001"] and c.statements
     assert "Brno" in s.say("Kde bydlí Petr?").text
     assert s.memory.statements["s0001"].status == "revoked"
+    # oprava MÍSTA, ne predikátu (stejné sloveso „bydlet“) — nesmí se naučit žádná vazba
+    assert not [l for l in s.memory.links.values() if l.authority == "read"]
+
+
+def test_korekce_uci_vazbu_mezi_predikaty(s: Session) -> None:
+    """Oprava „Ne, X namísto Y“ o TÉMŽ podmětu a MÍSTĚ, jen jiným slovesem,
+    je kontextový důkaz vztahu mezi predikáty — bez klíčového slova, bez
+    příkazu (J. 27. 9. 2026; `bench/vazby.py` mechanismus `korekce`).
+    Rozbor druhé věty ručně sestavený (stejná poctivost jako
+    `tests/test_lex_teach.py` — viz `mereni/HYPOTEZY.md` 2026‑09‑27)."""
+    from cb6.oracle import Parse, Token
+    zil = Parse("Ne, Petr žil v Praze.", (
+        Token(1, "Ne", "ne", "PART", 4, "advmod:emph", ()),
+        Token(2, ",", ",", "PUNCT", 1, "punct", ()),
+        Token(3, "Petr", "Petr", "PROPN", 4, "nsubj", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(4, "žil", "žít", "VERB", 0, "root", (("Aspect", "Imp"), ("Gender", "Masc"), ("Number", "Sing"), ("Polarity", "Pos"), ("Tense", "Past"), ("VerbForm", "Part"), ("Voice", "Act"))),
+        Token(5, "v", "v", "ADP", 6, "case", (("AdpType", "Prep"), ("Case", "Loc"))),
+        Token(6, "Praze", "Praha", "PROPN", 4, "obl", (("Case", "Loc"), ("Gender", "Fem"), ("NameType", "Geo"), ("Number", "Sing"))),
+        Token(7, ".", ".", "PUNCT", 4, "punct", ()),
+    ), "ruční UD (ověřeno) — test, ne UDPipe")
+
+    class _Then:
+        def parse(self, text: str) -> Parse:
+            assert text == zil.text
+            return zil
+    s.say("Petr bydlí v Praze.")
+    s.oracle = _Then()  # druhá věta není v tests/data/parses.json — ruční rozbor jen pro ni
+    s.say("Ne, Petr žil v Praze.")
+    said = [l for l in s.memory.links.values() if l.authority == "read"]
+    # síla `related`: nikdy ve verdiktu (I-3, ověřeno obecně v test_lexicon.py) — jen nápověda
+    assert len(said) == 1 and said[0].args == ("bydlet", "žít") and said[0].strength == "related"
 
 
 def test_denial_revokes_last(s: Session) -> None:

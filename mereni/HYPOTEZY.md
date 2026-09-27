@@ -329,3 +329,37 @@ cílit (§ 6 v HANDOVER, položka „‑1“: `korekce` a `graf`, oba 0/1, jsou 
 nejvyšší priorita). Vedlejší poučení: „veta“ mechanismus (dokončený
 minulý tah) sám o sobě ještě nesplňuje „bez klíčových slov“ — bench to
 teď drží viditelné, aby se to nezapomnělo vydávat za hotovo.
+
+## 2026-09-27 · pokračování · mechanismus `korekce` implementován (bench vazby 5/7 → 6/7)
+
+**Změna:** `cb6/dialog.py Session._learn_from_correction` — když oprava
+v dialogu (`main.correction`, „Ne, X namísto Y“) odvolá starý výrok a
+zapíše nový SE STEJNOU rolí `kdo` (a beze změny všech ostatních sdílených
+rolí) ale JINÝM predikátem, zapíše se řádek lexikonu `třída`/`related`,
+autorita `read` — bez klíčového slova, bez příkazu. Síla **`related`
+záměrně**, ne `same`/`implies`: jedna oprava může stejně dobře znamenat
+aktualizovaný fakt („bydlí už jinde“) jako parafrázi téže události —
+`related` nikdy nevstupuje do verdiktu (I‑3), takže riziko falešně
+pozitivní vazby se do QA nepropíše, jen do recall/nápovědy. Doplněn strážný
+test: pokud i ODLIŠNÁ role (ne jen predikát) se mezi starým a novým
+výrokem změní zároveň, link se NEnaučí (moc slabý/nejednoznačný signál).
+**Hypotéza:** `bench vazby` `korekce` 0/1 → 1/1, `prikaz`/`veta` beze
+změny (3/3, 2/2), `graf` beze změny (0/1); zbytek pytestu beze změny
+(žádná existující korekce v testech nezíská navíc řádek lexikonu, protože
+vyžaduje JINÝ predikát se STEJNÝMI rolemi — `test_unknown_stays_unknown_
+and_correction`ova „Ne, Petr bydlí v Brně.“ mění MÍSTO, ne predikát, takže
+první podmínka `old.pred == new.pred` ji vyřadí hned).
+**Výsledek:** přesně tak — `bench vazby` 6/7 (`korekce` 1/1, `graf` pořád
+0/1), pytest 187+2xfail → 188+2xfail (nový test `tests/test_dialog.py::
+test_korekce_uci_vazbu_mezi_predikaty` + rozšířený `test_unknown_stays_
+unknown_and_correction` o kontrolu „místní oprava nic nenaučí“), mypy
+čisté, `cb6/dialog.py` diff beze nového pylint nálezu (jen posun řádků).
+**Poučení:** rozšiřovací bod pro „vazba z kontextu dialogu“ byl přesně tam,
+kde ho `bench vazby` ukázal (`Session._assert`, větev `main.correction`) —
+měření samo řeklo, KDE v kódu zasáhnout, ne jen ŽE se má něco zlepšit.
+`graf` mechanismus (parafráze bez jakékoli opravné věty) zůstává jediný
+otevřený cíl — vyžaduje procházet `Memory.knowledge()` a hledat páry
+výroků se shodnými termy a různým predikátem, bez signálu „tohle je
+oprava“ z dialogu; to je systematicky náročnější (potenciálně O(n²) přes
+celou paměť) a je na samostatný tah s vlastní hypotézou o výkonu i
+precision (kolik falešných párů by to navrhlo na reálném textu).
