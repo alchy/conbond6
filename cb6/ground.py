@@ -260,6 +260,20 @@ class Grounder:
         Returns:
             Zapsaný (nebo u otázky jen sestavený) výrok.
         """
+        if p.lex_teach is not None and p.mood != "question" and self.write:
+            # Věta učí lexikon z běžné promluvy (J. 27. 9. 2026: „vše by mělo
+            # být z kontextu diskuse, bez příkazu“) — autorita `read`, přesně
+            # ta, kterou `cb6/lexicon.py` jmenuje od kroku 1. Není to tvrzení
+            # o světě (`mood="pattern"`, jako vzory pravidel), ale zůstává
+            # výrokem grafu se zdrojem — I‑12 platí i pro tohle.
+            op, args, strength = p.lex_teach
+            link = self.m.add_link(op, args, strength, "read", f"{self.prov.doc}#{self.prov.sent_no}: {self.prov.text}")
+            st = Statement("", None, "lex_teach", grade=self.grade, prov=self.prov, sentence=self.out.sentence,  # type: ignore[arg-type]
+                           mood="pattern", claim="SAFE", defaults=[f"věta učí lexikon: {link.label()} ({link.id})"])
+            if self.write:
+                self.m.attach(st)
+                self.out.statements.append(st)
+            return st
         self._defaults = list(p.defaults)
         self._pending_open = []
         subj = p.role("kdo")

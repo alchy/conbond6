@@ -36,6 +36,15 @@
   Nové sezení v cloudu: `python3.11 -m venv .venv && .venv/bin/pip install -e '.[dev]'`,
   ověřit `pytest -q`, a v HYPOTEZY/HANDOVER napsat, že měření tahu je jen
   pytest/mypy/pylint (ne QA/unsupported) — dokud služby nejsou po ruce.
+  Síťová politika kontejneru zamítá `lindat.mff.cuni.cz` (veřejný UDPipe) i
+  `huggingface.co`; `pypi.org`/`files.pythonhosted.org` a `github.com` (jen
+  přes `add_repo`, ne libovolné repo/release asset) fungují. **Nález:** `pip
+  install cs_core_news_sm` (spaCy, čistě z PyPI) dá český UD parser bez sítě
+  na LINDAT — ale změřená shoda se skutečným UDPipe2 na 177 zaznamenaných
+  větách je jen 50,8 % vět přesně / 83,1 % tokenů (`mereni/HYPOTEZY.md`
+  2026‑09‑27) → **nepoužívat na historická čísla** (smísilo by dva parsery
+  v jednom srovnání); použitelné jen pro zcela nové věty s ručním ověřením
+  (tak použito pro `tests/test_lex_teach.py`).
 - Python 3.11, `.venv` (`pip install -e '.[dev]'`), závislost jen `networkx` (+ dev pytest/mypy/pylint; viewbase editable z `~/Projects/viewBase2/python`).
 - **UDPipe** služba z conBond3 na `127.0.0.1:42200` (model `cs_all-ud-2.17-251125`) — jen pro nové rozbory a bench; testy jedou z keše.
 - **Ollama** `gemma4:latest` na `127.0.0.1:11434` — soudce auditu a `gold-gen` (27B qwen se do 24 GiB nevejde vedle UDPipe).
@@ -80,6 +89,16 @@ Paměť v2 (`claim`, `mood`, `parent`, `rule`, `alternatives`; JSON v2 čte v1) 
 **Výpis (17. 8. večer, nález J. z dema):** čtení `který/jaký + N` v otázce = díra v roli N (`co:?`) s N jako omezením výplně (místa/časy beze změny); imperativ `vyjmenuj/vypiš/uveď/jmenuj N (X‑gen)` = otázka druhu `list` (nezapisuje se): členové skupiny (přes `member*/subset*` a `podřazení` v lexikonu, krok `lex`), u vlastníka jen ti s výrokem `kdo: vlastník, co: kandidát`, nebo — přiznaně jako výchozí volba — pojmenované entity z dokumentu, jehož je vlastník tématem (téma = `base` uzlu dokumentu, přežije uložení); operátor `podřazení` v lexikonu (`!uč drama < dílo`, seed 18 ř.); nominativ jmenovací („drama R.U.R.“, „román Továrna na absolutno“ → entita s názvem ∈ skupina hlavy, typing „třída z nominativu jmenovacího“) místo dřívějšího paskvilu „drama R.U.r.“ jako jména.
 
 Opravy precision v čtení/zakotvení (jen věci, které lhaly): životopisná závorka jen u osob s tvarem „A – B“ bez slovesa; přivlastnění → `mít` jako HYPOTHESIS; částečná shoda jména jen s příjmením; tvary jmen jako jedno jméno; výčet „děti: Helena, Josef…“ = member, ne same_as; typing není odpověď; otázky nezanechávají osiřelé uzly.
+
+**Věta učí lexikon bez příkazu** (27. 9. 2026, J.: „vše z kontextu diskuse,
+bez příkazu“): `cb6/read.py Predication.lex_teach` + `Reader._lex_teach`
+rozpozná „X je synonymum/synonymem Y“ (autorita `read`, jmenovaná už od
+kroku 1) místo běžného výroku; `cb6/ground.py` zapíše řádek lexikonu a
+vrátí placeholder výrok `mood="pattern"` (source pro I‑12, mimo `knowledge()`).
+Záporná věta se nenaučí nic. `!uč`/`!role`/`!pravidlo` zůstávají jako
+explicitní/debug kanál. Test `tests/test_lex_teach.py` (rozbor ručně
+sestavený — viz § 2 poznámka o spaCy). Otevřené: jiné formulace („znamená
+totéž co“, výčtová „X a Y jsou synonyma“), ostatní operátory z promluvy.
 
 **Krok 2 (částečně): operátor `překryv`** (27. 9. 2026, fragmenty bez UDPipe):
 `cb6/lexicon.py` — `Link.modality` (JSON `modalita`), validace `překryv`
@@ -202,6 +221,32 @@ tři konkrétní nálezy z dnešní práce, každý s návrhem, co by ho ověři
    až bude NN/UDPipe po ruce, měřit ne jen „kolik řádků lexikon má“, ale
    „kolik řádků NN navrhl vs. kolik jich člověk musel ručně dopsat“ — to je
    číslo, které řekne, jestli se cíl (autonomní růst) plní.
+4a. **(subagent, nezávislý přezkum `discourse.py`/`ground.py`/`dialog.py`/
+`render.py`, 27. 9. 2026) Nálezy stejného tvaru jako 1., navíc bez disclosure:**
+`cb6/discourse.py:78‑84` (`Registry.candidates`) — koreferenční okno je napevno
+„tento segment ∪ přesně jeden předchozí“; antecedent za dvěma segmenty
+zpátky nikdy nevstoupí do kandidátů, systém to ani nenahlásí jako
+nejednoznačné (tiše spadne na téma dokumentu). **`cb6/ground.py:201‑223`
+(`_resolve_possessed`) — reálná I‑8 díra:** víc kandidátů u přivlastňovacího
+přídavného jména (`cands` > 1) vezme `max(..., key=activation)` **beze**
+`ambiguous()`/HYPOTHESIS/open-item — přesně ten mechanismus o pár řádků výš
+v `_resolve_pron` (180‑193) existuje a tady se nepoužije. Dvě osoby jménem
+„Jirásek“ + „Jiráskova kniha“ = tichý (špatný) odhad vlastníka. **`cb6/
+dialog.py:61‑63,95‑107`** — `Session.topics`/`_last_said` jsou proces-lokální
+skaláry bez zámku/verze; „autonomní, průběžně rostoucí“ růst implikuje
+souběžné zápisy do téže `Memory`, což by na `turn_no`/`sent_no` závodilo.
+**`cb6/render.py:16‑37`** — `ROLE_LABELS`/`TEMPLATES`/`STATUS_TAGS` jsou pořád
+Python literály, ne data vedle `cb6/lang/cs.json`, přestože modul sám tvrdí
+„šablony jako data“ — druhý jazyk potřebuje FORK `render.py`, ne nový
+soubor; to je konkrétní důkaz nálezu 4 níže. **`cb6/ground.py:208`** má
+českou příponovou tabulku (`ův/ova/ovo/in/ina/ino`) natvrdo v kódu, i když
+`cb6/lang/cs.json` už klíč `possessive` má — čtení přivlastnění je rozdělené
+na půl venku, půl uvnitř. **Doporučení subagenta:** neopravovat `derived_from`/
+`_resolve_possessed`/koreferenční okno každé zvlášť — jedno sdílené
+„kandidáti s přiznanou nejistotou“ primitivum (kandidáti + HYPOTHESIS
+alternativy + open item), kterým MUSÍ projít každé rozřešení, ne ad hoc
+nejlepší-odhad na každém místě zvlášť.
+
 4. **Role-klíče (`kde`,`kdo`,`co`…) jsou opaque symboly grafu (správně), ale
    jejich SÉMANTIKA (case frames — co je čas vs. místo, `ROLE_BY_CASE`) je
    zabudovaná do dvou míst (`ground.py` typuje výplň, `logic.py`

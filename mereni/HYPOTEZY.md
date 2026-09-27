@@ -215,3 +215,77 @@ beze regrese (jen posun čísel řádků).
 pylint diff `cb6/dialog.py`/`cb6/memory.py` beze nového nálezu (ověřeno
 `diff` baseline vs. po změně, ne jen skóre — skóre samo nerozliší posun
 řádků od nového nálezu, poučení z předchozího kroku téhle relace).
+
+## 2026-09-27 · nález (NE tah): spaCy `cs_core_news_sm` jako možná náhrada UDPipe — změřeno, NE nasazeno
+
+**Motivace:** UDPipe (127.0.0.1:42200) je nedostupné (jiný stroj), veřejný
+`lindat.mff.cuni.cz` zamítla síťová politika kontejneru (403). PyPI
+(`pypi.org`, `files.pythonhosted.org`) v `noProxy` je, takže `pip install`
+funguje bez omezení — zkusil jsem, jestli existuje český UD parser
+instalovatelný čistě odsud (bez LINDAT/GitHubu, oboje jinak blokované).
+`cs_core_news_sm` (spaCy pipeline, PyPI balíček `cs_core_news_sm==0.2.1`) jde
+nainstalovat a natrénovaný model je součástí balíčku (žádné další stahování).
+
+**Měření (ne hypotéza — šlo o zjištění, ne o tah, který mění cb6):** rozbor
+všech 177 vět z `tests/data/parses.json` spaCy modelem, token po tokenu
+porovnáno s uloženým skutečným rozborem UDPipe2 (lemma, upos, head, deprel;
+`ROOT`→`root` normalizováno) — **shoda 90/177 vět přesně (50,8 %), 754/907
+tokenů (83,1 %)**; UPOS sada, deprel jména (`nsubj`,`obl`,`expl:pv`,`flat`…) a
+rysy (`Case`,`Gender`,`Animacy`,`NameType`…) jsou stejná UD schémata — není to
+jiný tagset, jen jiný model se liší v konkrétních rozhodnutích (lemmatizace
+přechýlených tvarů, přiřazení přívlastků u dat/závorek, struktura otázek —
+právě první nesouhlasící věty byly datum v závorce a otázka).
+**Rozhodnutí:** **NEnasazovat jako tichou náhradu** — 16,9 % rozdílu v
+tokenech by znečistilo srovnání s historickými čísly (byla by to směs dvou
+parserů, ne jedna proměnná) a porušilo by ducha „čte se z tokenů rozboru,
+nikdy odhadem“ (`chronos.py` docstring, `oracle.py` provenience — `model?=`
+značka existuje přesně proto, aby se neztotožnila identita modelu). Možné
+užší použití příště: **jen pro zcela nové věty**, kde žádné historické číslo
+neexistuje k porušení (např. krok 2 `překryv` — „X žil v letech…“, „Mohli se
+X a Y potkat?“), s proveniencí jasně odlišnou (`spacy model=cs_core_news_sm-0.2.1`,
+nikdy `udpipe2`) a s ručním ověřením KAŽDÉ nové věty token po tokenu (přesně
+duch pravidla „testovací věty musí mít hlavu a patu“ — tady jsem to ověření
+já, ne LM generující bez kontroly). Nerozhodnuto bez J.: stojí to za tu
+práci (napsat `SpacyOracle`, ověřit ručně), nebo je lepší čekat na
+rozšíření síťové politiky pro `lindat.mff.cuni.cz`/`127.0.0.1:42200`?
+
+## 2026-09-27 · pokračování · věta učí lexikon bez příkazu (J.: „vše z kontextu diskuse, bez příkazu“)
+
+**Podnět J.:** „příkazy typu !uč — vše by mělo být z kontextu diskuse, bez
+příkazu.“ `cb6/lexicon.py` už od kroku 1 jmenuje autoritu `read` („věta typu
+„X je synonymum Y“ — zatím nečteme“) — přesně tohle je teď implementované.
+`!uč`/`!role`/`!pravidlo` zůstávají (debug/explicitní kanál, testy na nich
+stojí), ale k tomu přibyla cesta z běžné promluvy.
+
+**Změna:** `cb6/read.py` — `Predication.lex_teach: (op, args, síla) | None`;
+`Reader._lex_teach` v `_copula` rozpozná „X je synonymum/synonymem Y“
+(podmět = infinitiv VERB, druhý infinitiv se hledá v podstromu kořene —
+robustně vůči kolísání stromu `xcomp` vs. `nmod→acl`, stejný duch jako
+`chronos.time_from_tokens`); záporná věta („X není synonymum Y“) se
+**nenaučí nic** (radši nic než obráceně špatně). `cb6/ground.py` —
+`ground_predication` takovou predikaci nezakotví jako běžný výrok, zapíše
+řádek lexikonu (`Memory.add_link(..., "read", …)`) a vrátí placeholder
+výrok `kind="lex_teach"`, `mood="pattern"` (mimo `knowledge()`, ale se
+`source`/`sentence` pro I‑12 — je to výrok grafu, jen ne tvrzení o světě).
+
+**Metodická poznámka (proč rozbor ručně, ne ze zkoušeného spaCy):** tahle
+konstrukce (infinitiv jako podmět kopuly) není v žádném zaznamenaném
+korpusu a dostupný náhradní parser (viz nález výše, spaCy `cs_core_news_sm`)
+na ní viditelně selhává (např. „Bydlet a žít jsou synonyma.“ dostal UPOS
+`PROPN`/`ADV` místo `VERB`/`NOUN`) — rozbor testovací věty je proto sestavený
+ručně podle univerzálních závislostí (křížově ověřeno part proti spaCy
+tam, kde spaCy vyšlo správně), ne převzatý naslepo. Přesně duch pravidla
+„testovací věty musí mít hlavu a patu“ — tady jsem ověřovatel já.
+
+**Hypotéza:** pytest +2 (`tests/test_lex_teach.py`), mypy/pylint beze
+regrese na `read.py`/`ground.py` (jen posun řádků, ověřeno diffem).
+**Výsledek:** přesně tak — 185 passed + 2 xfailed (bylo 183), mypy čisté
+(1 nový `type: ignore[arg-type]` na stejném vzoru jako ostatní `Statement(...)`
+volání v `ground.py`), `diff` pylintu na `read.py`/`ground.py` beze nového
+nálezu. „Bydlet je synonymum žít.“ → `Lexicon.match("žít","bydlet")` i
+naopak (`same`, obousměrně); „Vydat není synonymum napsat.“ → nic se
+nenaučilo.
+**Otevřené (příští tah, měřeno, ne dohadem):** jiné formulace („X znamená
+totéž co Y“, „X a Y jsou synonyma“) mají jinou stromovou strukturu (kořen
+`znamenat`, ne kopula) — čekají na vlastní rozpoznávač a vlastní hypotézu;
+`podřazení`/`implikace`/`překryv` z promluvy (ne jen `třída`) taky.

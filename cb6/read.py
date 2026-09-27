@@ -134,6 +134,9 @@ class Predication:
     correction: bool = False
     #: U kopuly jméno role predikátového nominálu (`co` / `jaký` / `kde`…).
     pred_role_name: str = ""
+    #: Věta učí lexikon (`X je synonymum Y`), ne tvrzení o světě — `(op, args,
+    #: síla)` pro `Memory.add_link`; `ground.py` ho zapíše místo běžného výroku.
+    lex_teach: tuple[str, tuple[str, str], str] | None = None
 
     def role(self, name: str) -> RoleFill | None:
         for r in self.roles:
@@ -894,6 +897,32 @@ class _Reader:
 
     # ---- kopula ------------------------------------------------------------
 
+    def _lex_teach(self, root: Token, neg: bool, subj: list[Token]) -> tuple[str, tuple[str, str], str] | None:
+        """Věta učí lexikon z běžné promluvy, ne z příkazu `!uč` (J. 27. 9. 2026;
+        autorita `read` — `cb6/lexicon.py` ji jmenuje už od kroku 1, „zatím
+        nečteme“). Dnes jen `„X je synonymum/synonymem Y“` (podmět a jedna
+        vnořená infinitivní forma pod predikátovým nominálem jsou dvě sloveso-
+        lemmata vazby `třída`/`same`) — ostatní formulace („X znamená totéž
+        co Y“) čekají na měřený tah, ne na dohad.
+
+        Proč lemmata z podstromu, ne z pevného deprelu: reálný rozbor kolísá
+        (`synonymum X` jako `xcomp`, `synonymem slova X` jako `nmod→acl`) —
+        čte se robustně přes tvar (VERB, infinitiv), ne přes jednu cestu
+        stromem (stejný duch jako `chronos.time_from_tokens`).
+        Vstup: kořen kopuly, negace, podměty. Výstup: `(op, args, síla)` pro
+        `Memory.add_link`, nebo `None` (věta o synonymu nemluví/je záporná —
+        záporná se raději nenaučí nic, než aby se naučila obráceně špatně)."""
+        if neg or root.lemma not in ("synonymum", "synonym") or not subj:
+            return None
+        s = subj[0]
+        if s.upos != "VERB" or s.feat("VerbForm") != "Inf":
+            return None
+        excluded = {t.index for t in self.p.subtree(s.index)} | {root.index}
+        for t in self.p.subtree(root.index):
+            if t.index not in excluded and t.upos == "VERB" and t.feat("VerbForm") == "Inf":
+                return "třída", (s.lemma, t.lemma), "same"
+        return None
+
     def _copula(self, root: Token, cop: Token | None, *, shared_subject: RoleFill | None = None) -> Predication:
         p = Predication(pred="být", kind="copula", head=root.index)
         p.tense = cop.feat("Tense") if cop else None
@@ -908,6 +937,11 @@ class _Reader:
                 p.neg = True
                 self.mark(adv.index, "particle")
         subj = [t for t in self.p.children(root.index) if t.base_deprel in ("nsubj", "csubj")]
+        teach = self._lex_teach(root, p.neg, subj)
+        if teach is not None:
+            p.lex_teach = teach
+            self.mark(root.index, "role:lex_teach")
+            return p
         # predikátový nominál = kořen sám
         wh = self._wh_of(root)
         prep = self.case_of(root.index)
