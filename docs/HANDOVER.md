@@ -260,12 +260,14 @@ tři konkrétní nálezy z dnešní práce, každý s návrhem, co by ho ověři
 `cb6/discourse.py:78‑84` (`Registry.candidates`) — koreferenční okno je napevno
 „tento segment ∪ přesně jeden předchozí“; antecedent za dvěma segmenty
 zpátky nikdy nevstoupí do kandidátů, systém to ani nenahlásí jako
-nejednoznačné (tiše spadne na téma dokumentu). **`cb6/ground.py:201‑223`
-(`_resolve_possessed`) — reálná I‑8 díra:** víc kandidátů u přivlastňovacího
-přídavného jména (`cands` > 1) vezme `max(..., key=activation)` **beze**
-`ambiguous()`/HYPOTHESIS/open-item — přesně ten mechanismus o pár řádků výš
-v `_resolve_pron` (180‑193) existuje a tady se nepoužije. Dvě osoby jménem
-„Jirásek“ + „Jiráskova kniha“ = tichý (špatný) odhad vlastníka. **`cb6/
+nejednoznačné (tiše spadne na téma dokumentu). ~~`cb6/ground.py:201‑223`
+(`_resolve_possessed`) — reálná I‑8 díra: víc kandidátů u přivlastňovacího
+přídavného jména vezme `max(..., key=activation)` beze `HYPOTHESIS`/open-item~~
+**OPRAVENO 27. 9. 2026** — `_owner_candidates` (zrcadlí `discourse.ambiguous`),
+nejednoznačnost → `HYPOTHESIS` `mít` na každého kandidáta + open item, viz
+HYPOTEZY a `tests/test_ground.py::test_ambiguous_owner_gets_hypothesis_
+not_silent_guess`. `Registry.candidates`ovo okno (jeden segment zpátky) a
+zbytek téhle položky **zůstávají otevřené**. **`cb6/
 dialog.py:61‑63,95‑107`** — `Session.topics`/`_last_said` jsou proces-lokální
 skaláry bez zámku/verze; „autonomní, průběžně rostoucí“ růst implikuje
 souběžné zápisy do téže `Memory`, což by na `turn_no`/`sent_no` závodilo.

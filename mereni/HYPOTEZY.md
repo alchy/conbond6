@@ -406,3 +406,46 @@ stejný vzor jako `cb6.lexicon.set_seed_enabled`/`bench run --bez-lexikonu`:
 Test `tests/test_dialog.py::test_graf_ablace`. Pytest 189+2xfail →
 190+2xfail, mypy čisté, `cb6/dialog.py`/`bench/__main__.py` diff beze
 nového pylint nálezu (jen posun řádků).
+
+## 2026-09-27 · pokračování · oprava I‑8 díry: `_resolve_possessed` skrytý odhad vlastníka
+
+**Podnět:** vlastní shrnutí + priorita z kritického přezkumu (HANDOVER § 8,
+nález 4a subagenta): `ground.py._resolve_possessed` u víceznačného
+přivlastnění (víc entit odpovídajících stonku, srovnatelná aktivace)
+tiše vybíralo `max(..., key=activation)` — bez `HYPOTHESIS`/open-item,
+na rozdíl od analogické nejednoznačnosti u zájmen (`_resolve_pron`, které
+tohle řeší už od dřívějška). Bezslužbový fix (nepotřebuje UDPipe/Ollama —
+jen graf a existující zaznamenané věty), první bod souhrnu „další kroky“.
+
+**Změna:** `Grounder._owner_candidates` — nová metoda, zrcadlí
+`discourse.ambiguous` (poměr aktivace prvního/druhého kandidáta, mez 0,6)
+nad uzly přímo (kandidáti na vlastníka nemají metadata `Candidate` z
+registru zmínek, přišli ze jmenné shody stonku). `_resolve_possessed`:
+(1) existující vlastnictví (`mít`/`vlastnit`) se teď hledá přes VŠECHNY
+kandidáty, ne jen přes odhad — nalezená jistota vyhrává nad hypotézou;
+(2) když žádné existující vlastnictví není a kandidátů je víc, vznikne
+HYPOTHESIS `mít` na KAŽDÉHO kandidáta (ne jen na odhad) + otevřená
+položka („Čí je …? Kandidáti: …“) — přesně tvar disclosure jako u
+`_resolve_pron`, jen adaptovaný (ambiguity je o VLASTNÍKOVI, ne o termu
+role samotné, takže `self._ambiguous`/alternativy sdílené s koreferencí
+nešly použít 1:1 — vlastní, ale analogický mechanismus).
+**Hypotéza:** stávající test (`test_indefinite_object_instantiates`,
+jediný vlastník, jednoznačné) beze změny; nový test (dvě entity „Filip“,
+stejná aktivace) dá HYPOTHESIS `mít` na obě + open item; zbytek pytestu
+beze změny (nikde jinde nejsou v testech dvě jmenovsky se překrývající
+entity s přivlastněním).
+**Výsledek:** přesně tak — 190 → **191 passed** + 2 xfailed (nový
+`tests/test_ground.py::test_ambiguous_owner_gets_hypothesis_not_silent_
+guess`), mypy čisté, `cb6/ground.py` diff beze nového pylint nálezu (jen
+posun řádků + 1 dočasná `unused-variable`, hned opravená). Žádná
+existující sada (191 testů) se nezměnila — nejednoznačnost vlastníka se
+dřív v žádném testu neobjevila, takže díra byla neviditelná, přesně jak
+subagent popsal.
+**Poučení:** tohle je druhý případ (po `Statement.derived_from`
+jednorodičovském) „stejný tvar chyby na dvou místech, jedno má disclosure,
+druhé ne“ — `_resolve_pron` a `_resolve_possessed` řeší strukturně
+identickou nejednoznačnost (víc kandidátů, blízká aktivace), ale jen
+jedno z nich to přiznávalo. Stojí za prověření, jestli podobný vzorec
+(nejednoznačnost → tichý `max()`/`[0]` bez HYPOTHESIS) není i jinde v
+`ground.py`/`discourse.py` — dnešní fix řešil jen ten jeden konkrétní
+nález, ne systematický audit všech míst, která by týž vzorec mohla mít.

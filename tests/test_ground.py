@@ -92,6 +92,25 @@ def test_indefinite_object_instantiates(oracle: RecordedOracle) -> None:
     assert any("vlastník Filip" in d for d in g2.main.defaults)  # type: ignore[union-attr]
 
 
+def test_ambiguous_owner_gets_hypothesis_not_silent_guess(oracle: RecordedOracle) -> None:
+    """Dvě entity jménem „Filip“ se stejnou aktivací + přivlastnění →
+    HYPOTHESIS `mít` na KAŽDÉHO kandidáta a otevřená položka, ne tichý
+    odhad jednoho (nález kritického přezkumu 27. 9. 2026, HANDOVER § 8/4a:
+    `_resolve_pron` tohle už dělal, `_resolve_possessed` ne)."""
+    m = Memory()
+    a, _ = m.ensure_entity(["Filip", "Novák"])
+    b, _ = m.ensure_entity(["Filip", "Dvořák"])
+    m.activate([a.id], 1.0)
+    m.activate([b.id], 1.0)
+    g = put(m, oracle, "Filipovo auto je modré.")
+    auto_id = g.main.role("kdo").terms[0]  # type: ignore[union-attr]
+    mit = [st for st in m.statements.values() if st.pred == "mít" and st.role("co") and auto_id in st.role("co").terms]  # type: ignore[union-attr]
+    owners = {st.role("kdo").terms[0] for st in mit}  # type: ignore[union-attr]
+    assert owners == {a.id, b.id} and all(st.claim == "HYPOTHESIS" for st in mit)
+    assert any("nejednoznačný" in d for d in g.main.defaults)  # type: ignore[union-attr]
+    assert any(o.kind == "reference" for o in g.open)
+
+
 def test_generic_subject_does_not_instantiate(oracle: RecordedOracle) -> None:
     m = Memory()
     g = put(m, oracle, "Ovoce obsahuje vitamíny.")

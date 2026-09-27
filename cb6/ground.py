@@ -198,52 +198,80 @@ class Grounder:
         self._pending_open.append(("reference", t.lemma, f"Na koho odkazuje „{label}“ v roli {role}?", []))
         return None
 
+    def _owner_candidates(self, cands: list[Node], *, ratio: float = 0.6) -> list[Node]:
+        """Vlastníci, mezi kterými nejde bezpečně vybrat (aktivace prvního a
+        druhého jsou blízko) — zrcadlí `discourse.ambiguous`, jen nad uzly
+        přímo, ne `Candidate` (ta metadata tu nemáme: kandidáti přišli ze
+        jmenné shody, ne z registru zmínek). Vstup: kandidáti (aspoň 1),
+        `ratio` jako u `discourse.ambiguous`. Výstup: `[nejlepší]` (jistý),
+        nebo víc kandidátů (nejvýš 3, stejná mez jako `_resolve_pron`) —
+        nejednoznačné."""
+        ranked = sorted(cands, key=lambda n: -self.m.activation(n.id))
+        if len(ranked) < 2:
+            return ranked
+        a, b = self.m.activation(ranked[0].id), self.m.activation(ranked[1].id)
+        if a <= 0 or b >= ratio * a:
+            return ranked[:3]
+        return ranked[:1]
+
     def _resolve_possessed(self, t: TermSpec, group: Node, role: str) -> str | None:
         """„Filipovo auto“ / „jeho auto“ → auto, které Filip má (výrok `mít`),
-        jinak nová instance s `mít`."""
+        jinak nová instance s `mít`.
+
+        Víc kandidátů na vlastníka (dvě entity jménem „Jirásek“…) se dřív
+        vybíralo tiše (`max(..., key=activation)`) — beze stopy v grafu, na
+        rozdíl od stejné nejednoznačnosti u zájmen (`_resolve_pron`). Od
+        27. 9. 2026 (nález kritického přezkumu, HANDOVER § 8/4a): nejde-li
+        bezpečně vybrat, vznikne HYPOTHESIS `mít` na KAŽDÉHO kandidáta (ne
+        jen na odhad) a otevřená položka — I‑3/I‑8 stejně důsledně jako
+        u koreference."""
         kind, word = t.possessor  # type: ignore[misc]
-        owner: Node | None = None
         if kind == "adj":
             stem = word
             for suf in ("ův", "ova", "ovo", "in", "ina", "ino"):
                 if word.endswith(suf):
                     stem = word[: -len(suf)]
                     break
-            cands = [n for n in self.m.nodes.values() if n.kind == "entity" and any(w.lower().startswith(stem.lower()) for name in n.names for w in name.split()) and len(stem) >= 3]
-            if len(cands) == 1:
-                owner = cands[0]
-            elif cands:
-                owner = max(cands, key=lambda n: self.m.activation(n.id))
+            raw = [n for n in self.m.nodes.values() if n.kind == "entity" and any(w.lower().startswith(stem.lower()) for name in n.names for w in name.split()) and len(stem) >= 3]
         else:
-            cands = self.m.most_active(kinds=("entity",))
-            owner = cands[0] if cands else (self.m.nodes.get(self.topic) if self.topic else None)
-        if owner is None:
+            raw = self.m.most_active(kinds=("entity",)) or ([self.m.nodes[self.topic]] if self.topic and self.topic in self.m.nodes else [])
+        if not raw:
             self._pending_open.append(("reference", word, f"Čí je „{t.lemma}“ („{word}“)?", []))
             return None
-        self._defaults.append(f"{role}: „{word} {t.lemma}“ → vlastník {owner.label()}")
-        # existující vlastnictví?
-        for st in self.m.statements_about(owner.id):
-            if st.pred in ("mít", "vlastnit") and not st.neg:
-                kdo, co = st.role("kdo"), st.role("co")
-                if kdo and owner.id in kdo.terms and co:
-                    for x in co.terms:
-                        if self.m.member_star(x, group.id) is not None:
-                            return x
+        owners = self._owner_candidates(raw)
+        # existující vlastnictví u KTERÉHOKOLI kandidáta je jistota, ne odhad — vyhrává nad hypotézou
+        for cand in owners:
+            for st in self.m.statements_about(cand.id):
+                if st.pred in ("mít", "vlastnit") and not st.neg:
+                    kdo, co = st.role("kdo"), st.role("co")
+                    if kdo and cand.id in kdo.terms and co:
+                        for x in co.terms:
+                            if self.m.member_star(x, group.id) is not None:
+                                self._defaults.append(f"{role}: „{word} {t.lemma}“ → vlastník {cand.label()} (existující mít)")
+                                return x
         if not self.write:
             return None
+        if len(owners) > 1:
+            self._defaults.append(f"{role}: „{word} {t.lemma}“ — vlastník nejednoznačný, kandidáti {', '.join(n.label() for n in owners)} (hypotézy)")
+            self._pending_open.append(("reference", word, f"Čí je „{t.lemma}“ („{word}“)? Kandidáti: " + ", ".join(n.label() for n in owners), [n.label() for n in owners]))
+        else:
+            self._defaults.append(f"{role}: „{word} {t.lemma}“ → vlastník {owners[0].label()}")
         inst = self.m.new_node("entity", t.lemma, attrs=t.attrs, doc=self.prov.doc, gender=t.gender, number=t.number)
         inst.base = group.id
         self.out.nodes.append(inst)
         self._member(inst.id, group.id)
         # Přivlastnění není tvrzení o vlastnictví: „Jiráskova ulice“ ≠ „Jirásek má
         # ulici“, „jeho smrt“ ≠ „má smrt“. Nově odvozené `mít` je proto HYPOTHESIS
-        # (I‑3: nikdy ve verdiktu); existující vlastnictví výše se použije jako SAFE.
-        st = Statement("", "mít", "verb", grade=self.grade, prov=self.prov, sentence=self.out.sentence,  # type: ignore[arg-type]
-                       roles=[Role("kdo", [owner.id], "·", "structural"), Role("co", [inst.id], "·", "structural")],
-                       defaults=[f"vlastnictví z přivlastnění „{word}“"], claim="HYPOTHESIS",
-                       reason="přivlastnění „" + word + "“ neurčuje vlastnictví (může jít o pojmenování, autorství, vztah)")
-        self.m.attach(st)
-        self.out.statements.append(st)
+        # (I‑3: nikdy ve verdiktu) — jeden na KAŽDÉHO kandidáta, když je jich víc.
+        for owner in owners:
+            reason = "přivlastnění „" + word + "“ neurčuje vlastnictví (může jít o pojmenování, autorství, vztah)"
+            if len(owners) > 1:
+                reason += f"; vlastník mezi {', '.join(n.label() for n in owners)} nejednoznačný"
+            st = Statement("", "mít", "verb", grade=self.grade, prov=self.prov, sentence=self.out.sentence,  # type: ignore[arg-type]
+                           roles=[Role("kdo", [owner.id], "·", "structural"), Role("co", [inst.id], "·", "structural")],
+                           defaults=[f"vlastnictví z přivlastnění „{word}“"], claim="HYPOTHESIS", reason=reason)
+            self.m.attach(st)
+            self.out.statements.append(st)
         return inst.id
 
     # ---- predikace -----------------------------------------------------------
