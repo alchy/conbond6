@@ -363,3 +363,46 @@ výroků se shodnými termy a různým predikátem, bez signálu „tohle je
 oprava“ z dialogu; to je systematicky náročnější (potenciálně O(n²) přes
 celou paměť) a je na samostatný tah s vlastní hypotézou o výkonu i
 precision (kolik falešných párů by to navrhlo na reálném textu).
+
+## 2026-09-27 · pokračování · mechanismus `graf` implementován (bench vazby 6/7 → 7/7, všechny čtyři hotové)
+
+**Změna:** `cb6/dialog.py Session._suggest_link_from_graph` — po zápisu
+KAŽDÉHO nového výroku (`_ingest_sentence` i `_assert`, ne jen při opravě)
+se pomocí `Memory.statements_about` (existující index, O(k) na term, ne
+plný O(n²) sken paměti) podívá po jiných aktivních výrocích sdílejících
+roli `kdo` A JEŠTĚ JEDNU DALŠÍ roli (např. `co`) se STEJNÝMI termy, ale
+JINÝM predikátem — a pokud najde, zapíše řádek lexikonu `třída`/`related`,
+autorita `read`, deduplikovaně (nenavrhne tutéž dvojici predikátů dvakrát).
+Bez dialogového signálu „tohle je oprava/totéž“ je vyžadování DRUHÉ shodné
+role klíčové (jinak by každá druhá věta o téže osobě navrhla vazbu —
+`test_ingest_then_ask_with_source`, kde „narodit_se“/„pracovat“ sdílí jen
+`kdo“, jinou roli ne, teď explicitně ověřeno jako negativní případ).
+**Hypotéza:** `bench vazby` 6/7 → 7/7 (všechny čtyři mechanismy); zbytek
+pytestu beze změny (síla `related` nikdy nevstupuje do verdiktu, takže
+žádná existující QA/verdikt asercí se nemůže rozbít — jen `memory.links`
+přibude, což nic netestuje, dokud to test výslovně nekontroluje).
+**Výsledek:** přesně tak — `bench vazby` **7/7**, pytest 188+2xfail →
+189+2xfail (nový `tests/test_dialog.py::test_graf_uci_vazbu_z_parafraze_
+bez_opravy` + rozšířený `test_ingest_then_ask_with_source` o negativní
+kontrolu), mypy čisté, `cb6/dialog.py` diff beze nového pylint nálezu
+(jen posun řádků — ověřeno, ne jen skóre). Celá zbylá sada (187 testů)
+prošla BEZE ZMĚNY navzdory tomu, že `_suggest_link_from_graph` teď běží
+na každém zapsaném výroku v `ingest()`/`say()` — žádný test nezaznamenal
+vedlejší efekt, protože `related` je navržený tak, aby nemohl nic pokazit.
+**Poučení / co zůstává nevalidováno:** tenhle mechanismus NIKDY neběžel
+na reálném korpusu (žádný tu není) — `statements_about` drží náklad na
+term, ne na celou paměť, ale kolik falešných párů by to navrhlo na
+180 000 slovech reálného textu (dvě různé osoby se stejným jménem místa,
+apod.) je **neměřeno**. Priorita pro sezení se službami: `bench run
+--vse` s `--bez-lexikonu` i bez, porovnat počet `read`-autoritních řádků
+a ručně posoudit vzorek — přesně ten typ měření, který `bench/vazby.py`
+sám nemůže nahradit (je to fragmentový bench, ne zátěžový).
+
+**Doplněk (týž tah): ablační přepínač `--bez-graf`.** Přesně proto, že
+`graf` mechanismus je neměřený na reálném textu, dostal hned ablaci —
+stejný vzor jako `cb6.lexicon.set_seed_enabled`/`bench run --bez-lexikonu`:
+`cb6.dialog.set_graf_suggestions_enabled(bool)` (modulový přepínač),
+`bench run --bez-graf` ho vypne a přidá `-bez-graf` do labelu zprávy.
+Test `tests/test_dialog.py::test_graf_ablace`. Pytest 189+2xfail →
+190+2xfail, mypy čisté, `cb6/dialog.py`/`bench/__main__.py` diff beze
+nového pylint nálezu (jen posun řádků).

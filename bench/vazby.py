@@ -157,10 +157,10 @@ CASES: tuple[VazbaCase, ...] = (
               "učí bydlet~žít (síla `related` — opatrně, jedna oprava nestačí na `same`/`implies`)",
               _run_veta("Petr bydlí v Praze.", "Ne, Petr žil v Praze."), ("třída", ("bydlet", "žít"), "related")),
     VazbaCase("graf:parafraze", "graf",
-              "„Karel Čapek napsal román Krakatit.“ + „…vytvořil román Krakatit.“ — stejné role/termy, "
-              "jiný predikát → hypotéza vazby bez věty o vazbě samotné; dnes se nic nenaučí",
+              "„Karel Čapek napsal román Krakatit.“ + „…vytvořil román Krakatit.“ — stejné role kdo+co, "
+              "jiný predikát → hypotéza vazby bez věty o vazbě samotné (síla `related`, dvojice seřazená)",
               _run_veta("Karel Čapek napsal román Krakatit.", "Karel Čapek vytvořil román Krakatit."),
-              ("implikace", ("vytvořit", "napsat"), "implies")),
+              ("třída", ("napsat", "vytvořit"), "related")),
 )
 
 

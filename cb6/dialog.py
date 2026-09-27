@@ -30,6 +30,19 @@ from cb6.read import Reading, read
 from cb6.recall import recall
 from cb6.render import render_show, describe_node, render_answer, render_statement
 
+#: Ablace `bench run --bez-graf` (mechanismus `graf`, spec HANDOVER § 6 „‑1“
+#: 27. 9. 2026): dosud neměřeno na reálném korpusu, kolik falešných párů by
+#: to na velkém textu navrhlo — vypínatelné globálně, stejně jako
+#: `cb6.lexicon.set_seed_enabled`.
+_GRAF_SUGGESTIONS_ENABLED = True
+
+
+def set_graf_suggestions_enabled(enabled: bool) -> None:
+    """Zapni/vypni mechanismus `graf` (`Session._suggest_link_from_graph`).
+    Vstup: `enabled`. Výstup: nic (mění stav modulu)."""
+    global _GRAF_SUGGESTIONS_ENABLED  # pylint: disable=global-statement
+    _GRAF_SUGGESTIONS_ENABLED = enabled
+
 
 @dataclass
 class Turn:
@@ -157,6 +170,8 @@ class Session:
         reading = self._read(parse, "assert")
         prov = self._prov(doc, parse.text)
         g = ground(reading, self.memory, prov, "read", topic=self.topics.get(doc), segment=segment)
+        if g.main is not None:
+            self._suggest_link_from_graph(g.main)
         self._update_topic(doc, g)
         derived = derive(self.memory)
         self.memory.tick()
@@ -256,9 +271,12 @@ class Session:
                 if (v.value == "NE" and not probe_neg) or (v.value == "ANO" and probe_neg) or v.value == "KONFLIKT":
                     conflict = v
         g = ground(reading, m, prov, "said", topic=self.topics.get(doc))
-        if main.correction and g.main is not None:
-            for old in corrected:
-                self._learn_from_correction(old, g.main)
+        if g.main is not None:
+            if main.correction:
+                for old in corrected:
+                    self._learn_from_correction(old, g.main)
+            else:
+                self._suggest_link_from_graph(g.main)
         self._update_topic(doc, g)
         derived = derive(m)
         m.tick()
@@ -312,6 +330,44 @@ class Session:
                 return  # jiná role se taky změnila — nejde jen o predikát
         self.memory.add_link("třída", (old.pred, new.pred), "related", "read",
                               f"korekce (tah {self.turn_no}): „{old.pred}“ → „{new.pred}“, stejné role")
+
+    def _suggest_link_from_graph(self, new: Statement) -> None:
+        """Parafráze v grafu (dvě věty, stejné role/termy, jiný predikát) →
+        hypotéza vazby BEZ jakékoli věty o vazbě samotné a bez dialogového
+        signálu „tohle je oprava“ (J. 27. 9. 2026; `bench/vazby.py`
+        mechanismus `graf`). Opatrněji než `_learn_from_correction`: bez
+        toho signálu se vyžadují DVĚ shodné role (`kdo` + aspoň jedna
+        další), jinak by každá druhá věta o téže osobě navrhla vazbu.
+        Síla `related` (I‑3, nikdy ve verdiktu); jeden řádek na dvojici
+        predikátů (deduplikace přes existující řádky lexikonu).
+        Vstup: nově zapsaný výrok. Výstup: nic."""
+        if not _GRAF_SUGGESTIONS_ENABLED:
+            return
+        if new.pred is None or new.kind not in ("verb", "copula") or new.mood != "assert":
+            return
+        kdo = new.role("kdo")
+        if not kdo or not kdo.terms:
+            return
+        for other in new.roles:
+            if other.name == "kdo" or other.wh or not other.terms:
+                continue
+            for term in other.terms:
+                for f in self.memory.statements_about(term):
+                    if f.id == new.id or f.pred is None or f.pred == new.pred or f.derived_from is not None:
+                        continue
+                    if f.kind not in ("verb", "copula") or f.mood != "assert":
+                        continue
+                    f_kdo, f_other = f.role("kdo"), f.role(other.name)
+                    if not f_kdo or set(f_kdo.terms) != set(kdo.terms):
+                        continue
+                    if not f_other or set(f_other.terms) != set(other.terms):
+                        continue
+                    pair = tuple(sorted((f.pred, new.pred)))
+                    if any(l.op == "třída" and tuple(sorted(l.args)) == pair for l in self.memory.links.values()):
+                        continue
+                    self.memory.add_link("třída", pair, "related", "read",
+                                          f"graf (tah {self.turn_no}): „{f.pred}“ a „{new.pred}“ sdílí kdo+{other.name}")
+                    return
 
     def _fix_quantifier(self, reading: Reading, doc: str) -> Answer:
         m = self.memory

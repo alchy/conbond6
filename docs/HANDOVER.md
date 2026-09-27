@@ -22,7 +22,7 @@
 | zlaté otázky | `bench/gold/` (+ `PROVENIENCE.md`, `otazky-filtr.log.md`, `gen-*.json`) |
 | jádro | `cb6/` — `oracle chronos defaults lexicon read triage discourse memory ground logic recall render dialog cli viewbase_app` + `lang/` (jazyková pravidla jako data, `cb6/lang/cs.json`) |
 | bench | `bench/` — `data gold gold_gen qa metrics run graphcheck audit judge diff vazby __main__` |
-| **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes **6/7** (`korekce` hotovo, `graf` = jediný zbývající cíl, 0/1) |
+| **pokročilost chápání vazeb podle mechanismu** (`python -m bench vazby`) | `bench/vazby.py` — zlaté úlohy řazené `prikaz`/`veta`/`korekce`/`graf`; dnes **7/7** (všechny čtyři mechanismy hotové — `graf` NEvalidováno na reálném korpusu, viz § 8/5) |
 | testy | `tests/` (167 + 2 xfail; hermetické — rozbory `tests/data/parses.json`) |
 | data mimo repo | `data/corpus/conBond2` (klon), `data/cache/parses.json` (keš UDPipe, ~75 MB), `data/pamet-graf.json` |
 | paralelní větev | conbond5 (`~/Projects/conbond5`, jiné sezení, HEAD c503b68) — do něj nesahat |
@@ -141,19 +141,20 @@ lexikonový operátor `překryv` (protnutí dvou období na časové ose).
 
 ## 6. Otevřené tahy (pořadí podle toho, co ukázal bench)
 
--1. **(nejvyšší priorita podle `bench vazby`, 6/7) `graf` mechanismus —
-   jediný zbývající cíl, dnes 0/1.** `korekce` hotovo (27. 9. 2026,
-   `Session._learn_from_correction`, síla `related` — viz § 7 deník a
-   HYPOTEZY). `graf`: dvě věty se stejnými rolemi/termy a jiným predikátem
-   (parafráze, „napsal“/„vytvořil“ týž objekt), BEZ jakékoli opravné věty
-   v dialogu (na rozdíl od `korekce` tu není signál „tohle je oprava“) →
-   hypotéza vazby jen z toho, že se predikáty takhle „potkávají“ v grafu.
-   Potřebuje průchod `Memory.knowledge()` hledající páry výroků se shodnými
-   termy v roli `kdo`/`co` a různým predikátem — systematicky náročnější
-   (potenciálně O(n²) přes paměť) a riziko falešných párů na reálném textu
-   je vyšší než u `korekce` (žádný dialogový signál, který by omezil, kdy
-   se má hledat) — vlastní hypotéza o výkonu i precision, ne jen kopie
-   `korekce` postupu. Měřit přes `bench/vazby.py`.
+-1. **(nejvyšší priorita — chybí VALIDACE na reálném textu, ne implementace)
+   `bench vazby` je 7/7 (všechny čtyři mechanismy hotové: `prikaz`, `veta`,
+   `korekce`, `graf` — viz § 5, § 7 deník, HYPOTEZY 27. 9. 2026), ale
+   `graf`/`korekce` NIKDY neběžely na reálném korpusu — jen na fragmentech.
+   `Session._suggest_link_from_graph` (`cb6/dialog.py`) teď běží na KAŽDÉM
+   zapsaném výroku (`ingest()` i `say()`) a hledá páry výroků se shodnou
+   rolí `kdo` + jednou další (přes `Memory.statements_about`, ne plný sken)
+   a různým predikátem. Riziko: kolik falešných párů (dvě různé osoby
+   stejného jména, náhodná shoda objektu) by to navrhlo na 180 000 slovech
+   reálného textu je **neměřeno** — síla `related` limituje škodu (nikdy ve
+   verdiktu), ale lexikon by se mohl zaplevelit šumem. **Ablace už existuje**
+   (`cb6.dialog.set_graf_suggestions_enabled`, `bench run --bez-graf`) —
+   **první tah, jakmile budou služby:** `bench run --vse` s/bez `--bez-graf`,
+   porovnat počet nových `read`-autoritních řádků a ručně posoudit vzorek.
 0. **(priorita až budou služby) Multilingvnost + NN jako
    extraktor struktury** — J.: NN smí dělat skoro vše (parsing, extrakci,
    konverzaci, i pro víc jazyků), ale nikdy „znalost" — ta zůstává výhradně

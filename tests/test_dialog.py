@@ -25,6 +25,62 @@ def test_ingest_then_ask_with_source(s: Session) -> None:
     assert "Hronov" in a.text and "zdroj: „Alois Jirásek se narodil" in a.text and "alois_jirásek, věta 1" in a.text
     b = s.say("Kde pracoval Alois Jirásek?")
     assert "Litomyšl" in b.text and "Praha" in b.text and "nevyslovený podmět" in b.text
+    # „narodit_se“ a „pracovat“ sdílí jen roli kdo (jiné místo) — mechanismus
+    # `graf` (viz test_dialog_g / bench/vazby.py) vyžaduje DVĚ shodné role,
+    # tady žádnou vazbu nenavrhne
+    assert not [l for l in s.memory.links.values() if l.authority == "read"]
+
+
+def test_graf_uci_vazbu_z_parafraze_bez_opravy(s: Session) -> None:
+    """Dvě věty, stejné role `kdo`+`co`, jiný predikát, ŽÁDNÁ oprava v
+    dialogu — jen tak vedle sebe v textu — je kontextový důkaz vztahu mezi
+    predikáty (J. 27. 9. 2026; `bench/vazby.py` mechanismus `graf`)."""
+    s.ingest("Karel Čapek napsal román Krakatit.", "d")
+    from cb6.oracle import Parse, Token
+    vytvoril = Parse("Karel Čapek vytvořil román Krakatit.", (
+        Token(1, "Karel", "Karel", "PROPN", 3, "nsubj", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(2, "Čapek", "Čapek", "PROPN", 1, "flat", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(3, "vytvořil", "vytvořit", "VERB", 0, "root", (("Aspect", "Perf"), ("Gender", "Masc"), ("Number", "Sing"), ("Polarity", "Pos"), ("Tense", "Past"), ("VerbForm", "Part"), ("Voice", "Act"))),
+        Token(4, "román", "román", "NOUN", 3, "obj", (("Animacy", "Inan"), ("Case", "Acc"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(5, "Krakatit", "krakatit", "NOUN", 4, "nmod", (("Animacy", "Inan"), ("Case", "Nom"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(6, ".", ".", "PUNCT", 3, "punct", ()),
+    ), "ruční UD (ověřeno) — test, ne UDPipe")
+
+    class _Then:
+        def parse(self, text: str) -> Parse:
+            assert text == vytvoril.text
+            return vytvoril
+    s.oracle = _Then()  # type: ignore[assignment]
+    s.ingest("Karel Čapek vytvořil román Krakatit.", "d")
+    said = [l for l in s.memory.links.values() if l.authority == "read"]
+    assert len(said) == 1 and said[0].args == ("napsat", "vytvořit") and said[0].strength == "related"
+
+
+def test_graf_ablace(s: Session) -> None:
+    """`bench run --bez-graf` (dosud neměřeno na reálném korpusu, HANDOVER § 6 „‑1“)."""
+    from cb6.dialog import set_graf_suggestions_enabled
+    from cb6.oracle import Parse, Token
+    vytvoril = Parse("Karel Čapek vytvořil román Krakatit.", (
+        Token(1, "Karel", "Karel", "PROPN", 3, "nsubj", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(2, "Čapek", "Čapek", "PROPN", 1, "flat", (("Animacy", "Anim"), ("Case", "Nom"), ("Gender", "Masc"), ("NameType", "Giv"), ("Number", "Sing"))),
+        Token(3, "vytvořil", "vytvořit", "VERB", 0, "root", (("Aspect", "Perf"), ("Gender", "Masc"), ("Number", "Sing"), ("Polarity", "Pos"), ("Tense", "Past"), ("VerbForm", "Part"), ("Voice", "Act"))),
+        Token(4, "román", "román", "NOUN", 3, "obj", (("Animacy", "Inan"), ("Case", "Acc"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(5, "Krakatit", "krakatit", "NOUN", 4, "nmod", (("Animacy", "Inan"), ("Case", "Nom"), ("Gender", "Masc"), ("Number", "Sing"))),
+        Token(6, ".", ".", "PUNCT", 3, "punct", ()),
+    ), "ruční UD (ověřeno) — test, ne UDPipe")
+
+    class _Then:
+        def parse(self, text: str) -> Parse:
+            assert text == vytvoril.text
+            return vytvoril
+    set_graf_suggestions_enabled(False)
+    try:
+        s.ingest("Karel Čapek napsal román Krakatit.", "d")
+        s.oracle = _Then()  # type: ignore[assignment]
+        s.ingest("Karel Čapek vytvořil román Krakatit.", "d")
+    finally:
+        set_graf_suggestions_enabled(True)
+    assert not [l for l in s.memory.links.values() if l.authority == "read"]
 
 
 def test_unknown_stays_unknown_and_correction(s: Session) -> None:

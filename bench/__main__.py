@@ -33,12 +33,19 @@ def _cmd_run(args: argparse.Namespace) -> int:
         # ablace seed vrstvy lexikonu (návrh vazeb § 3): řádky `said` zůstávají, seed ne
         from cb6.lexicon import set_seed_enabled  # pylint: disable=import-outside-toplevel
         set_seed_enabled(False)
+    if args.bez_graf:
+        # ablace mechanismu `graf` (bench/vazby.py, 27. 9. 2026): neměřeno na reálném
+        # korpusu, kolik falešných párů by to navrhlo — vypnutelné pro srovnání
+        from cb6.dialog import set_graf_suggestions_enabled  # pylint: disable=import-outside-toplevel
+        set_graf_suggestions_enabled(False)
     report = run(sady, strop=args.strop, docs=args.dok, twice=args.dvakrat, with_auto=not args.bez_auto, cfg=cfg, verbose=args.vypis,
                  judge=judge, audit_n=audit_n, audit_docs=args.audit_doky)
     if args.label:
         report["label"] = args.label
     if args.bez_lexikonu:
         report["label"] = (report.get("label", "") + "-bez-lexikonu").lstrip("-")
+    if args.bez_graf:
+        report["label"] = (report.get("label", "") + "-bez-graf").lstrip("-")
     mereni = ROOT / cfg["mereni"]
     prev = _previous_report(mereni, args.proti)
     if prev is not None:
@@ -123,6 +130,7 @@ def main(argv: list[str]) -> int:
     r.add_argument("--dvakrat", action="store_true", help="determinismus: dokument dvakrát")
     r.add_argument("--bez-auto", action="store_true", help="bez automatické (filtrované) sady otázek")
     r.add_argument("--bez-lexikonu", action="store_true", help="ablace: bez seed vrstvy lexikonu (cb6/lexikon/*.jsonl)")
+    r.add_argument("--bez-graf", action="store_true", help="ablace: bez mechanismu `graf` (Session._suggest_link_from_graph)")
     r.add_argument("--vypis", action="store_true", help="vypsat každou otázku")
     r.add_argument("--proti", help="JSON zprávy pro diff (jinak poslední v mereni/)")
     r.add_argument("--label", help="přípona jména zprávy")
