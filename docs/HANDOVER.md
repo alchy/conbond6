@@ -367,6 +367,15 @@ použité jinde v souboru). Podrobně `mereni/HYPOTEZY.md` 27. 9. 2026.
 
 ## 7. Deník rozhodnutí
 
+- 27. 9. 2026 (pokračování) — J.: „posud možné kroky pro zjednodušení
+  komplexity — existují nějaké vzory?" Audit `cb6/` našel tři: (1)
+  `overlap_verdict`/`inverze_verdict`/obě `bridge_rules` smyčky sdílely
+  4× stejné 3 řádky bookkeepingu — extrahováno do `Evaluator._commit_
+  lex_join` (čistý refaktor, 0 změn chování, existující testy jako
+  regresní ochrana). (2) tři nezávislá místa v `read.py` řeší „patří
+  token ke jménu hlavy?" — zapsáno, NEprovedeno (čeká na další operátor,
+  co na to narazí, ne izolovaný refaktor srdce čtení). (3) kopírovaný
+  ablační přepínač — zapsáno, jen 2 výskyty, nenaléhavé.
 - 17. 8. — J.: cíle dává on, cestu rozhoduje Claude a měří benchem (viz paměť `conbond-goals-only-claude-decides-how`). Všechny cesty otevřené, včetně NN, rozhoduje měření.
 - 17. 8. — conbond6 = klon conbond5 s historií; obě větve běží nezávisle, smějí se inspirovat; do conbond5 conbond6 nesahá.
 - 17. 8. — Statusy `SAFE/HYPOTHESIS/REJECTED` jako pole `claim` (pole `status` v conbond5 je životní cyklus); `RESIDUE`/`OPEN` jsou vrstvy, ne statusy.

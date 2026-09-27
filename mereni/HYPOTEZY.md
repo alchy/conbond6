@@ -1420,3 +1420,52 @@ ale neškodí), než se stavbou jde dál.
 se v týhle sadě netestuje jednotkově, stejná konvence jako zbytek
 `bench/probe.py`, viz `tests/test_probe.py`). Pytest 226+2xfail beze
 změny, mypy čisté, pylint diff prázdný (0 nových nálezů).
+
+## 2026-09-27 · pokračování · zjednodušení: sdílený `_commit_lex_join` (query-time join operátory)
+
+**Podnět:** J.: „posud možné kroky pro zjednodušení komplexity současného
+návrhu — existují nějaké vzory?“ — audit `cb6/`, ne dohad. Nalezené vzory
+(tři, s důkazem): (1) `overlap_verdict`/`inverze_verdict` (`cb6/logic.py`)
+mají doslova stejnou kostru query-time joinu, jen jinou shodovací logiku
+uvnitř; (2) tři nezávislá místa v `read.py` řeší „patří token ke jménu
+hlavy, nebo je samostatná entita" (`_title_of`, `_relational_name`, holé
+`flat`-sloučení) — dnešní krok 8 tenhle problém opravoval potřetí zvlášť;
+(3) `_SEED_ENABLED`/`_GRAF_SUGGESTIONS_ENABLED` — kopírovaná šablona
+ablačního přepínače (jen 2×, ne naléhavé). J.: „ano, jdi do toho“ — vzor
+(1), nejnižší riziko/nejjasnější přínos, malý a izolovaný.
+
+**Rozbor:** `overlap_verdict` i `inverze_verdict` po nalezení shody
+opakují STEJNÉ tři řádky (`self.m.use_links((link,))`, `proof.links.
+append(link.id)`, `proof.hard.append(("lex", src, dst))`) — a přesně
+STEJNÉ tři řádky (jen jako `p.`/proměnná jinak pojmenovaná) se opakují
+ještě DVAKRÁT v `bridge_rules` smyčkách (`evaluate()` i `enumerate()`,
+krok 5) — čtyři kopie celkem, ne dvě. Krok 5 sám ukázal riziko: bridge
+pravidla měla roky nulovou grafovou provenienci, protože si kopírovaný
+vzorec nikdo nevšiml opravit na všech místech najednou.
+
+**Hypotéza:** extrahovat `Evaluator._commit_lex_join(proof, link,
+src_pred, dst_pred)` (materializace + `lex` tvrdý krok, sdíleno se
+`lex_proof`, který dělá totéž pro shodu přes `same_pred`/`LexMatch`, ne
+přes přímý join). Pytest beze regrese (čistý refaktor, žádná změna
+chování — `Proof.hard`/`links` obsah stejný, jen sestavený jednou funkcí
+místo čtyř kopií), mypy/pylint beze nového nálezu.
+
+**Výsledek:** přesně tak. Všechny čtyři místa (`overlap_verdict`,
+`inverze_verdict`, `evaluate()` i `enumerate()` bridge smyčky) teď volají
+`self._commit_lex_join(...)` místo tří ručně psaných řádků — **−4
+duplikované bloky → 1 sdílená metoda** (14 řádků). Pytest 226 passed +
+2 xfailed BEZE ZMĚNY (žádný nový/padlý test — čistě interní refaktor),
+mypy čisté, pylint diff (`git stash`) **0 nových nálezů**, jen posun
+řádků (stejný počet nálezů 14/14 před i po).
+
+**Poučení:** vzor #1 byl správná volba pro „jdi do toho hned" — malý
+(14 řádků), izolovaný (jedna třída, žádná změna veřejného rozhraní),
+ověřitelný beze zbytku (existující testy `test_prekryv.py`/`test_
+inverze.py`/`test_logic.py::test_rule_bridges` už kontrolují přesně tenhle
+kus chování přes `any(k == "lex" for k,_,_ in proof.hard)`, takže refaktor
+měl okamžitou, existující regresní ochranu — nemusel jsem psát nic
+nového). Vzory #2 (read.py term-building) a #3 (ablační přepínače) zůstávají
+zapsané, ale NEprovedené — #2 čeká na příští operátor/konstrukci, co na
+stejnou mez narazí (bezpečnější než jeden velký refaktor srdce čtení bez
+konkrétního nového případu, co ho vyžaduje), #3 na třetí výskyt (dnes jen
+2, „pravidlo tří" ještě nesplněno).

@@ -22,7 +22,7 @@ from typing import Literal
 
 from cb6.chronos import overlap as time_overlap
 from cb6.defaults import PLACE_NOUNS
-from cb6.lexicon import Lexicon, LexMatch
+from cb6.lexicon import Lexicon, LexMatch, Link
 from cb6.memory import Memory, Role, Statement
 
 Grade = Literal["said", "read", "derived"]
@@ -119,6 +119,21 @@ class Evaluator:
     def same_pred(self, a: str | None, b: str | None) -> LexMatch | None:
         """Shoda predikátů (dotaz/vzor `a` × výrok `b`) přes lexikon; viz `_same_pred`."""
         return _same_pred(a, b, self.lex)
+
+    def _commit_lex_join(self, proof: Proof, link: Link, src_pred: str, dst_pred: str) -> Proof:
+        """Zapiš použití JEDNOHO řádku lexikonu do důkazu — sdíleno mezi
+        query-time join operátory (`overlap_verdict`, `inverze_verdict`,
+        a budoucími stejného tvaru: `porovnání`, `skládání`), na rozdíl
+        od `lex_proof` (shoda přes `same_pred`, kde je `LexMatch` řetěz).
+        Materializuje řádek (uzel `vazba` v exportu — I‑12) a přidá tvrdý
+        krok `lex`; bez tohodle krok 5 ukázal, co se stane, když se
+        materializace/tvrdý krok zapomene v jedné z kopií (bridge pravidla
+        roky beze stopy v grafu). Vstup: rozestavěný důkaz, použitý řádek,
+        zdrojový/cílový predikát. Výstup: týž důkaz (upravený)."""
+        self.m.use_links((link,))
+        proof.links.append(link.id)
+        proof.hard.append(("lex", src_pred, dst_pred))
+        return proof
 
     def lex_proof(self, q_pred: str | None, f_pred: str | None, lm: LexMatch, base: Proof) -> Proof:
         """Zapiš použití lexikonu do důkazu: krok, tvrdý krok `lex`, stupeň
@@ -350,9 +365,7 @@ class Evaluator:
                 continue
             proof = Proof([sid_a, sid_b], [f"{ta.label()} × {tb.label()}: {'protnutí' if ov else 'bez protnutí'}"],
                           grade="derived", hard=[("overlap" if ov else "no_overlap", tid_a, tid_b)])
-            self.m.use_links((link,))
-            proof.links.append(link.id)
-            proof.hard.append(("lex", src, q.pred))
+            proof = self._commit_lex_join(proof, link, src, q.pred)
             proof.defaults.append(f"překryv jen podle {src}.kdy, ne podle skutečného setkání (řádek {link.id})")
             return Verdict("ANO", [proof]) if ov else Verdict("NE", [], [proof])
         return None
@@ -386,9 +399,8 @@ class Evaluator:
                     continue
                 proof = Proof([f.id], [f"{self.m.node(y).label()} {src} {self.m.node(x).label()} ⇒ "
                                         f"{self.m.node(x).label()} {target.lemma} {self.m.node(y).label()} (inverze)"],
-                              grade="derived", hard=[("role:kdo", f.id, y), ("role:čí", f.id, x), ("lex", src, target.lemma)])
-                self.m.use_links((link,))
-                proof.links.append(link.id)
+                              grade="derived", hard=[("role:kdo", f.id, y), ("role:čí", f.id, x)])
+                proof = self._commit_lex_join(proof, link, src, target.lemma)
                 return Verdict("ANO", [proof])
         return None
 
@@ -446,9 +458,7 @@ class Evaluator:
                     p.steps.append(f"pravidlo {link.id}: {link.label()}")
                     p.grade = weakest(p.grade, "derived")
                     self.lex_proof(q.pred, dst_pred, lm, p)
-                    self.m.use_links((link,))
-                    p.links.append(link.id)
-                    p.hard.append(("lex", src_pred, dst_pred))
+                    p = self._commit_lex_join(p, link, src_pred, dst_pred)
                     pos.append(p)
                 for p in v2.counter:
                     neg.append(p)
@@ -662,9 +672,7 @@ class Evaluator:
                     seen.add(t)
                     p.steps.append(f"pravidlo {link.id}: {link.label()}")
                     self.lex_proof(q.pred, dst_pred, lm, p)
-                    self.m.use_links((link,))
-                    p.links.append(link.id)
-                    p.hard.append(("lex", src_pred, dst_pred))
+                    p = self._commit_lex_join(p, link, src_pred, dst_pred)
                     fillers.append((t, p))
         # rodina rolí: „kde“ bez `kde` → sourozenci (kam/odkud/kudy) s přiznáním; totéž čas
         family = PLACE_FAMILY if hole.name in PLACE_FAMILY else TIME_FAMILY if hole.name in TIME_FAMILY else ()
