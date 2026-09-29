@@ -1,0 +1,5013 @@
+{
+ "dialog": {
+  "answers": {
+   "Bydlel Petr v Praze v roce 1990?": "čtu: bydlet(kdo:·Petr, kde:·Praha, kdy:·1990)\n→ NEVÍM\n   vím:\n   - bydlet(kdo: Petr, kde: Brno)\n   - bydlet(kdo: Petr, kde: Praha)\n   - žít(kdo: Petr, kde: Praha)\n   (+ 2 další)",
+   "Bydlí Petr v Brně?": "čtu: bydlet(kdo:·Petr, kde:·Brno)\n→ ANO\n   protože:\n   - bydlet(kdo: Petr, kde: Brno)  [s0090]\n       zdroj: „Ne, Petr bydlí v Brně.“ (golden, věta 46)\n   [přečteno z textu]",
+   "Bydlí Petr v Praze v roce 2020?": "čtu: bydlet(kdo:·Petr, kde:·Praha, kdy:·2020)\n→ NEVÍM\n   vím:\n   - bydlet(kdo: Petr, kde: Brno)\n   - bydlet(kdo: Petr, kde: Praha)\n   - žít(kdo: Petr, kde: Praha)\n   (+ 2 další)",
+   "Bydlí Petr v Praze?": "čtu: bydlet(kdo:·Petr, kde:·Praha)\n→ ANO\n   protože:\n   - bydlet(kdo: Petr, kde: Praha)  [s0111]\n       zdroj: „Petr bydlí v Praze.“ (golden, věta 59)\n   [přečteno z textu]",
+   "Byl Petr v pondělí v Česku?": "čtu: být(kdo:·Petr, kde:·Česko, kdy:·pondělí)\n→ NEVÍM\n   vím:\n   - být(kdo: Praha, kde: Česko) ⟨within⟩\n   - jet(kdo: Petr, kdy: pondělí, kam: Praha)\n   - žít(kdo: Petr, kde: Praha)\n   (+ 1 další)",
+   "Byl Petr ve středu v Česku?": "čtu: být(kdo:·Petr, kde:·Česko, kdy:·středa)\n→ NEVÍM\n   vím:\n   - být(kdo: Praha, kde: Česko) ⟨within⟩\n   - jet(kdo: Petr, kdy: pondělí, kam: Praha)\n   - žít(kdo: Petr, kde: Praha)\n   (+ 1 další)",
+   "Byl Čapek malíř?": "čtu: být(kdo:·Čapek, co:∃malíř) ⟨member⟩\n→ NEVÍM\n   vím:\n   - být(kdo: Josef Čapek, co: ∃malíř) ⟨member⟩\n   - být(kdo: Karel Čapek, co: ∃spisovatel (český) + ∃novinář + ∃dramatik) ⟨member⟩\n   - být(kdo: ∀spisovatel, co: ∃člověk) ⟨subset⟩\n   (+ 4 další)",
+   "Byl Čapek členem nějaké strany?": "čtu: být(kdo:·Čapek, co:∃člen) ⟨member⟩\n→ NEVÍM\n   vím:\n   - být(kdo: Karel Čapek, co: ∃spisovatel (český) + ∃novinář + ∃dramatik) ⟨member⟩\n   - být(kdo: ∀spisovatel, co: ∃člověk) ⟨subset⟩\n   - ne-být(kdo: Alois Jirásek, co: ∃člen) ⟨member⟩\n   (+ 4 další)",
+   "Byl Čapek člověk?": "čtu: být(kdo:·Čapek, co:∃člověk) ⟨member⟩\n→ ANO\n   protože:\n   - být(kdo: Karel Čapek, co: ∃spisovatel (český) + ∃novinář + ∃dramatik) ⟨member⟩  [s0069]\n       zdroj: „Karel Čapek (9. ledna 1890 Malé Svatoňovice – 25. prosince 1938 Praha) byl český spisovatel, novinář a dramatik.“ (golden, věta 34)\n   - být(kdo: ∀spisovatel, co: ∃člověk) ⟨subset⟩  [s0077]\n       zdroj: „Každý spisovatel je člověk.“ (golden, věta 38)\n   ↳ Karel Čapek ∈ člověk\n   [odvozeno z: přečteno z textu]",
+   "Co dělal Petr v pondělí?": "čtu: dělat(co:?, kdo:·Petr, kdy:·pondělí)\n→ NEVÍM\n   chybí: o „dělat“ nemám žádný výrok\n   vím:\n   - jet(kdo: Petr, kdy: pondělí, kam: Praha)\n   - žít(kdo: Petr, kde: Praha)\n   - bydlet(kdo: Petr, kde: Praha)",
+   "Co je Ford?": "čtu: být(kdo:·Ford, co:?)\n→ NEVÍM\n   vím:\n   - mít(kdo: Filip, co: Ford)",
+   "Co je jezevčík?": "čtu: být(kdo:∀jezevčík, co:?)\n→ pes\n   - být(kdo: ∀jezevčík, co: ∃pes) ⟨subset⟩  [s0062]\n       zdroj: „Jezevčík je pes.“ (golden, věta 30)\n   [přečteno z textu; kdo:∀ generický prézens; kernel:subset (obecný podmět)]",
+   "Co má Filip?": "čtu: mít(co:?, kdo:·Filip)\n→ Ford\n   - mít(kdo: Filip, co: Ford)  [s0037]\n       zdroj: „Filip má Ford.“ (golden, věta 18)\n   [přečteno z textu]\n→ auto (modrý)\n   - mít(kdo: Filip, co: ∃auto (modrý))  [s0039]\n       zdroj: „Filip má auto.“ (golden, věta 19)\n   [přečteno z textu; co: nová instance e0007 ∈ auto (neurčitá zmínka)]",
+   "Co napsal Hrabal?": "čtu: napsat(co:?, kdo:·Hrabal)\n→ postřižina\n   - napsat(kdo: Hrabal, co: ∃postřižina)  [s0043]\n       zdroj: „Hrabal napsal Postřižiny.“ (golden, věta 22)\n   [přečteno z textu; co: nová instance e0009 ∈ postřižina (neurčitá zmínka)]\n→ román\n   - napsat(kdo: Hrabal, co: ∃román)  [s0045]\n       zdroj: „Hrabal napsal román.“ (golden, věta 23)\n   [přečteno z textu; co: nová instance e0010 ∈ román (neurčitá zmínka)]",
+   "Co napsal Karel Čapek?": "čtu: napsat(co:?, kdo:·Karel Čapek)\n→ R.U.R.\n   - napsat(kdo: Karel Čapek, co: R.U.R.)  [s0073]\n       zdroj: „Karel Čapek napsal drama R.U.R.“ (golden, věta 35)\n   [přečteno z textu]\n→ Krakatit\n   - napsat(kdo: Karel Čapek, co: Krakatit)  [s0075]\n       zdroj: „Karel Čapek napsal román Krakatit.“ (golden, věta 36)\n   [přečteno z textu]",
+   "Co obsahuje ovoce?": "čtu: obsahovat(co:?, kdo:∀ovoce)\n→ vitamín\n   - obsahovat(kdo: ∀ovoce, co: ∀vitamín)  [s0100]\n       zdroj: „Ovoce obsahuje každý vitamín.“ (golden, věta 53)\n   [přečteno z textu; kdo:∀ generický prézens]",
+   "Jak rychle může jezdit auto po dálnici?": "čtu: možnost:jezdit(kdo:·auto, jak:·rychle, kudy:∃dálnice)\n→ NEVÍM\n   vím:\n   - jezdit(kdo: ∀prostředek (dopravní), kudy: ∃dálnice)\n   - mít(kdo: ∀dálnice, co: ∃rychlost (omezený), na+: 130)\n   - být(kdo: ∀auto, co: ∃prostředek (dopravní)) ⟨subset⟩\n   (+ 1 další)",
+   "Jaké drama napsal Karel Čapek?": "čtu: napsat(co:?filler:∃drama, kdo:·Karel Čapek)\n→ R.U.R.\n   - napsat(kdo: Karel Čapek, co: R.U.R.)  [s0073]\n       zdroj: „Karel Čapek napsal drama R.U.R.“ (golden, věta 35)\n   - být(kdo: R.U.R., co: ∃drama) ⟨member⟩  [s0072]\n       zdroj: „Karel Čapek napsal drama R.U.R.“ (golden, věta 35)\n   ↳ R.U.R. ∈ drama\n   [odvozeno z: přečteno z textu]",
+   "Jaké je Filipovo auto?": "čtu: být(kdo:·auto⟨Filipův⟩, jaký:?)\n→ modrý\n   - být(kdo: auto (modrý), jaký: ∃modrý)  [s0040]\n       zdroj: „Filipovo auto je modré.“ (golden, věta 20)\n   [přečteno z textu; kdo: „Filipův auto“ → vlastník Filip (existující mít)]",
+   "Jaké znáš spisovatele?": "čtu: znát(kdo:·∅, co:?filler:∃spisovatel)\n→ NEVÍM\n   chybí: o „znát“ nemám žádný výrok\n   vím:\n   - být(kdo: Hrabal, co: ∃spisovatel) ⟨member⟩\n   - být(kdo: ∀spisovatel, co: ∃člověk) ⟨subset⟩\n   - být(kdo: ∀spisovatel, co: ∃člověk) ⟨subset⟩",
+   "Je Hrabal stroj?": "čtu: být(kdo:·Hrabal, co:∃stroj) ⟨member⟩\n→ NE\n   protože:\n   - být(kdo: Hrabal, co: ∃spisovatel) ⟨member⟩  [s0041]\n       zdroj: „Hrabal je spisovatel.“ (golden, věta 21)\n   - ne-být(kdo: ∀stroj, co: ∃člověk) ⟨subset⟩  [s0159]\n       zdroj: „Žádný stroj není člověk.“ (golden, věta 92)\n   ↳ Hrabal ∈ spisovatel\n   ↳ spisovatel ∦ stroj\n   [odvozeno z: přečteno z textu]",
+   "Je Hrabal člověk?": "čtu: být(kdo:·Hrabal, co:∃člověk) ⟨member⟩\n→ ANO\n   protože:\n   - být(kdo: Hrabal, co: ∃spisovatel) ⟨member⟩  [s0041]\n       zdroj: „Hrabal je spisovatel.“ (golden, věta 21)\n   - být(kdo: ∀spisovatel, co: ∃člověk) ⟨subset⟩  [s0077]\n       zdroj: „Každý spisovatel je člověk.“ (golden, věta 38)\n   ↳ Hrabal ∈ člověk\n   [odvozeno z: přečteno z textu]",
+   "Je Praha v Česku?": "čtu: být(kdo:·Praha, kde:·Česko) ⟨within⟩\n→ ANO\n   protože:\n   - být(kdo: Praha, kde: Česko) ⟨within⟩  [s0129]\n       zdroj: „Praha je v Česku.“ (golden, věta 68)\n   ↳ Praha ⊆ Česko\n   [přečteno z textu]",
+   "Je citron ovoce?": "čtu: být(kdo:∀citron, co:∃ovoce) ⟨subset⟩\n→ ANO\n   protože:\n   - být(kdo: ∀citron, co: ∃ovoce) ⟨subset⟩  [s0025]\n       zdroj: „Citron je ovoce.“ (golden, věta 10)\n   ↳ citron ⊆ ovoce\n   [přečteno z textu]",
+   "Je jezevčík pes?": "čtu: být(kdo:∀jezevčík, co:∃pes) ⟨subset⟩\n→ ANO\n   protože:\n   - být(kdo: ∀jezevčík, co: ∃pes) ⟨subset⟩  [s0062]\n       zdroj: „Jezevčík je pes.“ (golden, věta 30)\n   ↳ jezevčík ⊆ pes\n   [přečteno z textu]",
+   "Jezdí auto po dálnici?": "čtu: jezdit(kdo:∀auto, kudy:∃dálnice)\n→ ANO\n   protože:\n   - jezdit(kdo: ∀prostředek (dopravní), kudy: ∃dálnice)  [s0029]\n       zdroj: „Dopravní prostředek jezdí po dálnici.“ (golden, věta 13)\n   - být(kdo: ∀auto, co: ∃prostředek (dopravní)) ⟨subset⟩  [s0007]\n       zdroj: „Auto je dopravní prostředek.“ (golden, věta 4)\n   ↳ auto ⊆ prostředek[dopravní] (∀ se přenáší dolů)\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]",
+   "Kam jel Petr dřív?": "čtu: jet(kam:?, kdo:·Petr, pořadí:·dříve)\n→ NEVÍM\n   vím:\n   - jet(kdo: Petr, kdy: pondělí, kam: Praha)\n   - jet(kdy: úterý, kdo: Petr, kam: Brno)\n   - žít(kdo: Petr, kde: Praha)\n   (+ 2 další)",
+   "Kam jel Petr v pondělí?": "čtu: jet(kam:?, kdo:·Petr, kdy:·pondělí)\n→ Praha\n   - jet(kdo: Petr, kdy: pondělí, kam: Praha)  [s0112]\n       zdroj: „Petr jel v pondělí do Prahy.“ (golden, věta 60)\n   [přečteno z textu]",
+   "Kde bydlí Petr?": "čtu: bydlet(kde:?, kdo:·Petr)\n→ Brno\n   - bydlet(kdo: Petr, kde: Brno)  [s0090]\n       zdroj: „Ne, Petr bydlí v Brně.“ (golden, věta 46)\n   [přečteno z textu]\n→ Praha\n   - bydlet(kdo: Petr, kde: Praha)  [s0111]\n       zdroj: „Petr bydlí v Praze.“ (golden, věta 59)\n   [přečteno z textu]",
+   "Kde pracoval Alois Jirásek?": "čtu: pracovat(kde:?, kdo:·Alois Jirásek)\n→ gymnázium; Litomyšl; Praha\n   - pracovat(kdo: Alois Jirásek, jak dlouho: život, jako: ∃učitel, kde: ∃gymnázium + ∃Litomyšl + ∃Praha, pořadí: nejprve + poté)  [s0013]\n       zdroj: „Celý život pracoval jako učitel dějepisu na gymnáziu, nejprve v Litomyšli a poté v Praze.“ (golden, věta 7)\n   [přečteno z textu; kdo:pro-drop z kontextu; kdo: „nevyslovený podmět“ = Alois Jirásek (koref: registr, téma dokumentu)]",
+   "Kde pracoval Čapek?": "čtu: pracovat(kde:?, kdo:·Čapek)\n→ NEVÍM\n   vím:\n   - pracovat(kdo: Karel Čapek, v+Loc: ∃noviny (lidový))\n   - narodit_se(kdo: Karel Čapek, kde: Praha)\n   - ∅(co: román, čí: Karel Čapek)\n   (+ 1 další)",
+   "Kde se narodil Alois Jirásek?": "čtu: narodit_se(kde:?, kdo:·Alois Jirásek)\n→ Hronov\n   - narodit_se(kdo: Alois Jirásek, kdy: 23. 8. 1851, kde: Hronov)  [s0002]\n       zdroj: „Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.“ (golden, věta 1)\n   [přečteno z textu; životopisná závorka]",
+   "Kde se narodil Karel Čapek?": "čtu: narodit_se(kde:?, kdo:·Karel Čapek)\n→ Svatoňovice\n   - narodit_se(kdo: Karel Čapek, kdy: 9. 1. 1890, kde: Svatoňovice)  [s0070]\n       zdroj: „Karel Čapek (9. ledna 1890 Malé Svatoňovice – 25. prosince 1938 Praha) byl český spisovatel, novinář a dramatik.“ (golden, věta 34)\n   [přečteno z textu; životopisná závorka]\n→ Praha\n   - narodit_se(kdo: Karel Čapek, kde: Praha)  [s0157]\n       zdroj: „Čapek se narodil v Praze.“ (golden, věta 90)\n   [přečteno z textu; identita: „Čapek“ = Karel Čapek (částečné jméno)]",
+   "Kde studoval?": "čtu: studovat(kdo:·∅, kde:?)\n→ Praha; Berlín; Paříž\n   - studovat(kdo: Alois Jirásek, co: ∃filozofie, kde: Praha + Berlín + Paříž)  [s0136]\n       zdroj: „Studoval filozofii v Praze, Berlíně a Paříži.“ (golden, věta 73)\n   [přečteno z textu; koordinace:kde:distribuce; kdo:pro-drop z kontextu; kdo: „nevyslovený podmět“ = Alois Jirásek (koref: registr, téma dokumentu); co: nová instance e0024 ∈ filozofie (neurčitá zmínka)]",
+   "Kde zemřel Alois Jirásek?": "čtu: zemřít(kde:?, kdo:·Alois Jirásek)\n→ Praha\n   - zemřít(kdo: Alois Jirásek, kdy: 12. 3. 1930, kde: Praha)  [s0003]\n       zdroj: „Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.“ (golden, věta 1)\n   [přečteno z textu; životopisná závorka]",
+   "Kde žije Petr?": "čtu: žít(kde:?, kdo:·Petr)\n→ Brno\n   - bydlet(kdo: Petr, kde: Brno)  [s0090]\n       zdroj: „Ne, Petr bydlí v Brně.“ (golden, věta 46)\n   ↳ implikace: bydlet ⇒ žít [lex:syn:0031]\n   [odvozeno z: přečteno z textu]\n→ Praha\n   - bydlet(kdo: Petr, kde: Praha)  [s0111]\n       zdroj: „Petr bydlí v Praze.“ (golden, věta 59)\n   ↳ implikace: bydlet ⇒ žít [lex:syn:0031]\n   [odvozeno z: přečteno z textu]",
+   "Kdo byl Karel Čapek?": "čtu: být(kdo:·Karel Čapek, co:?)\n→ spisovatel (český); novinář; dramatik\n   - být(kdo: Karel Čapek, co: ∃spisovatel (český) + ∃novinář + ∃dramatik) ⟨member⟩  [s0069]\n       zdroj: „Karel Čapek (9. ledna 1890 Malé Svatoňovice – 25. prosince 1938 Praha) byl český spisovatel, novinář a dramatik.“ (golden, věta 34)\n   [přečteno z textu; kernel:member (určitý podmět)]",
+   "Kdo je Alois Jirásek?": "čtu: být(kdo:·Alois Jirásek, co:?)\n→ prozaik (český); dramatik; učitel (středoškolský); politik\n   - být(kdo: Alois Jirásek, co: ∃prozaik (český) + ∃dramatik + ∃učitel (středoškolský) + ∃politik) ⟨member⟩  [s0001]\n       zdroj: „Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.“ (golden, věta 1)\n   [přečteno z textu; kernel:member (určitý podmět)]",
+   "Kdo je Hrabal?": "čtu: být(kdo:·Hrabal, co:?)\n→ spisovatel\n   - být(kdo: Hrabal, co: ∃spisovatel) ⟨member⟩  [s0041]\n       zdroj: „Hrabal je spisovatel.“ (golden, věta 21)\n   [přečteno z textu; kernel:member (určitý podmět)]",
+   "Kdo je Isaac Newton?": "čtu: být(kdo:·Isaac Newton, co:?)\n→ fyzik (anglický); matematik; astronom; alchymista; teolog\n   - být(kdo: Isaac Newton, co: ∃fyzik (anglický) + ∃matematik + ∃astronom + ∃alchymista + ∃teolog) ⟨member⟩  [s0046]\n       zdroj: „Isaac Newton (4. ledna 1643 – 31. března 1727) byl anglický fyzik, matematik, astronom, alchymista a teolog.“ (golden, věta 24)\n   [přečteno z textu; kernel:member (určitý podmět)]",
+   "Kdo namaloval obraz?": "čtu: namalovat(kdo:?, co:∃obraz)\n→ Alois Jirásek\n   - namalovat(kdo: Alois Jirásek, co: ∃obraz)  [s0097]\n       zdroj: „On namaloval obraz.“ (golden, věta 50)\n   - být(kdo: obraz, co: ∃obraz) ⟨member⟩  [s0096]\n       zdroj: „On namaloval obraz.“ (golden, věta 50)\n   ↳ obraz ∈ obraz\n   [odvozeno z: přečteno z textu; kdo: „on“ = Alois Jirásek (koref: registr, téma dokumentu); co: nová instance e0022 ∈ obraz (neurčitá zmínka)]",
+   "Kdo napsal Postřižiny?": "čtu: napsat(kdo:?, co:∃postřižina)\n→ Hrabal\n   - napsat(kdo: Hrabal, co: ∃postřižina)  [s0043]\n       zdroj: „Hrabal napsal Postřižiny.“ (golden, věta 22)\n   - být(kdo: postřižina, co: ∃postřižina) ⟨member⟩  [s0042]\n       zdroj: „Hrabal napsal Postřižiny.“ (golden, věta 22)\n   ↳ postřižina ∈ postřižina\n   [odvozeno z: přečteno z textu; co: nová instance e0009 ∈ postřižina (neurčitá zmínka)]",
+   "Kdo přijde na oslavu?": "čtu: přijít(kdo:?, na+Acc:∃oslava)\n→ Karel\n   - přijít(kdo: Karel, na+Acc: ∃oslava)  [s0110]\n       zdroj: „Karel přijde na oslavu, pokud přijde Jana.“ (golden, věta 33)\n   [odvozeno z: odvozeno; pravidlo z podmínky „pokud“ (if); odvozeno pravidlem s0066 z s0109]",
+   "Kdo přijde?": "čtu: přijít(kdo:?)\n→ Petr; Karel\n   - přijít(kdo: Petr + Karel)  [s0108]\n       zdroj: „Petr a Karel přijdou, když nepřijde Marie.“ (golden, věta 58)\n   [odvozeno z: odvozeno; pravidlo z podmínky „když“ (if); koordinace:kdo:distribuce; odvozeno pravidlem s0105 z s0086]\n→ Jana\n   - přijít(kdo: Jana)  [s0109]\n       zdroj: „Jana přijde, pokud přijde Petr.“ (golden, věta 27)\n   [odvozeno z: odvozeno; pravidlo z podmínky „pokud“ (if); odvozeno pravidlem s0053 z s0108]",
+   "Kdo stvořil Postřižiny?": "čtu: stvořit(kdo:?, co:∃postřižina)\n→ NEVÍM\n   chybí: o „stvořit“ nemám žádný výrok\n   vím:\n   - být(kdo: postřižina, co: ∃postřižina) ⟨member⟩",
+   "Kdy jel Petr do Prahy?": "čtu: jet(kdy:?, kdo:·Petr, kam:·Praha)\n→ pondělí\n   - jet(kdo: Petr, kdy: pondělí, kam: Praha)  [s0112]\n       zdroj: „Petr jel v pondělí do Prahy.“ (golden, věta 60)\n   [přečteno z textu]",
+   "Kdy napsal R.U.R.?": "čtu: napsat(kdy:?, kdo:·R.U.r.)\n→ NEVÍM\n   vím:\n   - napsat(kdo: Alois Jirásek, kdy: 1920, co: R.U.R.)\n   - napsat(kdo: Karel Čapek, co: R.U.R.)\n   - pršet(kdo: R.U.R.)",
+   "Kdy se narodil Alois Jirásek?": "čtu: narodit_se(kdy:?, kdo:·Alois Jirásek)\n→ 23. 8. 1851\n   - narodit_se(kdo: Alois Jirásek, kdy: 23. 8. 1851, kde: Hronov)  [s0002]\n       zdroj: „Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.“ (golden, věta 1)\n   [přečteno z textu; životopisná závorka]",
+   "Kdy se narodil Isaac Newton?": "čtu: narodit_se(kdy:?, kdo:·Isaac Newton)\n→ 4. 1. 1643\n   - narodit_se(kdo: Isaac Newton, kdy: 4. 1. 1643)  [s0047]\n       zdroj: „Isaac Newton (4. ledna 1643 – 31. března 1727) byl anglický fyzik, matematik, astronom, alchymista a teolog.“ (golden, věta 24)\n   [přečteno z textu; životopisná závorka]",
+   "Kdy zemřel Alois Jirásek?": "čtu: zemřít(kdy:?, kdo:·Alois Jirásek)\n→ 12. 3. 1930\n   - zemřít(kdo: Alois Jirásek, kdy: 12. 3. 1930, kde: Praha)  [s0003]\n       zdroj: „Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.“ (golden, věta 1)\n   [přečteno z textu; životopisná závorka]",
+   "Kolik druhů ovoce znáš?": "čtu: znát(kdo:·∅, co:?count:∃druh)\n→ NEVÍM\n   chybí: o „znát“ nemám žádný výrok",
+   "Kolik je druhů ovoce?": "čtu: být(kdo:?count:∀druh)\n→ NEVÍM",
+   "Kolik zubů má dospělý pes?": "čtu: mít(co:?count:∃zub, kdo:∀pes[dospělý])\n→ 42\n   - mít(kdo: ∀pes (dospělý), co: ∃42 zub)  [s0032]\n       zdroj: „Dospělý pes má 42 zubů.“ (golden, věta 15)\n   [přečteno z textu; kdo:∀ generický prézens]",
+   "Kterou knihu napsal Karel Čapek?": "čtu: napsat(co:?filler:∃kniha, kdo:·Karel Čapek)\n→ NEVÍM\n   vím:\n   - napsat(kdo: Karel Čapek, co: R.U.R.)\n   - napsat(kdo: Karel Čapek, co: Krakatit)\n   - narodit_se(kdo: Karel Čapek, kde: Praha)",
+   "Která díla napsal Karel Čapek?": "čtu: napsat(co:?filler:∃dílo, kdo:·Karel Čapek)\n→ R.U.R.\n   - napsat(kdo: Karel Čapek, co: R.U.R.)  [s0073]\n       zdroj: „Karel Čapek napsal drama R.U.R.“ (golden, věta 35)\n   - být(kdo: R.U.R., co: ∃drama) ⟨member⟩  [s0072]\n       zdroj: „Karel Čapek napsal drama R.U.R.“ (golden, věta 35)\n   ↳ R.U.R. ∈ drama\n   ↳ podřazení: drama ⊆ dílo [lex:pod:0002]\n   [odvozeno z: přečteno z textu]\n→ Krakatit\n   - napsat(kdo: Karel Čapek, co: Krakatit)  [s0075]\n       zdroj: „Karel Čapek napsal román Krakatit.“ (golden, věta 36)\n   - být(kdo: Krakatit, co: ∃román) ⟨member⟩  [s0074]\n       zdroj: „Karel Čapek napsal román Krakatit.“ (golden, věta 36)\n   ↳ Krakatit ∈ román\n   ↳ podřazení: román ⊆ dílo [lex:pod:0001]\n   [odvozeno z: přečteno z textu]",
+   "Která díla napsal Petr?": "čtu: napsat(co:?filler:∃dílo, kdo:·Petr)\n→ NEVÍM\n   vím:\n   - ∅(co: ∀dílo, čí: Karel Čapek)\n   - ∅(téma: ∃dílo)\n   - jet(kdy: úterý, kdo: Petr, kam: Brno)",
+   "Které romány napsal Karel Čapek?": "čtu: napsat(co:?filler:∃román, kdo:·Karel Čapek)\n→ Krakatit\n   - napsat(kdo: Karel Čapek, co: Krakatit)  [s0075]\n       zdroj: „Karel Čapek napsal román Krakatit.“ (golden, věta 36)\n   - být(kdo: Krakatit, co: ∃román) ⟨member⟩  [s0074]\n       zdroj: „Karel Čapek napsal román Krakatit.“ (golden, věta 36)\n   ↳ Krakatit ∈ román\n   [odvozeno z: přečteno z textu]",
+   "Létají ptáci?": "čtu: létat(kdo:∀pták)\n→ ANO\n   protože:\n   - létat(kdo: ∀pták)  [s0130]\n       zdroj: „Ptáci létají.“ (golden, věta 69)\n   [přečteno z textu; kdo:∀ generický prézens]",
+   "Létá tučňák?": "čtu: létat(kdo:∀tučňák)\n→ KONFLIKT — mám důkaz pro obojí\n   protože:\n   - létat(kdo: ∀pták)  [s0130]\n       zdroj: „Ptáci létají.“ (golden, věta 69)\n   - být(kdo: ∀tučňák, co: ∃pták) ⟨subset⟩  [s0140]\n       zdroj: „Tučňák je pták.“ (golden, věta 75)\n   ↳ tučňák ⊆ pták (∀ se přenáší dolů)\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]\n   proti tomu:\n   - ne-létat(kdo: ∀tučňák)  [s0141]\n       zdroj: „Tučňák nelétá.“ (golden, věta 76)\n   [přečteno z textu; kdo:∀ generický prézens]",
+   "Létá vrabec?": "čtu: létat(kdo:∀vrabec)\n→ ANO\n   protože:\n   - létat(kdo: ∀pták)  [s0130]\n       zdroj: „Ptáci létají.“ (golden, věta 69)\n   - být(kdo: ∀vrabec, co: ∃pták) ⟨subset⟩  [s0146]\n       zdroj: „Vrabec je pták.“ (golden, věta 81)\n   ↳ vrabec ⊆ pták (∀ se přenáší dolů)\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]",
+   "Má chov negativní dopad?": "čtu: mít(kdo:∀chov, co:∃dopad[negativní])\n→ MOŽNÁ — text říká jen, že může\n   protože:\n   - možnost: mít(kdo: chov, co: ∃dopad (negativní))  [s0022]\n       zdroj: „Chov domácích zvířat může mít negativní dopad na jejich zdraví.“ (golden, věta 9)\n   ↳ výrok je jen možnost\n   [přečteno z textu; kdo:· epizoda]",
+   "Má dospělý pes 42 zubů?": "čtu: mít(kdo:∀pes[dospělý], co:∃zub#42)\n→ ANO\n   protože:\n   - mít(kdo: ∀pes (dospělý), co: ∃42 zub)  [s0032]\n       zdroj: „Dospělý pes má 42 zubů.“ (golden, věta 15)\n   [přečteno z textu; kdo:∀ generický prézens]",
+   "Má jablko vitamíny?": "čtu: mít(kdo:∀jablko, co:∃vitamín)\n→ ANO\n   protože:\n   - obsahovat(kdo: ∀jablko, co: ∃vitamín)  [s0049]\n       zdroj: „Jablko obsahuje vitamíny.“ (golden, věta 25)\n   ↳ implikace: obsahovat ⇒ mít [lex:syn:0070]\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]",
+   "Může chov mít negativní dopad?": "čtu: možnost:mít(kdo:·chov, co:∃dopad[negativní])\n→ ANO\n   protože:\n   - možnost: mít(kdo: chov, co: ∃dopad (negativní))  [s0022]\n       zdroj: „Chov domácích zvířat může mít negativní dopad na jejich zdraví.“ (golden, věta 9)\n   [přečteno z textu; kdo:· epizoda]",
+   "Namaloval Josef obraz?": "čtu: namalovat(kdo:·Josef, co:∃obraz)\n→ NEVÍM\n   vím:\n   - namalovat(kdo: Alois Jirásek, co: ∃obraz)\n   - být(kdo: obraz, co: ∃obraz) ⟨member⟩",
+   "Namaloval Josef Čapek obraz?": "čtu: namalovat(kdo:·Josef Čapek, co:∃obraz)\n→ NEVÍM\n   vím:\n   - namalovat(kdo: Alois Jirásek, co: ∃obraz)\n   - být(kdo: Josef Čapek, co: ∃malíř) ⟨member⟩\n   - být(kdo: Josef Čapek, co: ∃bratr) ⟨member⟩\n   (+ 1 další)",
+   "Napsal Hrabal román?": "čtu: napsat(kdo:·Hrabal, co:∃román)\n→ ANO\n   protože:\n   - napsat(kdo: Hrabal, co: ∃román)  [s0045]\n       zdroj: „Hrabal napsal román.“ (golden, věta 23)\n   - být(kdo: román, co: ∃román) ⟨member⟩  [s0044]\n       zdroj: „Hrabal napsal román.“ (golden, věta 23)\n   ↳ román ∈ román\n   [odvozeno z: přečteno z textu; co: nová instance e0010 ∈ román (neurčitá zmínka)]",
+   "Napsal Postřižiny i nějaký stroj?": "čtu: napsat(co:∃postřižina, kdo:∃stroj)\n→ NEVÍM\n   vím:\n   - napsat(kdo: Hrabal, co: ∃postřižina)\n   - ne-být(kdo: ∀stroj, co: ∃člověk) ⟨subset⟩\n   - být(kdo: postřižina, co: ∃postřižina) ⟨member⟩",
+   "Napsal Postřižiny spisovatel?": "čtu: napsat(co:∃postřižina, kdo:·spisovatel)\n→ ANO\n   protože:\n   - napsat(kdo: Hrabal, co: ∃postřižina)  [s0043]\n       zdroj: „Hrabal napsal Postřižiny.“ (golden, věta 22)\n   - být(kdo: postřižina, co: ∃postřižina) ⟨member⟩  [s0042]\n       zdroj: „Hrabal napsal Postřižiny.“ (golden, věta 22)\n   - být(kdo: Hrabal, co: ∃spisovatel) ⟨member⟩  [s0041]\n       zdroj: „Hrabal je spisovatel.“ (golden, věta 21)\n   ↳ postřižina ∈ postřižina\n   ↳ Hrabal ∈ spisovatel\n   [odvozeno z: přečteno z textu; co: nová instance e0009 ∈ postřižina (neurčitá zmínka)]",
+   "Narodil se Jirásek v roce 1851?": "čtu: narodit_se(kdo:·Jirásek, kdy:·1851)\n→ ANO\n   protože:\n   - narodit_se(kdo: Alois Jirásek, kdy: 23. 8. 1851, kde: Hronov)  [s0002]\n       zdroj: „Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.“ (golden, věta 1)\n   ↳ 23. 8. 1851 je v 1851\n   [přečteno z textu; životopisná závorka]",
+   "Nelétá tučňák?": "čtu: ¬létat(kdo:∀tučňák)\n→ KONFLIKT — mám důkaz pro obojí\n   protože:\n   - létat(kdo: ∀pták)  [s0130]\n       zdroj: „Ptáci létají.“ (golden, věta 69)\n   - být(kdo: ∀tučňák, co: ∃pták) ⟨subset⟩  [s0140]\n       zdroj: „Tučňák je pták.“ (golden, věta 75)\n   ↳ tučňák ⊆ pták (∀ se přenáší dolů)\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]\n   proti tomu:\n   - ne-létat(kdo: ∀tučňák)  [s0141]\n       zdroj: „Tučňák nelétá.“ (golden, věta 76)\n   [přečteno z textu; kdo:∀ generický prézens]",
+   "Obsahuje citron nějaký vitamín?": "čtu: obsahovat(kdo:∀citron, co:∃vitamín)\n→ ANO\n   protože:\n   - obsahovat(kdo: ∀citron, co: ∃vitamín C)  [s0026]\n       zdroj: „Citron obsahuje vitamín C.“ (golden, věta 11)\n   - být(kdo: ∀vitamín C, co: ∃vitamín) ⟨subset⟩  [s0145]\n       zdroj: „Vitamín C je vitamín.“ (golden, věta 80)\n   ↳ vitamín C ⊆ vitamín\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]\n   protože:\n   - obsahovat(kdo: ∀ovoce, co: ∀vitamín)  [s0100]\n       zdroj: „Ovoce obsahuje každý vitamín.“ (golden, věta 53)\n   - být(kdo: ∀citron, co: ∃ovoce) ⟨subset⟩  [s0025]\n       zdroj: „Citron je ovoce.“ (golden, věta 10)\n   ↳ citron ⊆ ovoce (∀ se přenáší dolů)\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]\n   protože:\n   - obsahovat(kdo: ∀ovoce, co: ∃vitamín)  [s0101]\n       zdroj: „Ovoce obsahuje vitamíny.“ (golden, věta 54)\n   - být(kdo: ∀citron, co: ∃ovoce) ⟨subset⟩  [s0025]\n       zdroj: „Citron je ovoce.“ (golden, věta 10)\n   ↳ citron ⊆ ovoce (∀ se přenáší dolů)\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]",
+   "Obsahuje citron vitamín C?": "čtu: obsahovat(kdo:∀citron, co:∃vitamín C)\n→ ANO\n   protože:\n   - obsahovat(kdo: ∀citron, co: ∃vitamín C)  [s0026]\n       zdroj: „Citron obsahuje vitamín C.“ (golden, věta 11)\n   [přečteno z textu; kdo:∀ generický prézens]\n   protože:\n   - obsahovat(kdo: ∀ovoce, co: ∀vitamín)  [s0100]\n       zdroj: „Ovoce obsahuje každý vitamín.“ (golden, věta 53)\n   - být(kdo: ∀citron, co: ∃ovoce) ⟨subset⟩  [s0025]\n       zdroj: „Citron je ovoce.“ (golden, věta 10)\n   - být(kdo: ∀vitamín C, co: ∃vitamín) ⟨subset⟩  [s0145]\n       zdroj: „Vitamín C je vitamín.“ (golden, věta 80)\n   ↳ citron ⊆ ovoce (∀ se přenáší dolů)\n   ↳ vitamín C ⊆ vitamín (∀ se přenáší dolů)\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]",
+   "Obsahuje jablko vitamíny?": "čtu: obsahovat(kdo:∀jablko, co:∃vitamín)\n→ ANO\n   protože:\n   - obsahovat(kdo: ∀jablko, co: ∃vitamín)  [s0049]\n       zdroj: „Jablko obsahuje vitamíny.“ (golden, věta 25)\n   [přečteno z textu; kdo:∀ generický prézens]",
+   "Ovoce obsahuje vitamín C?": "čtu: obsahovat(kdo:∀ovoce, co:∃vitamín C)\n→ ANO\n   protože:\n   - obsahovat(kdo: ∀ovoce, co: ∀vitamín)  [s0100]\n       zdroj: „Ovoce obsahuje každý vitamín.“ (golden, věta 53)\n   - být(kdo: ∀vitamín C, co: ∃vitamín) ⟨subset⟩  [s0145]\n       zdroj: „Vitamín C je vitamín.“ (golden, věta 80)\n   ↳ vitamín C ⊆ vitamín (∀ se přenáší dolů)\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]",
+   "Platí Petr daně?": "čtu: platit(kdo:·Petr, co:∃daň)\n→ ANO\n   protože:\n   - platit(kdo: Petr, co: ∃daň, kde: Praha)  [s0128]\n       zdroj: „Pokud Petr žije v Praze, platí Petr daně v Praze.“ (golden, věta 67)\n   - být(kdo: daň, co: ∃daň) ⟨member⟩  [s0126]\n       zdroj: „Pokud Petr žije v Praze, platí Petr daně v Praze.“ (golden, věta 67)\n   ↳ daň ∈ daň\n   [odvozeno z: odvozeno, přečteno z textu; pravidlo z podmínky „pokud“ (if); co: nová instance e0023 ∈ daň (neurčitá zmínka); odvozeno pravidlem s0124 z s0111; implikace: bydlet ⇒ žít [lex:syn:0031]]",
+   "Přijde Jana?": "čtu: přijít(kdo:·Jana)\n→ ANO\n   protože:\n   - přijít(kdo: Jana)  [s0109]\n       zdroj: „Jana přijde, pokud přijde Petr.“ (golden, věta 27)\n   [odvozeno z: odvozeno; pravidlo z podmínky „pokud“ (if); odvozeno pravidlem s0053 z s0108]",
+   "Přijde Karel?": "čtu: přijít(kdo:·Karel)\n→ ANO\n   protože:\n   - přijít(kdo: Petr + Karel)  [s0108]\n       zdroj: „Petr a Karel přijdou, když nepřijde Marie.“ (golden, věta 58)\n   [odvozeno z: odvozeno; pravidlo z podmínky „když“ (if); koordinace:kdo:distribuce; odvozeno pravidlem s0105 z s0086]\n   protože:\n   - přijít(kdo: Karel, na+Acc: ∃oslava)  [s0110]\n       zdroj: „Karel přijde na oslavu, pokud přijde Jana.“ (golden, věta 33)\n   [odvozeno z: odvozeno; pravidlo z podmínky „pokud“ (if); odvozeno pravidlem s0066 z s0109]\n   protože:\n   - přijít(kdo: Karel)  [s0117]\n       zdroj: „Petr přijde jen pokud přijde Karel.“ (golden, věta 62)\n   [odvozeno z: odvozeno; pravidlo z podmínky „pokud“ (only_if); odvozeno pravidlem s0114 z s0108]",
+   "Přijde Marie?": "čtu: přijít(kdo:·Marie)\n→ NE\n   protože:\n   - ne-přijít(kdo: Marie)  [s0086]\n       zdroj: „Marie nepřijde.“ (golden, věta 43)\n   [přečteno z textu]",
+   "Přijde Petr?": "čtu: přijít(kdo:·Petr)\n→ ANO\n   protože:\n   - přijít(kdo: Petr + Karel)  [s0108]\n       zdroj: „Petr a Karel přijdou, když nepřijde Marie.“ (golden, věta 58)\n   [odvozeno z: odvozeno; pravidlo z podmínky „když“ (if); koordinace:kdo:distribuce; odvozeno pravidlem s0105 z s0086]\n   protože:\n   - přijít(kdo: Petr)  [s0118]\n       zdroj: „Petr přijde.“ (golden, věta 63)\n   [přečteno z textu]\n   protože:\n   - přijít(kdo: Petr)  [s0119]\n       zdroj: „Petr přišel a sedl si.“ (golden, věta 64)\n   [přečteno z textu]",
+   "Rozšířil se paralelní vesmír?": "čtu: rozšířit_se(kdo:·vesmír[paralelní])\n→ NEVÍM\n   vím:\n   - být(kdo: ∀vesmír (paralelní), co: ∃vesmír) ⟨subset⟩",
+   "Rozšířil se vesmír?": "čtu: rozšířit_se(kdo:·vesmír)\n→ ANO\n   protože:\n   - rozšířit_se(kdo: vesmír, do+Gen: ∃podoba (dnešní))  [s0144]\n       zdroj: „Vesmír se rozšířil do dnešní podoby.“ (golden, věta 79)\n   [přečteno z textu; kdo:· epizoda]",
+   "Slouží auto k přesunu osob?": "čtu: sloužit(kdo:∀auto, k+Dat:∃přesun)\n→ NEVÍM\n   chybí: o „sloužit“ nemám žádný výrok\n   ⚠ text o tom mluví (věta 14: „Dopravní prostředek slouží k přesunu nákladů nebo osob.“), ale interpretaci neurčuje: disjunkce bez prostoru modelů\n   vím:\n   - být(kdo: ∀auto, co: ∃prostředek (dopravní)) ⟨subset⟩\n   - být(kdo: auto (modrý), co: ∃auto) ⟨member⟩",
+   "Štěká jezevčík?": "čtu: štěkat(kdo:∀jezevčík)\n→ ANO\n   protože:\n   - štěkat(kdo: ∀pes)  [s0104]\n       zdroj: „Pes štěká.“ (golden, věta 57)\n   - být(kdo: ∀jezevčík, co: ∃pes) ⟨subset⟩  [s0062]\n       zdroj: „Jezevčík je pes.“ (golden, věta 30)\n   ↳ jezevčík ⊆ pes (∀ se přenáší dolů)\n   [odvozeno z: přečteno z textu; kdo:∀ generický prézens]",
+   "Štěká pes?": "čtu: štěkat(kdo:∀pes)\n→ ANO\n   protože:\n   - štěkat(kdo: ∀pes)  [s0104]\n       zdroj: „Pes štěká.“ (golden, věta 57)\n   [přečteno z textu; kdo:∀ generický prézens]"
+  },
+  "graph": {
+   "edges": {
+    "about": 12,
+    "alternative_of": 2,
+    "co_mention": 187,
+    "derived_from": 5,
+    "disjoint": 1,
+    "member": 29,
+    "mention": 117,
+    "nested_in": 16,
+    "not_member": 1,
+    "part_of": 96,
+    "residue_of": 1,
+    "restricts": 17,
+    "role:advcl:když": 1,
+    "role:bez+Gen": 1,
+    "role:co": 100,
+    "role:do+Gen": 1,
+    "role:jak": 1,
+    "role:jak_dlouho": 1,
+    "role:jako": 2,
+    "role:jaký": 1,
+    "role:k+Dat": 1,
+    "role:kam": 2,
+    "role:kde": 24,
+    "role:kdo": 140,
+    "role:kdy": 10,
+    "role:komu": 1,
+    "role:kudy": 2,
+    "role:na+": 1,
+    "role:na+Acc": 2,
+    "role:pak": 6,
+    "role:pokud": 6,
+    "role:pořadí": 2,
+    "role:téma": 6,
+    "role:v+Loc": 2,
+    "role:čí": 6,
+    "role:čím": 1,
+    "source": 159,
+    "subset": 10,
+    "uses_rule": 6,
+    "within": 1
+   },
+   "nodes": {
+    "document": 1,
+    "entity": 25,
+    "group": 96,
+    "open": 12,
+    "place": 9,
+    "segment": 4,
+    "sentence": 92,
+    "statement": 159,
+    "time": 15,
+    "vazba": 6
+   }
+  },
+  "program": [
+   "s0001: být(kdo:·Alois Jirásek, co:∃prozaik[český]+∃dramatik+∃učitel[středoškolský]+∃politik) ⟨member⟩ @read @golden#1",
+   "s0002: narodit_se(kdo:·Alois Jirásek, kdy:·23. 8. 1851, kde:·Hronov) @read @golden#1",
+   "s0003: zemřít(kdo:·Alois Jirásek, kdy:·12. 3. 1930, kde:·Praha) @read @golden#1",
+   "s0004: narodit_se(kdo:·Alois Jirásek, kde:·Hronov) @read @golden#2",
+   "s0005: narodit_se(kdo:·Alois Jirásek, kde:·Hronov) @read @golden#3",
+   "s0006: nmod:u+Gen(kdo:·Hronov, co:·Náchod) @read @golden#3",
+   "s0007: být(kdo:∀auto, co:∃prostředek[dopravní]) ⟨subset⟩ @read @golden#4",
+   "s0008: být(kdo:·babička, co:∃babička) ⟨member⟩ @read @golden#5",
+   "s0009: napsat(kdo:·Božena Němcová, co:∃babička) @read @golden#5",
+   "s0010: rozhodnutý(co:[s0011]) @read @golden#6",
+   "s0011: konat(co:∃obřad[pohřební], bez+Gen:∃účast) @read @golden#6",
+   "s0012: nmod:Gen(kdo:·účast, co:∃kněz) @read @golden#6",
+   "s0013: pracovat(kdo:·Alois Jirásek, jak_dlouho:·život, jako:∃učitel, kde:∃gymnázium+∃Litomyšl+∃Praha, pořadí:·nejprve+·poté) @read @golden#7",
+   "s0014: nmod:Gen(kdo:·učitel, co:∃dějepis) @read @golden#7",
+   "s0015: ∅(pokud:[s0016], pak:[s0017]) @read @golden#8",
+   "s0016: ¬splněný(co:·požadavek[určitý]) @read @golden#8",
+   "s0017: možnost:mít(kdo:·chov, co:∃dopad[negativní]) @read @golden#8",
+   "s0018: nmod:Gen(kdo:·chov, co:∃zvíře[domácí]) @read @golden#8",
+   "s0019: být(kdo:·zdraví, co:∃zdraví) ⟨member⟩ @read @golden#8",
+   "s0020: mít(kdo:·Alois Jirásek, co:·zdraví) @read @golden#8",
+   "s0021: nmod:na+Acc(kdo:·dopad[negativní], co:·zdraví) @read @golden#8",
+   "s0022: možnost:mít(kdo:·chov, co:∃dopad[negativní]) @read @golden#9",
+   "s0023: nmod:Gen(kdo:·chov, co:∃zvíře[domácí]) @read @golden#9",
+   "s0024: nmod:na+Acc(kdo:·dopad[negativní], co:·zdraví) @read @golden#9",
+   "s0025: být(kdo:∀citron, co:∃ovoce) ⟨subset⟩ @read @golden#10",
+   "s0026: obsahovat(kdo:∀citron, co:∃vitamín C) @read @golden#11",
+   "s0027: vyžadovat(kdo:∀mazlíček[domácí], co:∃péče[pravidelný]) @read @golden#12",
+   "s0028: nmod:Gen(kdo:·péče[pravidelný], co:∃majitel) @read @golden#12",
+   "s0029: jezdit(kdo:∀prostředek[dopravní], kudy:∃dálnice) @read @golden#13",
+   "s0030: sloužit(kdo:∀prostředek[dopravní], k+Dat:∃přesun) @read @golden#14",
+   "s0031: nmod:Gen(kdo:·přesun, co:∃náklad+∃osoba) @read @golden#14",
+   "s0032: mít(kdo:∀pes[dospělý], co:∃zub#42) @read @golden#15",
+   "s0033: mít(kdo:∀dálnice, co:∃rychlost[omezený], na+:·130) @read @golden#16",
+   "s0034: nmod:(kdo:·130, co:∃kilometr) @read @golden#16",
+   "s0035: nmod:(kdo:·kilometr, co:·hodina) @read @golden#16",
+   "s0036: ∅(téma:∃dílo) @read @golden#17",
+   "s0037: mít(kdo:·Filip, co:·Ford) @read @golden#18",
+   "s0038: být(kdo:·auto, co:∃auto) ⟨member⟩ @read @golden#19",
+   "s0039: mít(kdo:·Filip, co:∃auto) @read @golden#19",
+   "s0040: být(kdo:·auto, jaký:∃modrý) @read @golden#20",
+   "s0041: být(kdo:·Hrabal, co:∃spisovatel) ⟨member⟩ @read @golden#21",
+   "s0042: být(kdo:·postřižina, co:∃postřižina) ⟨member⟩ @read @golden#22",
+   "s0043: napsat(kdo:·Hrabal, co:∃postřižina) @read @golden#22",
+   "s0044: být(kdo:·román, co:∃román) ⟨member⟩ @read @golden#23",
+   "s0045: napsat(kdo:·Hrabal, co:∃román) @read @golden#23",
+   "s0046: být(kdo:·Isaac Newton, co:∃fyzik[anglický]+∃matematik+∃astronom+∃alchymista+∃teolog) ⟨member⟩ @read @golden#24",
+   "s0047: narodit_se(kdo:·Isaac Newton, kdy:·4. 1. 1643) @read @golden#24",
+   "s0048: zemřít(kdo:·Isaac Newton, kdy:·31. 3. 1727) @read @golden#24",
+   "s0049: obsahovat(kdo:∀jablko, co:∃vitamín) @read @golden#25",
+   "s0050: být(kdo:·manifest, co:∃manifest) ⟨member⟩ @read @golden#26",
+   "s0051: podepsat(kdo:·Alois Jirásek, jako:·jeden, co:∃manifest) @read @golden#26",
+   "s0052: nmod:Gen(kdo:·manifest, co:∃spisovatel[český]) @read @golden#26",
+   "s0053: ∅(pokud:[s0054], pak:[s0055]) @read @golden#27",
+   "s0054: přijít(kdo:·Petr) @read @golden#27",
+   "s0055: přijít(kdo:·Jana) @read @golden#27",
+   "s0056: být(kdo:·auto, co:·auto) ⟨member⟩ @read @golden#28",
+   "s0057: být(kdo:·Josef Čapek, co:∃bratr) ⟨member⟩ @read @golden#29",
+   "s0058: bratr(kdo:·Josef Čapek, čí:·auto) @read @golden#29",
+   "s0059: bratr(kdo:·Josef Čapek, čí:·Josef Čapek) @read @golden#29",
+   "s0060: bratr(kdo:·Josef Čapek, čí:·Alois Jirásek) @read @golden#29",
+   "s0061: být(kdo:·Josef Čapek, co:∃malíř) ⟨member⟩ @read @golden#29",
+   "s0062: být(kdo:∀jezevčík, co:∃pes) ⟨subset⟩ @read @golden#30",
+   "s0063: zemřít(kdo:·Alois Jirásek, kde:·Praha) @read @golden#31",
+   "s0064: být(kdo:·Čapkův, co:∃bratr) ⟨member⟩ @read @golden#32",
+   "s0065: nmod:Nom(kdo:·Čapkův, co:·Karel+·Josef) @read @golden#32",
+   "s0066: ∅(pokud:[s0067], pak:[s0068]) @read @golden#33",
+   "s0067: přijít(kdo:·Jana) @read @golden#33",
+   "s0068: přijít(kdo:·Karel, na+Acc:∃oslava) @read @golden#33",
+   "s0069: být(kdo:·Karel Čapek, co:∃spisovatel[český]+∃novinář+∃dramatik) ⟨member⟩ @read @golden#34",
+   "s0070: narodit_se(kdo:·Karel Čapek, kdy:·9. 1. 1890, kde:·Svatoňovice) @read @golden#34",
+   "s0071: zemřít(kdo:·Karel Čapek, kdy:·25. 12. 1938, kde:·Praha) @read @golden#34",
+   "s0072: být(kdo:·R.U.R., co:∃drama) ⟨member⟩ @read @golden#35",
+   "s0073: napsat(kdo:·Karel Čapek, co:·R.U.R.) @read @golden#35",
+   "s0074: být(kdo:·Krakatit, co:∃román) ⟨member⟩ @read @golden#36",
+   "s0075: napsat(kdo:·Karel Čapek, co:·Krakatit) @read @golden#36",
+   "s0076: narodit_se(kdo:·Karel Čapek, kde:·Svatoňovice) @read @golden#37",
+   "s0077: být(kdo:∀spisovatel, co:∃člověk) ⟨subset⟩ @read @golden#38",
+   "s0078: mít(kdo:∀ten, co:·R.U.R.) @read @golden#39",
+   "s0079: obsahovat(kdo:·ten, co:·Alois Jirásek) @read @golden#39",
+   "s0080: zůstat(kdo:·Alois Jirásek, advcl:když:[s0081], jak:·doma) @read @golden#40",
+   "s0081: pršet(kdo:·R.U.R.) @read @golden#40",
+   "s0082: být(kdo:∀krakatit, co:∃román) ⟨subset⟩ @read @golden#41",
+   "s0083: ∅(téma:∃manifest+∃vyhlášení) @read @golden#42",
+   "s0084: nmod:Gen(kdo:·manifest, co:∃spisovatel[český]) @read @golden#42",
+   "s0085: nmod:Gen(kdo:·vyhlášení, co:∃samostatnost) @read @golden#42",
+   "s0086: ¬přijít(kdo:·Marie) @read @golden#43",
+   "s0087: narodit_se(kdo:·Alois Jirásek, v+Loc:∃rodina) @read @golden#44",
+   "s0088: nmod:Gen(kdo:·rodina, co:∃lékař) @read @golden#44",
+   "s0089: ∅(téma:∀pták) @read @golden#45",
+   "s0090: bydlet(kdo:·Petr, kde:·Brno) @read @golden#46",
+   "s0091: ¬být(kdo:·Alois Jirásek, co:∃člen) ⟨member⟩ @read @golden#47",
+   "s0092: nmod:Gen(kdo:·člen, co:∀strana[politický]) @read @golden#47",
+   "s0093: znemožnit(kdo:·nemoc, komu:·Alois Jirásek, co:[s0094]) @read @golden#48",
+   "s0094: psát() @read @golden#48",
+   "s0095: ¬vědět(kdo:) @read @golden#49",
+   "s0096: být(kdo:·obraz, co:∃obraz) ⟨member⟩ @read @golden#50",
+   "s0097: namalovat(kdo:·Alois Jirásek, co:∃obraz) @read @golden#50",
+   "s0098: oženit_se(kdo:·Alois Jirásek) @read @golden#51",
+   "s0099: zemřít(kdo:·Marie, kde:·Praha) @read @golden#52",
+   "s0100: obsahovat(kdo:∀ovoce, co:∀vitamín) @read @golden#53",
+   "s0101: obsahovat(kdo:∀ovoce, co:∃vitamín) @read @golden#54",
+   "s0102: oženit_se(kdo:·Alois Jirásek, kdy:·1879) @read @golden#55",
+   "s0103: být(kdo:∀vesmír[paralelní], co:∃vesmír) ⟨subset⟩ @read @golden#56",
+   "s0104: štěkat(kdo:∀pes) @read @golden#57",
+   "s0105: ∅(pokud:[s0106], pak:[s0107]) @read @golden#58",
+   "s0106: ¬přijít(kdo:·Marie) @read @golden#58",
+   "s0107: přijít(kdo:·Petr+·Karel) @read @golden#58",
+   "s0108: přijít(kdo:·Petr+·Karel) @derived @golden#58",
+   "s0109: přijít(kdo:·Jana) @derived @golden#27",
+   "s0110: přijít(kdo:·Karel, na+Acc:∃oslava) @derived @golden#33",
+   "s0111: bydlet(kdo:·Petr, kde:·Praha) @read @golden#59",
+   "s0112: jet(kdo:·Petr, kdy:·pondělí, kam:·Praha) @read @golden#60",
+   "s0113: přijít(kdo:·Petr+·Jana) @read @golden#61",
+   "s0114: ∅(pokud:[s0115], pak:[s0116]) @read @golden#62",
+   "s0115: přijít(kdo:·Petr) @read @golden#62",
+   "s0116: přijít(kdo:·Karel) @read @golden#62",
+   "s0117: přijít(kdo:·Karel) @derived @golden#62",
+   "s0118: přijít(kdo:·Petr) @read @golden#63",
+   "s0119: přijít(kdo:·Petr) @read @golden#64",
+   "s0120: sednout_se(kdo:·Petr) @read @golden#64",
+   "s0121: říci(kdo:·Petr, co:[s0122]) @read @golden#65",
+   "s0122: přijít(kdo:·Marie) @read @golden#65",
+   "s0123: žít(kdo:·Petr, kde:·Praha) @read @golden#66",
+   "s0124: ∅(pokud:[s0125], pak:[s0127]) @read @golden#67",
+   "s0125: žít(kdo:·Petr, kde:·Praha) @read @golden#67",
+   "s0126: být(kdo:·daň, co:∃daň) ⟨member⟩ @read @golden#67",
+   "s0127: platit(kdo:·Petr, co:∃daň, kde:·Praha) @read @golden#67",
+   "s0128: platit(kdo:·Petr, co:∃daň, kde:·Praha) @derived @golden#67",
+   "s0129: být(kdo:·Praha, kde:·Česko) ⟨within⟩ @read @golden#68",
+   "s0130: létat(kdo:∀pták) @read @golden#69",
+   "s0131: přejít(kdo:·Alois Jirásek, kudy:∃most) @read @golden#70",
+   "s0132: přijít(kdo:·jeden) @read @golden#71",
+   "s0133: nmod:z+Gen(kdo:·jeden, co:·daň) @read @golden#71",
+   "s0134: být(kdo:∀spisovatel, co:∃člověk) ⟨subset⟩ @read @golden#72",
+   "s0135: být(kdo:·filozofie, co:∃filozofie) ⟨member⟩ @read @golden#73",
+   "s0136: studovat(kdo:·Alois Jirásek, co:∃filozofie, kde:·Praha+·Berlín+·Paříž) @read @golden#73",
+   "s0137: ¬být(kdo:, co:∃pravda) ⟨member⟩ @read @golden#74",
+   "s0138: ¬být(kdo:R.U.R., co:∃pravda) ⟨member⟩ @read @golden#74",
+   "s0139: ¬být(kdo:auto, co:∃pravda) ⟨member⟩ @read @golden#74",
+   "s0140: být(kdo:∀tučňák, co:∃pták) ⟨subset⟩ @read @golden#75",
+   "s0141: ¬létat(kdo:∀tučňák) @read @golden#76",
+   "s0142: napsat(kdo:·Alois Jirásek, kdy:·1920, co:·R.U.R.) @read @golden#77",
+   "s0143: jet(kdy:·úterý, kdo:·Petr, kam:·Brno) @read @golden#78",
+   "s0144: rozšířit_se(kdo:·vesmír, do+Gen:∃podoba[dnešní]) @read @golden#79",
+   "s0145: být(kdo:∀vitamín C, co:∃vitamín) ⟨subset⟩ @read @golden#80",
+   "s0146: být(kdo:∀vrabec, co:∃pták) ⟨subset⟩ @read @golden#81",
+   "s0147: ∅(co:?) @read @golden#82",
+   "s0148: ∅(co:?, čí:·Karel Čapek) @read @golden#83",
+   "s0149: ∅(co:?, čí:·Karel Čapek) @read @golden#84",
+   "s0150: ∅(co:?, čí:·Karel Čapek) @read @golden#85",
+   "s0151: být(kdo:·román, co:∃román) ⟨member⟩ @read @golden#86",
+   "s0152: fáze:psát(kdo:·Alois Jirásek, co:∃román) @read @golden#86",
+   "s0153: zemřít(kdo:·Alois Jirásek, kde:·Praha) @read @golden#87",
+   "s0154: ∅(téma:∃úraz) @read @golden#88",
+   "s0155: způsobený(co:·úraz, čím:∃pád) @read @golden#88",
+   "s0156: pracovat(kdo:·Karel Čapek, v+Loc:∃noviny[lidový]) @read @golden#89",
+   "s0157: narodit_se(kdo:·Karel Čapek, kde:·Praha) @read @golden#90",
+   "s0158: ∅(téma:·život) @read @golden#91",
+   "s0159: ¬být(kdo:∀stroj, co:∃člověk) ⟨subset⟩ @read @golden#92"
+  ]
+ },
+ "readings": {
+  "Alois Jirásek (23. srpna 1851 Hronov – 12. března 1930 Praha) byl český prozaik, dramatik, středoškolský učitel, a politik.": {
+   "moods": [
+    "assert",
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "10": "secondary",
+    "11": "secondary",
+    "12": "secondary",
+    "13": "punct",
+    "14": "pred",
+    "15": "term",
+    "16": "term",
+    "17": "particle",
+    "18": "term",
+    "19": "particle",
+    "2": "particle",
+    "20": "term",
+    "21": "term",
+    "22": "particle",
+    "23": "particle",
+    "24": "term",
+    "25": "particle",
+    "3": "punct",
+    "4": "secondary",
+    "5": "secondary",
+    "6": "secondary",
+    "7": "secondary",
+    "8": "secondary",
+    "9": "secondary"
+   },
+   "predications": [
+    "být(kdo:·Alois Jirásek, co:∃prozaik[český]+∃dramatik+∃učitel[středoškolský]+∃politik) ⟨member⟩",
+    "narodit_se(kdo:·Alois Jirásek, kdy:·23. 8. 1851, kde:·Hronov)",
+    "zemřít(kdo:·Alois Jirásek, kdy:·12. 3. 1930, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Alois Jirásek se narodil v Hronově.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "particle",
+    "4": "pred",
+    "5": "particle",
+    "6": "term",
+    "7": "punct"
+   },
+   "predications": [
+    "narodit_se(kdo:·Alois Jirásek, kde:·Hronov)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Alois Jirásek se narodil ve východočeském Hronově u Náchoda.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "10": "punct",
+    "2": "particle",
+    "3": "particle",
+    "4": "pred",
+    "5": "particle",
+    "6": "term",
+    "7": "term",
+    "8": "particle",
+    "9": "term"
+   },
+   "predications": [
+    "narodit_se(kdo:·Alois Jirásek, kde:·Hronov[východočeský])",
+    "nmod:u+Gen(kdo:·Hronov[východočeský], co:·Náchod)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Auto je dopravní prostředek.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:∀auto, co:∃prostředek[dopravní]) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Božena Němcová napsala Babičku.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "pred",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "napsat(kdo:·Božena Němcová, co:∃babička)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Bydlel Petr v Praze v roce 1990?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "particle",
+    "6": "term",
+    "7": "term",
+    "8": "punct"
+   },
+   "predications": [
+    "bydlet(kdo:·Petr, kde:·Praha, kdy:·1990)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Bydlí Petr v Brně?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "bydlet(kdo:·Petr, kde:·Brno)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Bydlí Petr v Praze v roce 2020?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "particle",
+    "6": "term",
+    "7": "term",
+    "8": "punct"
+   },
+   "predications": [
+    "bydlet(kdo:·Petr, kde:·Praha, kdy:·2020)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Bydlí Petr v Praze?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "bydlet(kdo:·Petr, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Byl Petr v pondělí v Česku?": {
+   "moods": [
+    "question",
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "particle",
+    "6": "term",
+    "7": "particle"
+   },
+   "predications": [
+    "být(kdo:·Petr, kde:·Česko, kdy:·pondělí)",
+    "nmod:v+Acc(kdo:·Česko, co:·pondělí)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Byl Petr ve středu v Česku?": {
+   "moods": [
+    "question",
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "particle",
+    "6": "term",
+    "7": "particle"
+   },
+   "predications": [
+    "být(kdo:·Petr, kde:·Česko, kdy:·středa)",
+    "nmod:v+Acc(kdo:·Česko, co:·středa)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Byl Čapek malíř?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:·Čapek, co:∃malíř) ⟨member⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Byl Čapek členem nějaké strany?": {
+   "moods": [
+    "question",
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "particle",
+    "5": "term",
+    "6": "particle"
+   },
+   "predications": [
+    "být(kdo:·Čapek, co:∃člen) ⟨member⟩",
+    "nmod:Gen(kdo:·člen, co:∃strana)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Byl Čapek člověk?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:·Čapek, co:∃člověk) ⟨member⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Bylo rozhodnuto konat pohřební obřady bez účasti kněze.": {
+   "moods": [
+    "assert",
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "pred",
+    "3": "pred",
+    "4": "term",
+    "5": "term",
+    "6": "particle",
+    "7": "term",
+    "8": "term",
+    "9": "punct"
+   },
+   "predications": [
+    "rozhodnutý(co:[konat(co:∃obřad[pohřební], bez+Gen:∃účast)])",
+    "konat(co:∃obřad[pohřební], bez+Gen:∃účast)",
+    "nmod:Gen(kdo:·účast, co:∃kněz)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "reported",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ]
+   ]
+  },
+  "Celý život pracoval jako učitel dějepisu na gymnáziu, nejprve v Litomyšli a poté v Praze.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "10": "role:pořadí",
+    "11": "particle",
+    "12": "term",
+    "13": "particle",
+    "14": "role:pořadí",
+    "15": "particle",
+    "16": "term",
+    "17": "punct",
+    "2": "term",
+    "3": "pred",
+    "4": "particle",
+    "5": "term",
+    "6": "term",
+    "7": "particle",
+    "8": "term",
+    "9": "punct"
+   },
+   "predications": [
+    "pracovat(kdo:·∅, jak_dlouho:·život[celý], jako:∃učitel, kde:∃gymnázium+·Litomyšl+·Praha, pořadí:·nejprve+·poté)",
+    "nmod:Gen(kdo:·učitel, co:∃dějepis)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ]
+   ]
+  },
+  "Chov domácích zvířat může mít negativní dopad na jejich zdraví, pokud nejsou splněny určité požadavky.": {
+   "moods": [
+    "assert",
+    "assert",
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "10": "term",
+    "11": "punct",
+    "12": "particle",
+    "13": "particle",
+    "14": "pred",
+    "15": "term",
+    "16": "term",
+    "17": "punct",
+    "2": "term",
+    "3": "term",
+    "4": "pred",
+    "5": "pred",
+    "6": "term",
+    "7": "term",
+    "8": "particle",
+    "9": "particle"
+   },
+   "predications": [
+    "možnost:mít(kdo:·chov, advcl:pokud:[¬splněný(co:·požadavek[určitý])], co:∃dopad[negativní])",
+    "¬splněný(co:·požadavek[určitý])",
+    "nmod:Gen(kdo:·chov, co:∃zvíře[domácí])",
+    "nmod:na+Acc(kdo:·dopad[negativní], co:·zdraví⟨jeho⟩)"
+   ],
+   "residue": [],
+   "rules": [
+    [
+     "if",
+     "pokud"
+    ]
+   ],
+   "triage": [
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ],
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:na+Acc)"
+    ]
+   ]
+  },
+  "Chov domácích zvířat může mít negativní dopad na jejich zdraví.": {
+   "moods": [
+    "assert",
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "10": "term",
+    "11": "punct",
+    "2": "term",
+    "3": "term",
+    "4": "pred",
+    "5": "pred",
+    "6": "term",
+    "7": "term",
+    "8": "particle",
+    "9": "particle"
+   },
+   "predications": [
+    "možnost:mít(kdo:·chov, co:∃dopad[negativní])",
+    "nmod:Gen(kdo:·chov, co:∃zvíře[domácí])",
+    "nmod:na+Acc(kdo:·dopad[negativní], co:·zdraví⟨jeho⟩)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:na+Acc)"
+    ]
+   ]
+  },
+  "Citron je ovoce.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:∀citron, co:∃ovoce) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Citron obsahuje vitamín C.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "obsahovat(kdo:∀citron, co:∃vitamín C)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Co dělal Petr v pondělí?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "dělat(co:?, kdo:·Petr, kdy:·pondělí)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Co je Ford?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "particle",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:·Ford, co:?)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Co je jezevčík?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:∀jezevčík, co:?)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Co má Filip?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "mít(co:?, kdo:·Filip)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Co napsal Hrabal?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "napsat(co:?, kdo:·Hrabal)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Co napsal Karel Čapek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "punct"
+   },
+   "predications": [
+    "napsat(co:?, kdo:·Karel Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Co obsahuje ovoce?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "obsahovat(co:?, kdo:∀ovoce)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Domácí mazlíčci vyžadují pravidelnou péči majitele.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "pred",
+    "4": "term",
+    "5": "term",
+    "6": "term",
+    "7": "punct"
+   },
+   "predications": [
+    "vyžadovat(kdo:∀mazlíček[domácí], co:∃péče[pravidelný])",
+    "nmod:Gen(kdo:·péče[pravidelný], co:∃majitel)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ]
+   ]
+  },
+  "Dopravní prostředek jezdí po dálnici.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "pred",
+    "4": "particle",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "jezdit(kdo:∀prostředek[dopravní], kudy:∃dálnice)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Dopravní prostředek slouží k přesunu nákladů nebo osob.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "pred",
+    "4": "particle",
+    "5": "term",
+    "6": "term",
+    "7": "particle",
+    "8": "term",
+    "9": "punct"
+   },
+   "predications": [
+    "sloužit(kdo:∀prostředek[dopravní], k+Dat:∃přesun)",
+    "nmod:Gen(kdo:·přesun, co:∃náklad+∃osoba)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "REJECTED",
+     "assert",
+     "disjunkce bez prostoru modelů"
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "disjunkce bez prostoru modelů"
+    ]
+   ]
+  },
+  "Dospělý pes má 42 zubů.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "pred",
+    "4": "term",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "mít(kdo:∀pes[dospělý], co:∃zub#42)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Dálnice má omezenou rychlost na 130 km/h.": {
+   "moods": [
+    "assert",
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "10": "punct",
+    "2": "pred",
+    "3": "term",
+    "4": "term",
+    "5": "particle",
+    "6": "term",
+    "7": "term",
+    "8": "particle",
+    "9": "term"
+   },
+   "predications": [
+    "mít(kdo:∀dálnice, co:∃rychlost[omezený], na+:·130)",
+    "nmod:(kdo:·130, co:∃kilometr)",
+    "nmod:(kdo:·kilometr, co:·hodina)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:)"
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:)"
+    ]
+   ]
+  },
+  "Dílo": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term"
+   },
+   "predications": [
+    "∅(téma:∃dílo)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Filip má Ford.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "mít(kdo:·Filip, co:·Ford)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Filip má auto.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "mít(kdo:·Filip, co:∃auto)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Filipovo auto je modré.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "pred",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:·auto⟨Filipův⟩, jaký:∃modrý)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Hrabal je spisovatel.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:·Hrabal, co:∃spisovatel) ⟨member⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Hrabal napsal Postřižiny.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "napsat(kdo:·Hrabal, co:∃postřižina)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Hrabal napsal román.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "napsat(kdo:·Hrabal, co:∃román)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Isaac Newton (4. ledna 1643 – 31. března 1727) byl anglický fyzik, matematik, astronom, alchymista a teolog.": {
+   "moods": [
+    "assert",
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "10": "secondary",
+    "11": "punct",
+    "12": "pred",
+    "13": "term",
+    "14": "term",
+    "15": "particle",
+    "16": "term",
+    "17": "particle",
+    "18": "term",
+    "19": "particle",
+    "2": "particle",
+    "20": "term",
+    "21": "particle",
+    "22": "term",
+    "23": "particle",
+    "3": "punct",
+    "4": "secondary",
+    "5": "secondary",
+    "6": "secondary",
+    "7": "secondary",
+    "8": "secondary",
+    "9": "secondary"
+   },
+   "predications": [
+    "být(kdo:·Isaac Newton, co:∃fyzik[anglický]+∃matematik+∃astronom+∃alchymista+∃teolog) ⟨member⟩",
+    "narodit_se(kdo:·Isaac Newton, kdy:·4. 1. 1643)",
+    "zemřít(kdo:·Isaac Newton, kdy:·31. 3. 1727)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jablko obsahuje vitamíny.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "obsahovat(kdo:∀jablko, co:∃vitamín)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jak rychle může jezdit auto po dálnici?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "residue",
+    "2": "role:jak",
+    "3": "pred",
+    "4": "pred",
+    "5": "term",
+    "6": "particle",
+    "7": "term",
+    "8": "punct"
+   },
+   "predications": [
+    "možnost:jezdit(kdo:·auto, jak:·rychle, kudy:∃dálnice)"
+   ],
+   "residue": [
+    [
+     "Jak",
+     "xcomp>advmod>advmod"
+    ]
+   ],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jako jeden z prvních podepsal Manifest českých spisovatelů.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "pred",
+    "6": "term",
+    "7": "term",
+    "8": "term",
+    "9": "punct"
+   },
+   "predications": [
+    "podepsat(kdo:·∅, jako:·jeden[první], co:∃manifest)",
+    "nmod:Gen(kdo:·manifest, co:∃spisovatel[český])"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ]
+   ]
+  },
+  "Jaké drama napsal Karel Čapek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "role:jaký",
+    "3": "pred",
+    "4": "term",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "napsat(co:?filler:∃drama, kdo:·Karel Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jaké je Filipovo auto?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:jaký",
+    "2": "pred",
+    "3": "term",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:·auto⟨Filipův⟩, jaký:?)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jaké znáš spisovatele?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "pred",
+    "3": "role:jaký",
+    "4": "punct"
+   },
+   "predications": [
+    "znát(kdo:·∅, co:?filler:∃spisovatel)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jana přijde, pokud přijde Petr.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "punct",
+    "4": "particle",
+    "5": "pred",
+    "6": "term",
+    "7": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Jana, advcl:pokud:[přijít(kdo:·Petr)])",
+    "přijít(kdo:·Petr)"
+   ],
+   "residue": [],
+   "rules": [
+    [
+     "if",
+     "pokud"
+    ]
+   ],
+   "triage": [
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ],
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ]
+   ]
+  },
+  "Je Hrabal stroj?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:·Hrabal, co:∃stroj) ⟨member⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Je Hrabal člověk?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:·Hrabal, co:∃člověk) ⟨member⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Je Praha v Česku?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:·Praha, kde:·Česko) ⟨within⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Je citron ovoce?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:∀citron, co:∃ovoce) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Je jezevčík pes?": {
+   "moods": [
+    "question",
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "být(kdo:∀jezevčík, co:∃pes) ⟨subset⟩",
+    "nmod:Nom(kdo:·jezevčík, co:∃pes)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Je to to auto.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:·ten, co:·auto) ⟨member⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jeho bratr Josef Čapek byl malíř.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "term",
+    "3": "particle",
+    "4": "particle",
+    "5": "pred",
+    "6": "term",
+    "7": "particle"
+   },
+   "predications": [
+    "být(kdo:·Josef Čapek, co:∃malíř) ⟨member⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jezdí auto po dálnici?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "jezdit(kdo:∀auto, kudy:∃dálnice)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jezevčík je pes.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:∀jezevčík, co:∃pes) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Jirásek zemřel v Praze.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "zemřít(kdo:·Jirásek, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kam jel Petr dřív?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kam",
+    "2": "pred",
+    "3": "term",
+    "4": "role:pořadí",
+    "5": "punct"
+   },
+   "predications": [
+    "jet(kam:?, kdo:·Petr, pořadí:·dříve)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kam jel Petr v pondělí?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kam",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "jet(kam:?, kdo:·Petr, kdy:·pondělí)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Karel a Josef Čapkovi byli bratři.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "term",
+    "4": "term",
+    "5": "pred",
+    "6": "term",
+    "7": "particle"
+   },
+   "predications": [
+    "být(kdo:·Čapkův, co:∃bratr) ⟨member⟩",
+    "nmod:Nom(kdo:·Čapkův, co:·Karel+·Josef)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Nom)"
+    ]
+   ]
+  },
+  "Karel přijde na oslavu, pokud přijde Jana.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "punct",
+    "6": "particle",
+    "7": "pred",
+    "8": "term",
+    "9": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Karel, na+Acc:∃oslava, advcl:pokud:[přijít(kdo:·Jana)])",
+    "přijít(kdo:·Jana)"
+   ],
+   "residue": [],
+   "rules": [
+    [
+     "if",
+     "pokud"
+    ]
+   ],
+   "triage": [
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ],
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ]
+   ]
+  },
+  "Karel Čapek (9. ledna 1890 Malé Svatoňovice – 25. prosince 1938 Praha) byl český spisovatel, novinář a dramatik.": {
+   "moods": [
+    "assert",
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "10": "secondary",
+    "11": "secondary",
+    "12": "secondary",
+    "13": "secondary",
+    "14": "punct",
+    "15": "pred",
+    "16": "term",
+    "17": "term",
+    "18": "particle",
+    "19": "term",
+    "2": "particle",
+    "20": "particle",
+    "21": "term",
+    "22": "particle",
+    "3": "punct",
+    "4": "secondary",
+    "5": "secondary",
+    "6": "secondary",
+    "7": "secondary",
+    "8": "secondary",
+    "9": "secondary"
+   },
+   "predications": [
+    "být(kdo:·Karel Čapek, co:∃spisovatel[český]+∃novinář+∃dramatik) ⟨member⟩",
+    "narodit_se(kdo:·Karel Čapek, kdy:·9. 1. 1890, kde:·Svatoňovice)",
+    "zemřít(kdo:·Karel Čapek, kdy:·25. 12. 1938, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Karel Čapek napsal drama R.U.R.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "pred",
+    "4": "term",
+    "5": "term"
+   },
+   "predications": [
+    "napsat(kdo:·Karel Čapek, co:·R.U.r.)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Karel Čapek napsal román Krakatit.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "pred",
+    "4": "term",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "napsat(kdo:·Karel Čapek, co:·krakatit)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Karel Čapek se narodil v Malých Svatoňovicích.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "particle",
+    "4": "pred",
+    "5": "particle",
+    "6": "term",
+    "7": "term",
+    "8": "punct"
+   },
+   "predications": [
+    "narodit_se(kdo:·Karel Čapek, kde:·Svatoňovice[malý])"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Každý spisovatel je člověk.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "term",
+    "3": "pred",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:∀spisovatel, co:∃člověk) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kde bydlí Petr?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kde",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "bydlet(kde:?, kdo:·Petr)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kde pracoval Alois Jirásek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kde",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "punct"
+   },
+   "predications": [
+    "pracovat(kde:?, kdo:·Alois Jirásek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kde pracoval Čapek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kde",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "pracovat(kde:?, kdo:·Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kde se narodil Alois Jirásek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kde",
+    "2": "particle",
+    "3": "pred",
+    "4": "term",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "narodit_se(kde:?, kdo:·Alois Jirásek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kde se narodil Karel Čapek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kde",
+    "2": "particle",
+    "3": "pred",
+    "4": "term",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "narodit_se(kde:?, kdo:·Karel Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kde studoval?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kde",
+    "2": "pred",
+    "3": "punct"
+   },
+   "predications": [
+    "studovat(kdo:·∅, kde:?)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kde zemřel Alois Jirásek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kde",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "punct"
+   },
+   "predications": [
+    "zemřít(kde:?, kdo:·Alois Jirásek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kde žije Petr?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kde",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "žít(kde:?, kdo:·Petr)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo byl Karel Čapek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:·Karel Čapek, co:?)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo je Alois Jirásek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:·Alois Jirásek, co:?)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo je Hrabal?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:·Hrabal, co:?)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo je Isaac Newton?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:co",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:·Isaac Newton, co:?)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo namaloval obraz?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdo",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "namalovat(kdo:?, co:∃obraz)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo napsal Postřižiny?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdo",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "napsat(kdo:?, co:∃postřižina)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo něco obsahuje, ten to má.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "pred",
+    "4": "punct",
+    "5": "term",
+    "6": "term",
+    "7": "pred",
+    "8": "punct"
+   },
+   "predications": [
+    "mít(kdo:∀ten, co:·ten)",
+    "obsahovat(kdo:·ten, co:·něco)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo přijde na oslavu?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdo",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "přijít(kdo:?, na+Acc:∃oslava)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo přijde?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdo",
+    "2": "pred",
+    "3": "punct"
+   },
+   "predications": [
+    "přijít(kdo:?)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdo stvořil Postřižiny?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdo",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "stvořit(kdo:?, co:∃postřižina)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdy jel Petr do Prahy?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdy",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "jet(kdy:?, kdo:·Petr, kam:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdy napsal R.U.R.?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdy",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "napsat(kdy:?, kdo:·R.U.r.)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdy se narodil Alois Jirásek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdy",
+    "2": "particle",
+    "3": "pred",
+    "4": "term",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "narodit_se(kdy:?, kdo:·Alois Jirásek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdy se narodil Isaac Newton?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdy",
+    "2": "particle",
+    "3": "pred",
+    "4": "term",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "narodit_se(kdy:?, kdo:·Isaac Newton)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kdy zemřel Alois Jirásek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "role:kdy",
+    "2": "pred",
+    "3": "term",
+    "4": "particle",
+    "5": "punct"
+   },
+   "predications": [
+    "zemřít(kdy:?, kdo:·Alois Jirásek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Když pršelo, zůstal doma.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "pred",
+    "3": "punct",
+    "4": "pred",
+    "5": "role:jak",
+    "6": "punct"
+   },
+   "predications": [
+    "zůstat(kdo:·∅, advcl:když:[pršet(kdo:·∅)], jak:·doma)",
+    "pršet(kdo:·∅)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kolik druhů ovoce znáš?": {
+   "moods": [
+    "question",
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "role:count",
+    "3": "term",
+    "4": "pred",
+    "5": "punct"
+   },
+   "predications": [
+    "znát(kdo:·∅, co:?count:∃druh)",
+    "nmod:Gen(kdo:·druh, co:∃ovoce)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kolik je druhů ovoce?": {
+   "moods": [
+    "question",
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "pred",
+    "3": "role:count",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "být(kdo:?count:∀druh)",
+    "nmod:Gen(kdo:·druh, co:∃ovoce)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kolik zubů má dospělý pes?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "role:count",
+    "3": "pred",
+    "4": "term",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "mít(co:?count:∃zub, kdo:∀pes[dospělý])"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Krakatit je román.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:∀krakatit, co:∃román) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Kterou knihu napsal Karel Čapek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "role:který",
+    "3": "pred",
+    "4": "term",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "napsat(co:?filler:∃kniha, kdo:·Karel Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Která díla napsal Karel Čapek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "role:který",
+    "3": "pred",
+    "4": "term",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "napsat(co:?filler:∃dílo, kdo:·Karel Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Která díla napsal Petr?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "role:který",
+    "3": "pred",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "napsat(co:?filler:∃dílo, kdo:·Petr)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Které romány napsal Karel Čapek?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "role:který",
+    "3": "pred",
+    "4": "term",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "napsat(co:?filler:∃román, kdo:·Karel Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Létají ptáci?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "létat(kdo:∀pták)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Létá tučňák?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "létat(kdo:∀tučňák)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Létá vrabec?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "létat(kdo:∀vrabec)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Manifest českých spisovatelů a vyhlášení samostatnosti": {
+   "moods": [
+    "assert",
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "term",
+    "4": "particle",
+    "5": "term",
+    "6": "term"
+   },
+   "predications": [
+    "∅(téma:∃manifest+∃vyhlášení)",
+    "nmod:Gen(kdo:·manifest, co:∃spisovatel[český])",
+    "nmod:Gen(kdo:·vyhlášení, co:∃samostatnost)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ]
+   ]
+  },
+  "Marie nepřijde.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "punct"
+   },
+   "predications": [
+    "¬přijít(kdo:·Marie)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Má chov negativní dopad?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "mít(kdo:∀chov, co:∃dopad[negativní])"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Má dospělý pes 42 zubů?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "term",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "mít(kdo:∀pes[dospělý], co:∃zub#42)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Má jablko vitamíny?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "mít(kdo:∀jablko, co:∃vitamín)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Může chov mít negativní dopad?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "pred",
+    "4": "term",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "možnost:mít(kdo:·chov, co:∃dopad[negativní])"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Namaloval Josef obraz?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "namalovat(kdo:·Josef, co:∃obraz)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Namaloval Josef Čapek obraz?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "namalovat(kdo:·Josef Čapek, co:∃obraz)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Napsal Hrabal román?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "napsat(kdo:·Hrabal, co:∃román)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Napsal Postřižiny i nějaký stroj?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "particle",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "napsat(co:∃postřižina, kdo:∃stroj)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Napsal Postřižiny spisovatel?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "napsat(co:∃postřižina, kdo:·spisovatel)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Narodil se Jirásek v roce 1851?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "particle",
+    "3": "term",
+    "4": "particle",
+    "5": "term",
+    "6": "term",
+    "7": "punct"
+   },
+   "predications": [
+    "narodit_se(kdo:·Jirásek, kdy:·1851)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Narodil se v rodině lékaře.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "particle",
+    "3": "particle",
+    "4": "term",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "narodit_se(kdo:·∅, v+Loc:∃rodina)",
+    "nmod:Gen(kdo:·rodina, co:∃lékař)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ]
+   ]
+  },
+  "Ne každý pták.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "particle",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "∅(téma:∀pták)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Ne, Petr bydlí v Brně.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "punct",
+    "3": "term",
+    "4": "pred",
+    "5": "particle",
+    "6": "term",
+    "7": "punct"
+   },
+   "predications": [
+    "bydlet(kdo:·Petr, kde:·Brno)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Nebyl nikdy členem žádné politické strany.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "particle",
+    "3": "term",
+    "4": "particle",
+    "5": "term",
+    "6": "term",
+    "7": "particle"
+   },
+   "predications": [
+    "¬být(kdo:·∅, co:∃člen) ⟨member⟩",
+    "nmod:Gen(kdo:·člen, co:∀strana[politický])"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "vedlejší vztah bez sémantiky (nmod:Gen)"
+    ]
+   ]
+  },
+  "Nelétá tučňák?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "¬létat(kdo:∀tučňák)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Nemoc mu znemožnila psát.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "pred",
+    "4": "pred",
+    "5": "punct"
+   },
+   "predications": [
+    "znemožnit(kdo:·nemoc, komu:·on, co:[psát()])",
+    "psát()"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "reported",
+     ""
+    ]
+   ]
+  },
+  "Nevím.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "punct"
+   },
+   "predications": [
+    "¬vědět(kdo:·∅)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Obsahuje citron nějaký vitamín?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "obsahovat(kdo:∀citron, co:∃vitamín)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Obsahuje citron vitamín C?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "obsahovat(kdo:∀citron, co:∃vitamín C)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Obsahuje jablko vitamíny?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "obsahovat(kdo:∀jablko, co:∃vitamín)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "On namaloval obraz.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "namalovat(kdo:·on, co:∃obraz)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "On se oženil.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "pred",
+    "4": "punct"
+   },
+   "predications": [
+    "oženit_se(kdo:·on)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Ona zemřela v Praze.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "zemřít(kdo:·on, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Ovoce obsahuje každý vitamín.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "obsahovat(kdo:∀ovoce, co:∀vitamín)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Ovoce obsahuje vitamín C?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "obsahovat(kdo:∀ovoce, co:∃vitamín C)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Ovoce obsahuje vitamíny.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "obsahovat(kdo:∀ovoce, co:∃vitamín)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Oženil se v roce 1879.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "particle",
+    "3": "particle",
+    "4": "term",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "oženit_se(kdo:·∅, kdy:·1879)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Paralelní vesmír je vesmír.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "pred",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:∀vesmír[paralelní], co:∃vesmír) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Pes štěká.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "punct"
+   },
+   "predications": [
+    "štěkat(kdo:∀pes)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Petr a Karel přijdou, když nepřijde Marie.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "term",
+    "4": "pred",
+    "5": "punct",
+    "6": "particle",
+    "7": "pred",
+    "8": "term",
+    "9": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Petr+·Karel, advcl:když:[¬přijít(kdo:·Marie)])",
+    "¬přijít(kdo:·Marie)"
+   ],
+   "residue": [],
+   "rules": [
+    [
+     "if",
+     "když"
+    ]
+   ],
+   "triage": [
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ],
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ]
+   ]
+  },
+  "Petr bydlí v Praze.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "bydlet(kdo:·Petr, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Petr jel v pondělí do Prahy.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "particle",
+    "6": "term",
+    "7": "punct"
+   },
+   "predications": [
+    "jet(kdo:·Petr, kdy:·pondělí, kam:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Petr nebo Jana přijde.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "term",
+    "4": "pred",
+    "5": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Petr+·Jana)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "REJECTED",
+     "assert",
+     "disjunkce bez prostoru modelů"
+    ]
+   ]
+  },
+  "Petr přijde jen pokud přijde Karel.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "particle",
+    "5": "pred",
+    "6": "term",
+    "7": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Petr, advcl:pokud:[přijít(kdo:·Karel)])",
+    "přijít(kdo:·Karel)"
+   ],
+   "residue": [],
+   "rules": [
+    [
+     "only_if",
+     "pokud"
+    ]
+   ],
+   "triage": [
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ],
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ]
+   ]
+  },
+  "Petr přijde.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Petr)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Petr přišel a sedl si.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "secondary",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Petr)",
+    "sednout_se(kdo:·Petr)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Petr řekl, že Marie přijde.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "punct",
+    "4": "particle",
+    "5": "term",
+    "6": "pred",
+    "7": "punct"
+   },
+   "predications": [
+    "říci(kdo:·Petr, co:[přijít(kdo:·Marie)])",
+    "přijít(kdo:·Marie)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "reported",
+     ""
+    ]
+   ]
+  },
+  "Petr žil v Praze.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "žít(kdo:·Petr, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Platí Petr daně?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "platit(kdo:·Petr, co:∃daň)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Pokud Petr žije v Praze, platí Petr daně v Praze.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "10": "particle",
+    "11": "term",
+    "12": "punct",
+    "2": "term",
+    "3": "pred",
+    "4": "particle",
+    "5": "term",
+    "6": "punct",
+    "7": "pred",
+    "8": "term",
+    "9": "term"
+   },
+   "predications": [
+    "platit(advcl:pokud:[žít(kdo:·Petr, kde:·Praha)], kdo:·Petr, co:∃daň, kde:·Praha)",
+    "žít(kdo:·Petr, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [
+    [
+     "if",
+     "pokud"
+    ]
+   ],
+   "triage": [
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ],
+    [
+     "SAFE",
+     "pattern",
+     ""
+    ]
+   ]
+  },
+  "Praha je v Česku.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:·Praha, kde:·Česko) ⟨within⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Ptáci létají.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "punct"
+   },
+   "predications": [
+    "létat(kdo:∀pták)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Přešel přes most.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "particle",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "přejít(kdo:·∅, kudy:∃most)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Přijde Jana?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Jana)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Přijde Karel?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Karel)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Přijde Marie?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Marie)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Přijde Petr?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·Petr)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Přijde aspoň jeden z nich.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "residue",
+    "3": "term",
+    "4": "particle",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "přijít(kdo:·jeden)",
+    "nmod:z+Gen(kdo:·jeden, co:·on)"
+   ],
+   "residue": [
+    [
+     "aspoň",
+     "nsubj>advmod:emph"
+    ]
+   ],
+   "rules": [],
+   "triage": [
+    [
+     "REJECTED",
+     "assert",
+     "kardinalita bez prostoru modelů"
+    ],
+    [
+     "REJECTED",
+     "assert",
+     "kardinalita bez prostoru modelů"
+    ]
+   ]
+  },
+  "Rozšířil se paralelní vesmír?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "particle",
+    "3": "term",
+    "4": "term",
+    "5": "punct"
+   },
+   "predications": [
+    "rozšířit_se(kdo:·vesmír[paralelní])"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Rozšířil se vesmír?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "particle",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "rozšířit_se(kdo:·vesmír)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Slouží auto k přesunu osob?": {
+   "moods": [
+    "question",
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "sloužit(kdo:∀auto, k+Dat:∃přesun)",
+    "nmod:Gen(kdo:·přesun, co:∃osoba)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Spisovatel je člověk.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:∀spisovatel, co:∃člověk) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Studoval filozofii v Praze, Berlíně a Paříži.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "particle",
+    "4": "term",
+    "5": "particle",
+    "6": "term",
+    "7": "particle",
+    "8": "term",
+    "9": "punct"
+   },
+   "predications": [
+    "studovat(kdo:·∅, co:∃filozofie, kde:·Praha+·Berlín+·Paříž)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "To není pravda.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "¬být(kdo:·ten, co:∃pravda) ⟨member⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Tučňák je pták.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:∀tučňák, co:∃pták) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Tučňák nelétá.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "punct"
+   },
+   "predications": [
+    "¬létat(kdo:∀tučňák)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "V roce 1920 napsal drama R.U.R.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "term",
+    "3": "term",
+    "4": "pred",
+    "5": "term",
+    "6": "term"
+   },
+   "predications": [
+    "napsat(kdo:·∅, kdy:·1920, co:·R.U.r.)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "V úterý jel Petr do Brna.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "term",
+    "3": "pred",
+    "4": "term",
+    "5": "particle",
+    "6": "term",
+    "7": "punct"
+   },
+   "predications": [
+    "jet(kdy:·úterý, kdo:·Petr, kam:·Brno)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Vesmír se rozšířil do dnešní podoby.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "pred",
+    "4": "particle",
+    "5": "term",
+    "6": "term",
+    "7": "punct"
+   },
+   "predications": [
+    "rozšířit_se(kdo:·vesmír, do+Gen:∃podoba[dnešní])"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Vitamín C je vitamín.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "term",
+    "3": "pred",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "být(kdo:∀vitamín C, co:∃vitamín) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Vrabec je pták.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "být(kdo:∀vrabec, co:∃pták) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Vyjmenuj všechna dramata.": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "particle",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "∅(co:?filler:∀drama)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Vyjmenuj všechna díla Karla Čapka.": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "particle",
+    "3": "term",
+    "4": "term",
+    "5": "particle",
+    "6": "punct"
+   },
+   "predications": [
+    "∅(co:?filler:∀dílo, čí:·Karel Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Vypiš prózy Karla Čapka.": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "term",
+    "3": "term",
+    "4": "particle",
+    "5": "punct"
+   },
+   "predications": [
+    "∅(co:?filler:próza, čí:·Karel Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Vypiš romány Karla Čapka.": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "term",
+    "3": "term",
+    "4": "particle",
+    "5": "punct"
+   },
+   "predications": [
+    "∅(co:?filler:román, čí:·Karel Čapek)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Začal psát romány.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "pred",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "fáze:psát(kdo:·∅, co:∃román)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Zemřel v Praze.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "particle",
+    "3": "term",
+    "4": "punct"
+   },
+   "predications": [
+    "zemřít(kdo:·∅, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Úrazy způsobené pády.": {
+   "moods": [
+    "assert",
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "term",
+    "4": "particle"
+   },
+   "predications": [
+    "∅(téma:∃úraz)",
+    "způsobený(co:·úraz, čím:∃pád)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ],
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Čapek pracoval v Lidových novinách.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "pred",
+    "3": "particle",
+    "4": "term",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "pracovat(kdo:·Čapek, v+Loc:∃noviny[lidový])"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Čapek se narodil v Praze.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term",
+    "2": "particle",
+    "3": "pred",
+    "4": "particle",
+    "5": "term",
+    "6": "punct"
+   },
+   "predications": [
+    "narodit_se(kdo:·Čapek, kde:·Praha)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Štěká jezevčík?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "štěkat(kdo:∀jezevčík)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Štěká pes?": {
+   "moods": [
+    "question"
+   ],
+   "placement": {
+    "1": "pred",
+    "2": "term",
+    "3": "punct"
+   },
+   "predications": [
+    "štěkat(kdo:∀pes)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Život": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "term"
+   },
+   "predications": [
+    "∅(téma:·život)"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  },
+  "Žádný stroj není člověk.": {
+   "moods": [
+    "assert"
+   ],
+   "placement": {
+    "1": "particle",
+    "2": "term",
+    "3": "pred",
+    "4": "term",
+    "5": "particle"
+   },
+   "predications": [
+    "¬být(kdo:∀stroj, co:∃člověk) ⟨subset⟩"
+   ],
+   "residue": [],
+   "rules": [],
+   "triage": [
+    [
+     "SAFE",
+     "assert",
+     ""
+    ]
+   ]
+  }
+ }
+}
